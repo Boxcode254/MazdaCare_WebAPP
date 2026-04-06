@@ -114,9 +114,48 @@ export async function searchNearbyGarages(
 }
 
 const MARKER_COLORS: Record<GarageResult['type'], string> = {
-  dealer: 'gold',
-  garage: '#C00000',
-  petrol_station: '#2563eb',
+  dealer: '#111010',
+  garage: '#9B1B30',
+  petrol_station: '#1A3A6B',
+}
+
+const MARKER_SIZES: Record<GarageResult['type'], number> = {
+  dealer: 14,
+  garage: 12,
+  petrol_station: 10,
+}
+
+let activeMarker: google.maps.Marker | null = null
+
+function markerSvg(place: GarageResult, selected: boolean): string {
+  const base = MARKER_COLORS[place.type]
+  const size = MARKER_SIZES[place.type] * (selected ? 1.5 : 1)
+  const ring = selected ? '#FFFFFF' : 'none'
+  const dealerRing = place.type === 'dealer' ? '#C49A3C' : 'none'
+  const dealerStrokeWidth = place.type === 'dealer' ? 2 : 0
+  const r = size / 2
+  const c = r + (selected ? 2 : 1)
+  const canvas = c * 2
+
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${canvas}" height="${canvas}" viewBox="0 0 ${canvas} ${canvas}">
+      ${selected ? `<circle cx="${c}" cy="${c}" r="${r + 1}" fill="none" stroke="${ring}" stroke-width="2" />` : ''}
+      ${place.type === 'dealer' ? `<circle cx="${c}" cy="${c}" r="${r + 1.5}" fill="none" stroke="${dealerRing}" stroke-width="${dealerStrokeWidth}" />` : ''}
+      <circle cx="${c}" cy="${c}" r="${r}" fill="${base}" />
+    </svg>
+  `
+}
+
+function markerIcon(place: GarageResult, selected: boolean): google.maps.Icon {
+  const svg = markerSvg(place, selected)
+  const encoded = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+  const px = Math.round(MARKER_SIZES[place.type] * (selected ? 1.5 : 1) + 8)
+
+  return {
+    url: encoded,
+    scaledSize: new google.maps.Size(px, px),
+    anchor: new google.maps.Point(px / 2, px / 2),
+  }
 }
 
 export function addGarageMarker(
@@ -128,16 +167,22 @@ export function addGarageMarker(
     position: { lat: place.lat, lng: place.lng },
     map,
     title: place.name,
-    icon: {
-      path: google.maps.SymbolPath.CIRCLE,
-      scale: 10,
-      fillColor: MARKER_COLORS[place.type],
-      fillOpacity: 0.9,
-      strokeColor: '#ffffff',
-      strokeWeight: 2,
-    },
+    icon: markerIcon(place, false),
   })
-  marker.addListener('click', () => onClick(place))
+  marker.addListener('click', () => {
+    if (activeMarker && activeMarker !== marker) {
+      const previousPlace = (activeMarker as google.maps.Marker & { __garagePlace?: GarageResult }).__garagePlace
+      if (previousPlace) {
+        activeMarker.setIcon(markerIcon(previousPlace, false))
+      }
+    }
+
+    marker.setIcon(markerIcon(place, true))
+    activeMarker = marker
+    onClick(place)
+  })
+
+  ;(marker as google.maps.Marker & { __garagePlace?: GarageResult }).__garagePlace = place
   return marker
 }
 

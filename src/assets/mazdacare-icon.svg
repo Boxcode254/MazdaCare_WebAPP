@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background with rounded corners for maskable safe zone -->
+  <rect width="512" height="512" rx="113" fill="#111010"/>
+
+  <!-- Left wing petal -->
+  <path
+    d="M256 41 C256 41,76 110,29 214 C-18 318,47 421,116 471
+       C116 471,194 380,207 256 C220 145,256 41,256 41 Z"
+    fill="#9B1B30"
+    opacity="0.7"
+  />
+
+  <!-- Right wing petal -->
+  <path
+    d="M256 41 C256 41,436 110,483 214 C530 318,465 421,396 471
+       C396 471,318 380,305 256 C292 145,256 41,256 41 Z"
+    fill="#9B1B30"
+    opacity="0.7"
+  />
+
+  <!-- Center vertical petal -->
+  <path
+    d="M256 41 C256 41,186 131,186 256 C186 381,256 471,256 471
+       C256 471,326 381,326 256 C326 131,256 41,256 41 Z"
+    fill="#9B1B30"
+  />
+
+  <!-- Center ring outer -->
+  <circle cx="256" cy="256" r="48" fill="#9B1B30"/>
+
+  <!-- Center ring inner knockout -->
+  <circle cx="256" cy="256" r="24" fill="#111010"/>
+</svg>

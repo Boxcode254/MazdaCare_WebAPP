@@ -3,10 +3,10 @@
 <!-- AUTO_STATUS_START -->
 ## Auto Snapshot
 
-- Last auto update: 2026-04-06T16:41:23.663Z
+- Last auto update: 2026-04-06T19:55:49.843Z
 - Branch: main
-- Latest commit: c9fdfbd
-- Git status: dirty (17 file(s) changed, main...origin/main)
+- Latest commit: d6ab1b8
+- Git status: dirty (23 file(s) changed, main...origin/main)
 - Production app URL: https://mazdacare-app.vercel.app
 - Vercel project: mazdacare-app
 - Supabase project ref: rmfkykcijcndwvsursmu
@@ -27,18 +27,26 @@
 
 ## UI/UX Progress
 
-- Phase 1 redesign pass - DONE (global style system, auth, dashboard, add-car, map/schedule/settings polish)
+- Mazda Soul Red redesign pass - DONE (UI-1 through UI-15 complete)
+- Phase 1 redesign pass - DONE
 - Phase 2 performance and interaction pass - DONE
-  - Route-level lazy loading added for all major pages
-  - Suspense loading fallback added for auth and protected routes
-  - Manual build chunking added (`vendor`, `supabase`, `maps`)
-  - Staggered reveal motion added to dashboard/service-history lists
-  - Mobile touch feedback improved on quick action cards
 - Phase 3 final UX QA pass - DONE
-  - Focus-visible outlines standardized for keyboard accessibility
-  - Reduced-motion fallback added for users with motion preference enabled
-  - Bottom navigation safe-area padding added for modern mobile devices
-  - Dashboard card/list interactions improved with keyboard activation support
+
+## Phase 4 — Logo, Refinements & Security
+
+- LOGO-1 MazdaCare SVG icon component - PENDING
+- LOGO-2 Apply logo to auth page - PENDING
+- LOGO-3 PWA icons and splash screen - PENDING
+- LOGO-4 Dashboard and nav logo placement - PENDING
+- SEC-1 CSP headers via vercel.json - PENDING
+- SEC-2 Input sanitization (DOMPurify) - PENDING
+- SEC-3 API key and env variable audit - PENDING
+- SEC-4 Supabase RLS edge case hardening - PENDING
+- SEC-5 Auth guard and session hardening - PENDING
+- SEC-6 Client-side form rate limiting - PENDING
+- REFINE-1 Micro-interactions and haptics - PENDING
+- REFINE-2 Onboarding empty state - PENDING
+- REFINE-3 Offline indicator and network state - PENDING
 
 ## Deployment and Infra Status
 
@@ -58,52 +66,37 @@
 - RLS enabled and policies applied for core tables
 - `push_subscriptions` table created with RLS and policies
 - Edge function deployed: `check-alerts` (ACTIVE)
-- Function secrets configured:
-  - `SUPABASE_URL`
-  - `SUPABASE_SERVICE_ROLE_KEY`
-  - `VAPID_PUBLIC_KEY`
-  - `VAPID_PRIVATE_KEY`
-  - `VAPID_CONTACT_EMAIL`
-- Daily cron created and active:
-  - Job: `check-alerts-daily`
-  - Schedule: `0 7 * * *` (07:00 UTC)
+- Function secrets configured: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+  VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_CONTACT_EMAIL
+- Daily cron active: `check-alerts-daily` at `0 7 * * *`
 
 ### Auth
 
-- Supabase Site URL set to: `https://mazdacare-app.vercel.app`
-- Redirect allow list set to:
-  - `https://mazdacare-app.vercel.app`
-  - `http://localhost:5173`
-  - `http://192.168.2.102:5174`
-- Google OAuth provider enabled in Supabase
+- Supabase Site URL: `https://mazdacare-app.vercel.app`
+- Google OAuth: enabled
 
 ## Final Live Smoke Test (2026-04-06) - ALL GREEN
 
-- Google Auth: PASS (`boxcode254@gmail.com` now has providers `[email google]`)
-- Add Vehicle: PASS
-- Log Service: PASS
-- Alert Banner: PASS
-- Edge Function Endpoint: PASS (`check-alerts` returns valid JSON)
-- Build + PWA Output: PASS
+- Google Auth, Add Vehicle, Log Service, Alert Banner,
+  Edge Function Endpoint, Build + PWA Output — all PASS
 
-## Optional Follow-ups
+## Remaining Blockers
 
-1. Google Maps API key
-- `VITE_GOOGLE_MAPS_API_KEY` is still not set.
-- Map features remain key-gated until key is added.
-- Once available, set it in:
-  - local `.env.local`
-  - Vercel env (`production`, `preview`, `development`)
+1. Google Maps API key — set VITE_GOOGLE_MAPS_API_KEY in:
+   - local `.env.local`
+   - Vercel env (production, preview, development)
+   After adding: verify map loads, then add HTTP referrer restrictions
+   in Google Cloud Console for https://mazdacare-app.vercel.app/*
 
-2. Maps key restrictions
-- In Google Cloud, add HTTP referrer restrictions for your domain(s) before release.
+2. PWA icon PNG files — after LOGO-3 is applied, export the SVG icon to
+   192×192 and 512×512 PNG and commit to public/icons/
 
 ## Useful Resume Commands
 
-From project root (`mazda-app`):
-
-- Build: `pnpm build`
-- Dev server (LAN): `pnpm dev --host 0.0.0.0`
-- List Supabase functions: `npx supabase functions list`
-- Check cron job: `npx supabase db query --linked -o table "select jobname, schedule, active from cron.job where jobname='check-alerts-daily';"`
-- Check Vercel env: `npx vercel env ls production --format json --non-interactive`
+From project root (mazda-app):
+  Build:                pnpm build
+  Dev server (LAN):     pnpm dev --host 0.0.0.0
+  List Supabase fns:    npx supabase functions list
+  Check cron:           npx supabase db query --linked -o table "select jobname, schedule, active from cron.job where jobname='check-alerts-daily';"
+  Check Vercel env:     npx vercel env ls production --format json --non-interactive
+  Check RLS policies:   npx supabase db query --linked "select tablename, policyname, cmd from pg_policies where schemaname='public' order by tablename;"

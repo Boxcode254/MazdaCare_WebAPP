@@ -3,18 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { format, parseISO } from 'date-fns'
 import {
   Bell,
-  BellOff,
-  CheckCircle2,
-  Circle,
+  Check,
   Wrench,
   CalendarDays,
-  TrendingUp,
-  ChevronRight,
   CarFront,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { useVehicles } from '@/hooks/useVehicles'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
 import { calculateNextService } from '@/hooks/useAlerts'
@@ -40,13 +35,6 @@ const MAJOR_CHECKLIST = [
   'Fuel filter replacement',
   'Cabin air filter replacement',
 ]
-
-// Progress bar colour based on fraction used (0–1)
-function progressColour(fractionUsed: number): string {
-  if (fractionUsed < 0.6) return 'bg-green-500'
-  if (fractionUsed < 0.9) return 'bg-yellow-400'
-  return 'bg-red-500'
-}
 
 type NotifState = 'idle' | 'granted' | 'denied' | 'unsupported'
 
@@ -108,7 +96,7 @@ export function Schedule() {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-28 animate-pulse rounded-xl bg-slate-100" />
+          <div key={i} className="skeleton h-28 rounded-xl" />
         ))}
       </div>
     )
@@ -116,10 +104,13 @@ export function Schedule() {
 
   if (!vehicle) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <Wrench className="h-10 w-10 text-slate-300" />
-        <p className="text-sm text-slate-500">Vehicle not found.</p>
-        <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+      <div className="flex flex-col items-center px-6 py-10 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mz-red-light">
+          <Wrench className="h-6 w-6 text-mz-red" />
+        </div>
+        <h2 className="mt-4 text-[16px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>Vehicle not found</h2>
+        <p className="mt-[6px] text-[13px] text-mz-gray-500">This vehicle may have been removed.</p>
+        <Button className="mt-5 bg-mz-red text-white hover:bg-mz-red-mid" size="sm" onClick={() => navigate('/')}>
           Go to Dashboard
         </Button>
       </div>
@@ -129,15 +120,21 @@ export function Schedule() {
   if (!lastLog) {
     return (
       <div className="space-y-4">
-        <h1 className="text-xl font-semibold text-slate-900">
-          {vehicle.model} {vehicle.year}
-        </h1>
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-slate-300 py-16 text-center">
-          <CalendarDays className="h-10 w-10 text-slate-300" />
-          <p className="text-sm text-slate-500">No service history yet.</p>
+        <PageHeader
+          title="Service Schedule"
+          subtitle={`${vehicle.model} ${vehicle.year}`}
+          backTo="/"
+          action={<CarFront className="h-5 w-5 text-white/60" />}
+        />
+        <div className="flex flex-col items-center px-6 py-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mz-red-light">
+            <CalendarDays className="h-6 w-6 text-mz-red" />
+          </div>
+          <h2 className="mt-4 text-[16px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>No service history yet</h2>
+          <p className="mt-[6px] max-w-[240px] text-center text-[13px] text-mz-gray-500">Log your first service to unlock schedule predictions.</p>
           <Button
             size="sm"
-            className="bg-[#C00000] text-white hover:bg-[#a00000]"
+            className="mt-5 bg-mz-red text-white hover:bg-mz-red-mid"
             onClick={() => navigate(`/log-service/${vehicleId}`)}
           >
             Log First Service
@@ -148,203 +145,157 @@ export function Schedule() {
   }
 
   const nextSvc = calculateNextService(vehicle, lastLog)
-  const { dueMileage, dueDate, kmRemaining, daysRemaining, fractionUsed } = nextSvc
+  const { dueDate, kmRemaining, fractionUsed } = nextSvc
   const nextType = getNextType(lastLog.serviceType)
   const checklist = nextType === 'major' ? MAJOR_CHECKLIST : MINOR_CHECKLIST
-  const barColour = progressColour(fractionUsed)
-
-  // Urgency label
-  const urgentKm = kmRemaining <= 500
-  const urgentDays = daysRemaining <= 14
-  const urgencyLabel = urgentKm || urgentDays ? 'Due Soon' : kmRemaining <= 1500 ? 'Upcoming' : 'On Track'
-  const urgencyColour =
-    urgentKm || urgentDays
-      ? 'bg-red-100 text-red-700'
-      : kmRemaining <= 1500
-        ? 'bg-yellow-100 text-yellow-700'
-        : 'bg-green-100 text-green-700'
+  const progressFill = fractionUsed > 0.8 ? '#9B1B30' : fractionUsed >= 0.5 ? '#C49A3C' : '#2E7D4F'
+  const serviceBadgeClass =
+    nextType === 'major' ? 'bg-mz-black text-white' : 'bg-mz-red-light text-mz-red'
 
   return (
-    <div className="space-y-5 pb-4 animate-enter-up">
-      <div className="rounded-2xl border border-white/70 bg-white/92 p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-semibold text-slate-900">
-              {vehicle.model} {vehicle.year}
-            </h1>
-            <p className="text-xs text-slate-500">Next service readiness and timeline</p>
-          </div>
-          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-mazda-red">
-            <CarFront className="h-5 w-5" />
-          </div>
-        </div>
-        <div className="mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold">
-          <Badge className={urgencyColour}>{urgencyLabel}</Badge>
-        </div>
-      </div>
+    <div className="space-y-5 bg-mz-gray-100 pb-4 animate-enter-up">
+      <PageHeader
+        title="Service Schedule"
+        subtitle={`${vehicle.model} ${vehicle.year} · Next service readiness and timeline`}
+        backTo="/"
+        action={<CarFront className="h-5 w-5 text-white/60" />}
+      />
 
       {/* ── Next service countdown ── */}
-      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <TrendingUp className="h-4 w-4 text-[#C00000]" />
-            Next Service
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-2xl font-bold text-slate-900">
-            {kmRemaining > 0
-              ? `${kmRemaining.toLocaleString()} km`
-              : 'Overdue'}
-          </p>
-          <p className="text-sm text-slate-500">
-            or by{' '}
-            <span className="font-medium text-slate-700">
-              {format(dueDate, 'dd MMM yyyy')}
-            </span>{' '}
-            · {daysRemaining > 0 ? `${daysRemaining} days` : 'Overdue'} remaining
-          </p>
-          <p className="text-xs text-slate-400">
-            Service type: <span className="font-medium capitalize">{nextType}</span> · Due at{' '}
-            {dueMileage.toLocaleString()} km
-          </p>
+      <section className="mx-[-2px] mt-0 rounded-2xl bg-mz-black p-5 text-white">
+        <p
+          className="text-[10px] uppercase text-white/45"
+          style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.1em' }}
+        >
+          NEXT SERVICE
+        </p>
+        <p
+          className="mt-1 text-[36px] font-bold leading-none"
+          style={{
+            fontFamily: 'Outfit, sans-serif',
+            color: kmRemaining > 0 ? '#FFFFFF' : '#9B1B30',
+          }}
+        >
+          {kmRemaining > 0 ? `${kmRemaining.toLocaleString()} km` : 'OVERDUE'}
+        </p>
+        <p className="mt-1 text-xs text-white/45" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          or by {format(dueDate, 'dd MMM yyyy')} - whichever comes first
+        </p>
 
-          {/* Coloured progress bar */}
-          <div className="relative h-2.5 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className={`h-full rounded-full transition-all ${barColour}`}
-              style={{ width: `${Math.round(fractionUsed * 100)}%` }}
-            />
-          </div>
-          <p className="text-right text-xs text-slate-400">
-            {Math.round(fractionUsed * 100)}% of interval used
-          </p>
-        </CardContent>
-      </Card>
+        <div className="mt-4 h-1 overflow-hidden rounded bg-white/10">
+          <div
+            className="h-full rounded"
+            style={{ width: `${Math.round(fractionUsed * 100)}%`, backgroundColor: progressFill }}
+          />
+        </div>
+
+        <div className="mt-2 flex items-center justify-between text-[11px] text-white/45" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <span>Last service: {format(parseISO(lastLog.serviceDate), 'dd MMM yyyy')}</span>
+          <span>{vehicle.mileageInterval.toLocaleString()} km interval</span>
+        </div>
+      </section>
 
       {/* ── Reminder button ── */}
       <Button
-        className="h-11 w-full gap-2"
-        variant="outline"
+        className="mx-[-2px] flex w-[calc(100%+4px)] items-center justify-center gap-2 rounded-xl border-[1.5px] border-mz-red bg-white py-3 text-[13px] font-semibold text-mz-red hover:bg-white/90"
+        style={{ fontFamily: 'Outfit, sans-serif' }}
         onClick={requestReminder}
         disabled={notifState === 'denied' || notifState === 'unsupported'}
       >
-        {notifState === 'granted' ? (
-          <>
-            <Bell className="h-4 w-4 text-green-600" />
-            Reminder set
-          </>
-        ) : notifState === 'denied' ? (
-          <>
-            <BellOff className="h-4 w-4 text-slate-400" />
-            Notifications blocked
-          </>
-        ) : notifState === 'unsupported' ? (
-          <>
-            <BellOff className="h-4 w-4 text-slate-400" />
-            Not supported
-          </>
-        ) : (
-          <>
-            <Bell className="h-4 w-4" />
-            Schedule reminder
-          </>
-        )}
+        <Bell className="h-4 w-4 text-mz-red" />
+        Set service reminder
       </Button>
 
       {/* ── Service checklist ── */}
-      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <CheckCircle2 className="h-4 w-4 text-[#C00000]" />
-            {nextType === 'major' ? 'Major' : 'Minor'} Service Checklist
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {checklist.map((item) => (
-              <li key={item} className="flex items-center gap-2 text-sm text-slate-700">
-                <Circle className="h-3.5 w-3.5 shrink-0 text-slate-300" />
+      <section className="mx-[-2px] rounded-2xl bg-white p-[14px]">
+        <h2
+          className="mb-3 text-[11px] font-bold uppercase text-mz-red"
+          style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.1em' }}
+        >
+          What's included
+        </h2>
+        <ul>
+          {checklist.map((item) => (
+            <li key={item} className="flex items-center gap-2.5 border-b border-b-[0.5px] border-b-mz-gray-100 py-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] border-mz-gray-300 bg-transparent">
+                <Check className="h-3 w-3 text-transparent" />
+              </span>
+              <span className="flex-1 text-[13px] text-mz-gray-700" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 {item}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+              </span>
+              <span
+                className={`rounded-[8px] px-[7px] py-[2px] text-[9px] font-bold uppercase ${serviceBadgeClass}`}
+                style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}
+              >
+                {nextType}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* ── Estimated cost card ── */}
-      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Wrench className="h-4 w-4 text-[#C00000]" />
-            Cost Estimate (Nairobi)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">Minor Service</span>
-            <span className="font-medium text-slate-800">KES 3,000 – 6,000</span>
+      <section className="mx-[-2px] rounded-xl bg-mz-red-light p-[14px]">
+        <h3 className="text-xs font-semibold text-mz-red" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          Typical cost range - Nairobi
+        </h3>
+        <div className="mt-2 space-y-2 text-xs text-mz-gray-700" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <div className="flex items-center justify-between">
+            <span>Minor</span>
+            <span>KES 3,000–6,000</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">Major Service</span>
-            <span className="font-medium text-slate-800">KES 8,000 – 20,000</span>
+          <div className="flex items-center justify-between">
+            <span>Major</span>
+            <span>KES 8,000–20,000</span>
           </div>
-          <p className="mt-1 text-xs text-slate-400">
-            Estimates for independent garages in Nairobi. Mazda dealer prices may be higher.
-          </p>
-          <div
-            className={`mt-2 rounded-lg p-3 ${nextType === 'major' ? 'bg-orange-50' : 'bg-blue-50'}`}
-          >
-            <p className="text-xs font-medium text-slate-700">
-              Your upcoming{' '}
-              <span className="capitalize">{nextType}</span> service estimate:
-            </p>
-            <p className="text-base font-bold text-slate-900">
-              {nextType === 'major' ? 'KES 8,000 – 20,000' : 'KES 3,000 – 6,000'}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* ── Past services timeline ── */}
-      <div>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
-          <CalendarDays className="h-4 w-4 text-[#C00000]" />
-          Service Timeline
+      <div className="mx-[-2px]">
+        <h2
+          className="mb-2 text-[11px] font-bold uppercase text-mz-red"
+          style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.1em' }}
+        >
+          Service history
         </h2>
         {sortedLogs.length === 0 ? (
-          <p className="py-4 text-center text-sm text-slate-400">No logs yet.</p>
+          <p className="py-4 text-center text-[13px] text-mz-gray-300">No logs yet.</p>
         ) : (
-          <ol className="relative border-l-2 border-slate-200 pl-5">
+          <ol>
             {sortedLogs.map((log, idx) => (
-              <li key={log.id} className={`relative pb-5 ${idx === sortedLogs.length - 1 ? '' : ''}`}>
-                {/* Timeline dot */}
-                <span className="absolute -left-[1.15rem] flex h-5 w-5 items-center justify-center rounded-full bg-white ring-2 ring-slate-200">
+              <li key={log.id} className="mb-3 flex items-start gap-3">
+                <div className="flex w-5 flex-col items-center">
                   <span
                     className={`h-2.5 w-2.5 rounded-full ${
-                      log.serviceType === 'major' ? 'bg-[#C00000]' : 'bg-slate-400'
+                      log.serviceType === 'major'
+                        ? 'bg-mz-black'
+                        : log.serviceType === 'minor'
+                          ? 'bg-mz-red'
+                          : log.serviceType === 'oil_change'
+                            ? 'bg-mz-gold'
+                            : 'bg-mz-gray-300'
                     }`}
                   />
-                </span>
+                  {idx !== sortedLogs.length - 1 ? <span className="mt-1 min-h-8 w-px flex-1 bg-mz-gray-100" /> : null}
+                </div>
 
                 <button
                   type="button"
-                  className="flex w-full items-start justify-between text-left"
+                  className="flex flex-1 items-start justify-between gap-2 rounded-[10px] bg-white px-3 py-2 text-left"
                   onClick={() => navigate(`/service/${vehicleId}`)}
                 >
                   <div>
-                    <p className="text-xs font-medium text-slate-800">
-                      {format(parseISO(log.serviceDate), 'dd MMM yyyy')}
+                    <p className="text-xs font-semibold capitalize text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      {log.serviceType.replace('_', ' ')}
                     </p>
-                    <p className="text-xs capitalize text-slate-500">
-                      {log.serviceType.replace('_', ' ')} ·{' '}
+                    <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
                       {log.mileageAtService.toLocaleString()} km
                     </p>
-                    {log.garageName && (
-                      <p className="text-xs text-slate-400">{log.garageName}</p>
-                    )}
                   </div>
-                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
+                  <p className="text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    {format(parseISO(log.serviceDate), 'dd MMM yyyy')}
+                  </p>
                 </button>
               </li>
             ))}
@@ -354,7 +305,7 @@ export function Schedule() {
 
       {/* ── Log new service CTA ── */}
       <Button
-        className="h-11 w-full bg-[#C00000] text-white hover:bg-[#a00000]"
+        className="mx-[-2px] h-11 w-[calc(100%+4px)] bg-mz-red text-white hover:bg-mz-red-mid"
         onClick={() => navigate(`/log-service/${vehicleId}`)}
       >
         Log a Service

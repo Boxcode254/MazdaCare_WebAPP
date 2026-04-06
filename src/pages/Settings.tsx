@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, BellOff, ChevronLeft, LogOut, User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth } from '@/hooks/useAuth'
+import { sanitizeText } from '@/lib/sanitize'
 import { useAppStore } from '@/stores/appStore'
 import { toast } from 'sonner'
 
@@ -11,15 +10,29 @@ export function Settings() {
   const navigate = useNavigate()
   const { signOut } = useAuth()
   const user = useAppStore((s) => s.user)
+  const setDisplayName = useAppStore((s) => s.setDisplayName)
 
   const [notifEnabled, setNotifEnabled] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted',
   )
   const [signingOut, setSigningOut] = useState(false)
+  const [editingProfile, setEditingProfile] = useState(false)
+  const [displayNameInput, setDisplayNameInput] = useState('')
 
   const displayName: string =
     user?.user_metadata?.full_name ?? user?.email ?? 'Unknown user'
   const email = user?.email ?? ''
+
+  useEffect(() => {
+    setDisplayNameInput(displayName)
+  }, [displayName])
+
+  const initials = displayName
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
 
   async function handleToggleNotifications() {
     if (!('Notification' in window)) {
@@ -52,101 +65,170 @@ export function Settings() {
     }
   }
 
+  function handleProfileSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const sanitizedName = sanitizeText(displayNameInput)
+
+    if (!sanitizedName) {
+      toast.error('Please enter a valid display name.')
+      return
+    }
+
+    setDisplayName(sanitizedName)
+    setDisplayNameInput(sanitizedName)
+    setEditingProfile(false)
+    toast.success('Display name updated for this session.')
+  }
+
   return (
-    <div className="space-y-5 pb-4 animate-enter-up">
-      {/* Header */}
-      <div className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/90 p-3 shadow-sm">
-        <button
-          type="button"
-          aria-label="Go back"
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200"
-          onClick={() => navigate(-1)}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <h1 className="text-xl font-semibold text-slate-900">Settings</h1>
+    <div className="bg-mz-gray-100 pb-8 animate-enter-up" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      <PageHeader title="Settings" backTo="/" />
+
+      {/* ── Profile card ── */}
+      <div className="mb-[10px] overflow-hidden rounded-[16px] bg-white p-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-mz-red-light text-[15px] font-semibold text-mz-red"
+            aria-hidden="true"
+          >
+            {initials || '?'}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-semibold text-mz-black">{displayName}</p>
+            <p className="truncate text-[11px] text-mz-gray-500">{email}</p>
+          </div>
+          <button
+            type="button"
+            className="shrink-0 text-[12px] font-medium text-mz-red"
+            onClick={() => setEditingProfile((current) => !current)}
+          >
+            Edit →
+          </button>
+        </div>
+
+        {editingProfile ? (
+          <form className="mt-4 space-y-3 border-t border-[#F0ECEC] pt-4" onSubmit={handleProfileSubmit}>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="displayName"
+                className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500"
+              >
+                Display Name
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                value={displayNameInput}
+                onChange={(event) => setDisplayNameInput(event.target.value)}
+                className="h-auto w-full rounded-lg border border-transparent bg-mz-gray-100 px-3 py-[9px] text-[13px] text-mz-black outline-none transition focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(155,27,48,0.1)]"
+                placeholder="Enter your name"
+                maxLength={500}
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="rounded-xl bg-mz-red px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-mz-red-mid"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-mz-gray-100 px-4 py-2 text-[13px] font-medium text-mz-gray-700 transition hover:bg-[#E8E2E3]"
+                onClick={() => {
+                  setDisplayNameInput(displayName)
+                  setEditingProfile(false)
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : null}
       </div>
 
-      {/* Profile */}
-      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
-        <CardContent className="flex items-center gap-4 pt-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-            <User className="h-6 w-6 text-[#C00000]" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p>
-            <p className="truncate text-xs text-slate-500">{email}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Preferences */}
-      <div className="space-y-2">
-        <p className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+      {/* ── Preferences group ── */}
+      <div className="mb-[10px] overflow-hidden rounded-[16px] bg-white">
+        <p className="px-[14px] pb-2 pt-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-mz-red">
           Preferences
         </p>
 
-        {/* Notifications toggle */}
-        <Card className="border-slate-200/80 bg-white/95 shadow-sm">
-          <CardContent className="flex items-center justify-between pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              {notifEnabled ? (
-                <Bell className="h-5 w-5 text-green-600" />
-              ) : (
-                <BellOff className="h-5 w-5 text-slate-400" />
-              )}
-              <div>
-                <p className="text-sm font-medium text-slate-800">Service reminders</p>
-                <p className="text-xs text-slate-500">
-                  {notifEnabled ? 'Notifications enabled' : 'Notifications off'}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              aria-label="Toggle notifications"
-              role="switch"
-              aria-checked={notifEnabled}
-              onClick={handleToggleNotifications}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                notifEnabled ? 'bg-green-500' : 'bg-slate-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  notifEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </CardContent>
-        </Card>
+        {/* Service reminders toggle */}
+        <div className="flex items-center justify-between border-b border-[#F0ECEC] px-[14px] py-3">
+          <div>
+            <p className="text-[13px] text-mz-black">Service reminders</p>
+            <p className="mt-[1px] text-[11px] text-mz-gray-500">
+              {notifEnabled ? 'Notifications enabled' : 'Notifications off'}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={notifEnabled}
+            aria-label="Toggle service reminders"
+            onClick={handleToggleNotifications}
+            className="relative ml-3 inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200"
+            style={{ background: notifEnabled ? '#9B1B30' : '#C4BABB' }}
+          >
+            <span
+              className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
+              style={{ transform: notifEnabled ? 'translateX(24px)' : 'translateX(4px)' }}
+            />
+          </button>
+        </div>
 
-        {/* Mileage unit (display only — km is fixed for Kenya) */}
-        <Card className="border-slate-200/80 bg-white/95 shadow-sm">
-          <CardContent className="flex items-center justify-between pt-4 pb-4">
-            <div>
-              <p className="text-sm font-medium text-slate-800">Mileage unit</p>
-              <p className="text-xs text-slate-500">Fixed to km for Kenya</p>
-            </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-              km
-            </span>
-          </CardContent>
-        </Card>
+        {/* Mileage unit — km fixed for Kenya */}
+        <div className="flex items-center justify-between px-[14px] py-3">
+          <div>
+            <p className="text-[13px] text-mz-black">Mileage unit</p>
+            <p className="mt-[1px] text-[11px] text-mz-gray-500">Fixed to km for Kenya</p>
+          </div>
+          <span className="rounded-full bg-mz-gray-100 px-3 py-1 text-[11px] font-medium text-mz-gray-700">
+            km
+          </span>
+        </div>
       </div>
 
-      {/* Sign out */}
-      <Button
-        variant="outline"
-        className="h-11 w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-        onClick={handleSignOut}
-        disabled={signingOut}
-      >
-        <LogOut className="h-4 w-4" />
-        {signingOut ? 'Signing out…' : 'Sign out'}
-      </Button>
+      {/* ── App group ── */}
+      <div className="mb-[10px] overflow-hidden rounded-[16px] bg-white">
+        <p className="px-[14px] pb-2 pt-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-mz-red">
+          App
+        </p>
+        <div className="flex items-center justify-between border-b border-[#F0ECEC] px-[14px] py-3">
+          <p className="text-[13px] text-mz-black">Version</p>
+          <span className="text-[12px] text-mz-gray-500">v1.2.0</span>
+        </div>
+        <div className="flex items-center justify-between px-[14px] py-3">
+          <p className="text-[13px] text-mz-black">Region</p>
+          <span className="text-[12px] text-mz-gray-500">Kenya (KES)</span>
+        </div>
+      </div>
 
-      <p className="text-center text-xs text-slate-300">MazdaCare v0.1.0</p>
+      {/* ── Account / danger group ── */}
+      <div className="mb-[10px] overflow-hidden rounded-[16px] bg-white">
+        <p className="px-[14px] pb-2 pt-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-mz-red">
+          Account
+        </p>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="flex w-full items-center border-b border-[#F0ECEC] px-[14px] py-3 text-left text-[13px] font-medium text-mz-red disabled:opacity-60"
+        >
+          {signingOut ? 'Signing out…' : 'Sign out'}
+        </button>
+        <button
+          type="button"
+          onClick={() => toast.info('To delete your account, please contact support.')}
+          className="flex w-full items-center px-[14px] py-3 text-left text-[13px] text-mz-red"
+        >
+          Delete account
+        </button>
+      </div>
+
+      {/* App version footer */}
+      <p className="py-5 text-center text-[11px] text-mz-gray-300">MazdaCare v1.2.0</p>
     </div>
   )
 }

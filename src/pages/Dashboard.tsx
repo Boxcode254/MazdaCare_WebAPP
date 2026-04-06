@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CarFront, MapPin, ClipboardList, CalendarDays, Plus, Star, UserCircle, Fuel } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Activity, Bell, Calendar, Navigation, Plus, Fuel, Wrench } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { CarCard } from '@/components/car/CarCard'
 import { InstallAppBanner } from '@/components/layout/InstallAppBanner'
 import { AlertBanner } from '@/components/schedule/AlertBanner'
+import MazdaLogo from '@/components/ui/MazdaLogo'
 import { useVehicles } from '@/hooks/useVehicles'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
 import { calculateNextService } from '@/hooks/useAlerts'
+import { haptics } from '@/lib/haptics'
 import { useAppStore } from '@/stores/appStore'
 import type { Vehicle, ServiceLog } from '@/types'
 
 // ─── Skeleton ──────────────────────────────────────────────────────────────
 function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-slate-100 ${className}`} />
+  return <div className={`skeleton rounded-xl ${className}`} />
 }
 
 // ─── Greeting ──────────────────────────────────────────────────────────────
@@ -32,26 +32,148 @@ function firstName(displayName: string | null | undefined): string {
   return displayName.split(' ')[0]
 }
 
-// ─── Circular progress ─────────────────────────────────────────────────────
-function CircularProgress({ fraction, size = 80 }: { fraction: number; size?: number }) {
-  const r = (size - 10) / 2
-  const circ = 2 * Math.PI * r
-  const dash = circ * Math.min(Math.max(fraction, 0), 1)
-  const colour = fraction < 0.6 ? '#16a34a' : fraction < 0.9 ? '#ca8a04' : '#C00000'
+function initials(displayName: string | null | undefined): string {
+  if (!displayName) return 'M'
+  const words = displayName.split(' ').filter(Boolean)
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+  return `${words[0][0] ?? ''}${words[1][0] ?? ''}`.toUpperCase()
+}
+
+function CarSilhouette({ width = 200, opacity = 0.2 }: { width?: number; opacity?: number }) {
+  const height = Math.round(width * 0.4)
+
   return (
-    <svg width={size} height={size} className="-rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e2e8f0" strokeWidth={8} />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke={colour}
-        strokeWidth={8}
-        strokeDasharray={`${dash} ${circ}`}
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 200 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      style={{ opacity }}
+    >
+      <path
+        d="M19 53C22 44 29 38 42 35L61 30C67 19 81 13 104 13C126 13 141 19 152 30L168 34C176 36 181 41 184 48L188 53V59H179C177 65 171 69 163 69C155 69 149 65 147 59H56C54 65 48 69 40 69C32 69 26 65 24 59H13V55L19 53Z"
+        stroke="white"
+        strokeWidth="3"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
+      <path
+        d="M69 29L82 22C88 19 96 18 109 18C123 18 133 20 142 29"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="40" cy="58" r="8" stroke="white" strokeWidth="3" />
+      <circle cx="163" cy="58" r="8" stroke="white" strokeWidth="3" />
     </svg>
+  )
+}
+
+function OnboardingEmptyState({ onAddMazda }: { onAddMazda: () => void }) {
+  const [cardVisible, setCardVisible] = useState(false)
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => setCardVisible(true))
+    return () => window.cancelAnimationFrame(frameId)
+  }, [])
+
+  return (
+    <div className="fixed inset-0 left-1/2 z-50 flex w-full max-w-md -translate-x-1/2 flex-col overflow-hidden bg-mz-black">
+      <div className="flex min-h-[40vh] flex-col items-center justify-center px-6 text-center">
+        <MazdaLogo variant="full" theme="dark" size="lg" />
+        <div className="mt-8 flex justify-center">
+          <CarSilhouette width={200} opacity={0.2} />
+        </div>
+      </div>
+
+      <div
+        className={`flex min-h-[60vh] flex-1 flex-col rounded-t-[28px] bg-white px-6 pb-[calc(env(safe-area-inset-bottom,0px)+24px)] pt-8 transition-transform duration-300 ease-out ${
+          cardVisible ? 'translate-y-0' : 'translate-y-12'
+        }`}
+      >
+        <h2
+          className="text-[28px] font-light italic leading-none text-mz-black"
+          style={{ fontFamily: 'Cormorant Garamond, serif' }}
+        >
+          Welcome to MazdaCare
+        </h2>
+        <p className="mt-[6px] text-[14px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          Add your Mazda to get started
+        </p>
+
+        <div className="mt-6 flex-1">
+          {[
+            {
+              icon: Wrench,
+              label: 'Track every service, oil, and cost',
+              iconWrapClass: 'bg-mz-red-light',
+              iconClass: 'text-mz-red',
+            },
+            {
+              icon: Navigation,
+              label: 'Find certified garages near you',
+              iconWrapClass: 'bg-[#EDF2FF]',
+              iconClass: 'text-[#1A3A6B]',
+            },
+            {
+              icon: Bell,
+              label: 'Get reminders before your next service',
+              iconWrapClass: 'bg-mz-gold-light',
+              iconClass: 'text-[#7A5C14]',
+            },
+          ].map(({ icon: Icon, label, iconWrapClass, iconClass }, index, rows) => (
+            <div
+              key={label}
+              className={`flex items-center gap-3 py-[10px] ${index !== rows.length - 1 ? 'border-b border-b-[0.5px] border-b-mz-gray-100' : ''}`}
+            >
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${iconWrapClass}`}>
+                <Icon className={`h-4 w-4 ${iconClass}`} />
+              </span>
+              <span className="text-[13px] text-mz-gray-700" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          className="mt-6 w-full rounded-xl bg-mz-red px-4 py-[14px] text-[14px] font-semibold text-white"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+          onClick={onAddMazda}
+        >
+          Add my Mazda →
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ReturningEmptyState({ onAddVehicle }: { onAddVehicle: () => void }) {
+  return (
+    <div className="flex min-h-[calc(100dvh-11rem)] flex-col items-center justify-center px-6 text-center">
+      <CarSilhouette width={220} opacity={0.16} />
+      <h2
+        className="mt-6 text-[28px] font-light italic leading-none text-mz-black"
+        style={{ fontFamily: 'Cormorant Garamond, serif' }}
+      >
+        Your garage is empty
+      </h2>
+      <p className="mt-[6px] max-w-[260px] text-[14px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        Add a vehicle to bring back service history, reminders, and garage tools.
+      </p>
+      <button
+        type="button"
+        className="mt-6 rounded-xl bg-mz-red px-5 py-[14px] text-[14px] font-semibold text-white"
+        style={{ fontFamily: 'Outfit, sans-serif' }}
+        onClick={onAddVehicle}
+      >
+        Add a vehicle
+      </button>
+    </div>
   )
 }
 
@@ -98,7 +220,9 @@ export function Dashboard() {
   const { logs, fetchLogs, loading: lLoading } = useServiceLogs()
 
   const [activeIdx, setActiveIdx] = useState(0)
+  const [animatedMileage, setAnimatedMileage] = useState(0)
   const activeVehicle: Vehicle | undefined = vehicles[activeIdx]
+  const hasAnimatedMileageRef = useRef(false)
 
   const loadData = useCallback(async () => {
     await fetchVehicles()
@@ -108,15 +232,6 @@ export function Dashboard() {
   useEffect(() => {
     void loadData()
   }, [loadData])
-
-  // Auto-navigate to AddCar on first open if no vehicles (and not still loading)
-  useEffect(() => {
-    if (!vLoading && vehicles.length === 0) {
-      // Small delay so the user sees the dashboard briefly before redirect
-      const t = setTimeout(() => navigate('/add-car'), 800)
-      return () => clearTimeout(t)
-    }
-  }, [vLoading, vehicles.length, navigate])
 
   // Fetch logs for the active vehicle
   useEffect(() => {
@@ -146,15 +261,53 @@ export function Dashboard() {
 
   const nextSvc =
     activeVehicle && lastLog ? calculateNextService(activeVehicle, lastLog) : null
-
-  const onEnterActivate = (event: React.KeyboardEvent<HTMLElement>, action: () => void) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      action()
-    }
-  }
+  const isNewUser = Boolean(
+    user?.created_at && new Date(user.created_at).getTime() > Date.now() - 86400000,
+  )
 
   const name = firstName(user?.user_metadata?.full_name ?? user?.email)
+  const userInitials = initials(user?.user_metadata?.full_name ?? user?.email)
+  const handleAddVehicle = () => {
+    haptics.medium()
+    navigate('/add-car')
+  }
+
+  useEffect(() => {
+    if (!activeVehicle) {
+      setAnimatedMileage(0)
+      return
+    }
+
+    const targetMileage = activeVehicle.currentMileage
+
+    if (hasAnimatedMileageRef.current || targetMileage >= 200000) {
+      setAnimatedMileage(targetMileage)
+      return
+    }
+
+    hasAnimatedMileageRef.current = true
+    setAnimatedMileage(0)
+
+    let animationFrameId = 0
+    const durationMs = 800
+    const startTime = performance.now()
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - startTime) / durationMs, 1)
+      const easedProgress = 1 - Math.pow(1 - progress, 3)
+      setAnimatedMileage(Math.round(targetMileage * easedProgress))
+
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(tick)
+      }
+    }
+
+    animationFrameId = window.requestAnimationFrame(tick)
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId)
+    }
+  }, [activeVehicle])
 
   // ── Loading skeleton ──
   if (vLoading) {
@@ -176,57 +329,57 @@ export function Dashboard() {
 
   // ── Empty state ──
   if (vehicles.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-6 rounded-2xl border border-white/70 bg-white/90 py-20 text-center shadow-sm backdrop-blur">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50 ring-8 ring-red-50/60">
-          <CarFront className="h-10 w-10 text-[#C00000]" />
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900">No vehicles yet</h2>
-          <p className="mt-1 text-sm text-slate-500">Add your Mazda to start tracking services.</p>
-        </div>
-        <Button
-          className="bg-[#C00000] text-white hover:bg-[#a00000]"
-          onClick={() => navigate('/add-car')}
-        >
-          <Plus className="mr-1.5 h-4 w-4" />
-          Add your Mazda
-        </Button>
-      </div>
-    )
+    if (isNewUser) {
+      return <OnboardingEmptyState onAddMazda={handleAddVehicle} />
+    }
+
+    return <ReturningEmptyState onAddVehicle={handleAddVehicle} />
   }
 
   return (
     <div className="space-y-5 pb-4 animate-enter-up">
       {/* ── Header ── */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#C00000] via-[#a31207] to-[#7f1d1d] p-4 text-white shadow-[0_14px_34px_rgba(127,29,29,0.35)]">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium text-white/80">{greeting()}</p>
-            <h1 className="text-xl font-semibold text-white">
-              {name ? `Hello, ${name}` : 'Welcome back'}
-            </h1>
-            <p className="mt-1 text-xs text-white/80">Keep your Mazda running smoothly across Nairobi roads.</p>
-          </div>
+      <header className="-mx-4 -mt-6 mb-4 bg-mz-black text-white" role="banner">
+        <div className="relative px-4 pb-5 pt-[calc(env(safe-area-inset-top,0px)+16px)]">
           <button
             type="button"
-            aria-label="Settings"
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white transition hover:bg-white/20"
+            aria-label="Open settings"
+            className="absolute right-4 top-[calc(env(safe-area-inset-top,0px)+14px)] flex h-9 w-9 items-center justify-center rounded-full bg-mz-red text-[13px] font-semibold text-white"
+            style={{ fontFamily: 'Outfit, sans-serif' }}
             onClick={() => navigate('/settings')}
           >
-            <UserCircle className="h-5 w-5" />
+            {userInitials}
           </button>
-        </div>
 
-        {activeVehicle ? (
-          <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs">
-            <Fuel className="h-3.5 w-3.5" />
-            <span className="capitalize">
-              {activeVehicle.fuelType} service profile · {activeVehicle.registration}
-            </span>
+          <div className="flex items-center gap-2">
+            <MazdaLogo variant="icon" theme="dark" size="sm" />
+            <p
+              className="text-[11px] uppercase text-white/45"
+              style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.1em' }}
+            >
+              {greeting()}
+            </p>
           </div>
-        ) : null}
-      </div>
+          <h1
+            className="mt-1 text-[22px] font-semibold text-white"
+            style={{ fontFamily: 'Outfit, sans-serif' }}
+          >
+            {name ? `Hello, ${name}` : 'Hello'}
+          </h1>
+          <p className="mt-1 text-xs text-white/40" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            {vehicles.length} vehicle{vehicles.length === 1 ? '' : 's'} tracked
+          </p>
+
+          {activeVehicle ? (
+            <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs">
+              <Fuel className="h-3.5 w-3.5" />
+              <span className="capitalize">
+                {activeVehicle.fuelType} service profile · {activeVehicle.registration}
+              </span>
+            </div>
+          ) : null}
+        </div>
+      </header>
 
       {/* ── Install app prompt ── */}
       <InstallAppBanner />
@@ -267,7 +420,7 @@ export function Dashboard() {
                 type="button"
                 aria-label={`Select vehicle ${i + 1}`}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === activeIdx ? 'w-5 bg-[#C00000]' : 'w-1.5 bg-slate-300'
+                  i === activeIdx ? 'w-5 bg-mz-red' : 'w-1.5 bg-mz-gray-300'
                 }`}
                 onClick={() => setActiveIdx(i)}
               />
@@ -276,116 +429,139 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* ── Next service countdown ── */}
+      {/* ── Stats grid ── */}
       {activeVehicle && (
-        <Card
-          className="cursor-pointer border-slate-200/80 bg-white/95 shadow-sm"
-          role="button"
-          tabIndex={0}
-          onClick={() => navigate(`/schedule/${activeVehicle.id}`)}
-          onKeyDown={(event) => onEnterActivate(event, () => navigate(`/schedule/${activeVehicle.id}`))}
-        >
-          <CardContent className="flex items-center gap-5 pt-4">
-            <div className="relative shrink-0">
-              <CircularProgress fraction={nextSvc?.fractionUsed ?? 0} size={80} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[10px] font-medium text-slate-500 leading-tight">used</span>
-                <span className="text-xs font-bold text-slate-800">
-                  {Math.round((nextSvc?.fractionUsed ?? 0) * 100)}%
-                </span>
-              </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-slate-500">Next service</p>
-              {lLoading ? (
-                <Skeleton className="mt-1 h-6 w-32" />
-              ) : nextSvc ? (
-                <>
-                  <p className="text-2xl font-bold text-slate-900 leading-tight">
-                    {nextSvc.kmRemaining > 0
-                      ? `${nextSvc.kmRemaining.toLocaleString()} km`
-                      : 'Overdue'}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    or {nextSvc.daysRemaining > 0 ? `in ${nextSvc.daysRemaining} days` : 'overdue'}
-                  </p>
-                </>
-              ) : (
-                <p className="text-sm text-slate-400">No service history</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+        <div className="mb-[14px] grid grid-cols-2 gap-2">
+          <div className="rounded-xl border border-[0.5px] border-black/6 bg-mz-white p-3">
+            <p
+              className="mb-1 text-[10px] font-medium uppercase text-mz-gray-500"
+              style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.06em' }}
+            >
+              Vehicles
+            </p>
+            <p className="text-[22px] font-semibold leading-none text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              {vehicles.length}
+            </p>
+            <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              In garage
+            </p>
+          </div>
 
-      {/* ── Last service card ── */}
-      {lastLog && activeVehicle && (
-        <Card
-          className="cursor-pointer border-slate-200/80 bg-white/95 shadow-sm"
-          role="button"
-          tabIndex={0}
-          onClick={() => navigate(`/service/${activeVehicle.id}`)}
-          onKeyDown={(event) => onEnterActivate(event, () => navigate(`/service/${activeVehicle.id}`))}
-        >
-          <CardContent className="pt-4">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-slate-500">Last service</p>
-                <p className="mt-0.5 text-sm font-semibold capitalize text-slate-800">
-                  {lastLog.serviceType.replace('_', ' ')}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {new Date(lastLog.serviceDate).toLocaleDateString('en-KE', {
+          <div className="rounded-xl border border-[0.5px] border-black/6 bg-mz-white p-3">
+            <p
+              className="mb-1 text-[10px] font-medium uppercase text-mz-gray-500"
+              style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.06em' }}
+            >
+              Current Mileage
+            </p>
+            <p className="text-[22px] font-semibold leading-none text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              {animatedMileage.toLocaleString()}
+            </p>
+            <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              km
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="rounded-xl border border-[0.5px] border-black/6 bg-mz-white p-3 text-left"
+            onClick={() => navigate(`/schedule/${activeVehicle.id}`)}
+          >
+            <p
+              className="mb-1 text-[10px] font-medium uppercase text-mz-gray-500"
+              style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.06em' }}
+            >
+              Next Service
+            </p>
+            <p
+              className="text-[22px] font-semibold leading-none"
+              style={{ fontFamily: 'Outfit, sans-serif', color: (nextSvc?.kmRemaining ?? Infinity) < 1000 ? '#9B1B30' : '#111010' }}
+            >
+              {nextSvc ? `${Math.max(nextSvc.kmRemaining, 0).toLocaleString()}` : '--'}
+            </p>
+            <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              {nextSvc ? 'km remaining' : 'No service history'}
+            </p>
+          </button>
+
+          <button
+            type="button"
+            className="rounded-xl border border-[0.5px] border-black/6 bg-mz-white p-3 text-left"
+            onClick={() => navigate(`/service/${activeVehicle.id}`)}
+          >
+            <p
+              className="mb-1 text-[10px] font-medium uppercase text-mz-gray-500"
+              style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.06em' }}
+            >
+              Last Service
+            </p>
+            <p className="truncate text-[22px] font-semibold capitalize leading-none text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              {lastLog ? lastLog.serviceType.replace('_', ' ') : '--'}
+            </p>
+            <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              {lastLog
+                ? new Date(lastLog.serviceDate).toLocaleDateString('en-KE', {
                     day: 'numeric',
                     month: 'short',
-                    year: 'numeric',
-                  })}
-                  {lastLog.garageName ? ` · ${lastLog.garageName}` : ''}
-                </p>
-              </div>
-              {lastLog.rating && (
-                <div className="flex items-center gap-0.5 text-xs text-amber-500">
-                  <Star className="h-3.5 w-3.5 fill-amber-400" />
-                  {lastLog.rating}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  })
+                : 'No logs yet'}
+            </p>
+          </button>
+        </div>
       )}
 
       {/* ── Quick actions ── */}
       {activeVehicle && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="mb-[14px] grid grid-cols-4 gap-2">
           {[
             {
               label: 'Log Service',
-              icon: ClipboardList,
+              icon: Plus,
               to: `/log-service/${activeVehicle.id}`,
-              colour: 'bg-red-50 text-[#C00000]',
+              iconBg: 'bg-mz-red-light',
+              iconText: 'text-mz-red',
             },
             {
               label: 'Find Garage',
-              icon: MapPin,
+              icon: Navigation,
               to: '/map',
-              colour: 'bg-blue-50 text-blue-600',
+              iconBg: 'bg-[#EDF2FF]',
+              iconText: 'text-[#1A3A9B]',
             },
             {
               label: 'Schedule',
-              icon: CalendarDays,
+              icon: Calendar,
               to: `/schedule/${activeVehicle.id}`,
-              colour: 'bg-green-50 text-green-600',
+              iconBg: 'bg-mz-gold-light',
+              iconText: 'text-[#7A5C14]',
             },
-          ].map(({ label, icon: Icon, to, colour }, idx) => (
+            {
+              label: 'History',
+              icon: Activity,
+              to: `/service/${activeVehicle.id}`,
+              iconBg: 'bg-[#EAFAF0]',
+              iconText: 'text-[#1A6B33]',
+            },
+          ].map(({ label, icon: Icon, to, iconBg, iconText }, idx) => (
             <button
               key={label}
               type="button"
-              className={`stagger-enter flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-3 text-xs font-semibold transition active:scale-[0.98] hover:opacity-80 ${colour}`}
+              className="stagger-enter flex cursor-pointer flex-col items-center gap-[5px] rounded-xl border border-[0.5px] border-black/6 bg-white px-1 pb-2 pt-2.5 transition-transform duration-100 active:scale-[0.96]"
               style={{ '--stagger-delay': `${80 + idx * 60}ms` } as CSSProperties}
-              onClick={() => navigate(to)}
+              onClick={() => {
+                haptics.light()
+                navigate(to)
+              }}
             >
-              <Icon className="h-5 w-5" />
-              {label}
+              <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}>
+                <Icon className={`h-4.5 w-4.5 ${iconText}`} />
+              </span>
+              <span
+                className="text-center text-[9px] font-semibold uppercase leading-[1.3] text-mz-gray-700"
+                style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}
+              >
+                {label}
+              </span>
             </button>
           ))}
         </div>
@@ -395,13 +571,19 @@ export function Dashboard() {
       {activeVehicle && (
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700">Recent Services</h2>
+            <h2
+              className="mb-2 text-[10px] font-semibold uppercase text-mz-red"
+              style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.1em' }}
+            >
+              Recent Services
+            </h2>
             <button
               type="button"
-              className="text-xs text-[#C00000] hover:underline"
+              className="text-[11px] font-medium text-mz-red hover:underline"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
               onClick={() => navigate(`/service/${activeVehicle.id}`)}
             >
-              View all
+              See all →
             </button>
           </div>
           {lLoading ? (
@@ -409,11 +591,11 @@ export function Dashboard() {
               {[1, 2].map((i) => <Skeleton key={i} className="h-20" />)}
             </div>
           ) : recentLogs.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-300 py-8 text-center">
-              <p className="text-sm text-slate-400">No services logged yet.</p>
+            <div className="rounded-xl border border-dashed border-mz-gray-300 py-8 text-center">
+              <p className="text-[13px] text-mz-gray-500">No services logged yet.</p>
               <button
                 type="button"
-                className="mt-2 text-xs text-[#C00000] hover:underline"
+                className="mt-2 text-[12px] text-mz-red hover:underline"
                 onClick={() => navigate(`/log-service/${activeVehicle.id}`)}
               >
                 Log first service →
@@ -425,15 +607,15 @@ export function Dashboard() {
                 <button
                   key={log.id}
                   type="button"
-                  className="stagger-enter flex items-center justify-between rounded-xl border border-slate-100 bg-white/95 px-4 py-3 shadow-sm transition active:scale-[0.995]"
+                  className="stagger-enter flex items-center justify-between rounded-xl border border-[0.5px] border-black/6 bg-white px-4 py-3 transition active:scale-[0.995]"
                   style={{ '--stagger-delay': `${140 + idx * 55}ms` } as CSSProperties}
                   onClick={() => navigate(`/service/${activeVehicle.id}`)}
                 >
                   <div>
-                    <p className="text-sm font-medium capitalize text-slate-800">
+                    <p className="text-[13px] font-medium capitalize text-mz-black">
                       {log.serviceType.replace('_', ' ')}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[11px] text-mz-gray-500">
                       {log.mileageAtService.toLocaleString()} km ·{' '}
                       {new Date(log.serviceDate).toLocaleDateString('en-KE', {
                         day: 'numeric',
@@ -445,14 +627,14 @@ export function Dashboard() {
                     <Badge
                       className={
                         log.serviceType === 'major'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-slate-100 text-slate-600'
+                          ? 'bg-mz-red-light text-mz-red'
+                          : 'bg-mz-gray-100 text-mz-gray-500'
                       }
                     >
                       {log.serviceType === 'major' ? 'Major' : 'Minor'}
                     </Badge>
                     {typeof log.serviceCost === 'number' && (
-                      <p className="text-xs text-slate-400">
+                      <p className="text-[11px] text-mz-gray-500">
                         KES {log.serviceCost.toLocaleString()}
                       </p>
                     )}
@@ -467,7 +649,7 @@ export function Dashboard() {
       {/* ── Add another vehicle ── */}
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 py-3 text-sm text-slate-400 hover:border-slate-400 hover:text-slate-600"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-mz-gray-300 py-3 text-[13px] text-mz-gray-500 hover:border-mz-gray-500 hover:text-mz-black"
         onClick={() => navigate('/add-car')}
       >
         <Plus className="h-4 w-4" />

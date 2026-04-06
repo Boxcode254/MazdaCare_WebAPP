@@ -1,4 +1,4 @@
-import { CalendarDays, ClipboardList, LayoutDashboard, Map } from 'lucide-react'
+import { Calendar, FileText, LayoutGrid, Navigation } from 'lucide-react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 
 export function BottomNav() {
@@ -9,10 +9,10 @@ export function BottomNav() {
   const vid = vehicleId ?? ''
 
   const navItems = [
-    { label: 'Dashboard', to: '/', icon: LayoutDashboard, path: '/' },
-    { label: 'Service', to: vid ? `/service/${vid}` : '/', icon: ClipboardList, path: '/service' },
-    { label: 'Map', to: '/map', icon: Map, path: '/map' },
-    { label: 'Schedule', to: vid ? `/schedule/${vid}` : '/', icon: CalendarDays, path: '/schedule' },
+    { label: 'Dashboard', to: '/', icon: LayoutGrid, path: '/' },
+    { label: 'Services', to: vid ? `/service/${vid}` : '/', icon: FileText, path: '/service' },
+    { label: 'Map', to: '/map', icon: Navigation, path: '/map' },
+    { label: 'Schedule', to: vid ? `/schedule/${vid}` : '/', icon: Calendar, path: '/schedule' },
   ]
 
   const isRouteActive = (path: string) => {
@@ -24,8 +24,8 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 border-t border-slate-200/70 bg-white/95 px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur">
-      <div className="grid grid-cols-4 gap-1 rounded-2xl bg-slate-100/80 p-1">
+    <nav className="fixed bottom-0 left-1/2 z-40 flex w-full max-w-md -translate-x-1/2 justify-around border-t border-[0.5px] border-t-mz-gray-300 bg-mz-white px-0 pt-[10px] pb-[calc(env(safe-area-inset-bottom,14px))]">
+      <div className="flex w-full items-start justify-around">
         {navItems.map(({ icon: Icon, label, to, path }) => {
           const active = isRouteActive(path)
 
@@ -33,14 +33,23 @@ export function BottomNav() {
             <NavLink
               key={label}
               to={to}
-              className={`flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 text-[11px] font-semibold transition ${
-                active
-                  ? 'bg-white text-mazda-red shadow-sm'
-                  : 'text-slate-500 hover:bg-white/80 hover:text-slate-900'
-              }`}
+              className="flex min-w-[60px] flex-col items-center gap-[3px] transition-transform duration-100 active:scale-[0.97]"
             >
-              <Icon className="h-[18px] w-[18px]" />
-              <span>{label}</span>
+              <Icon
+                className={`h-5 w-5 ${active ? 'text-mz-red' : 'text-mz-gray-300'}`}
+                strokeWidth={2.5}
+              />
+              <span
+                className={`font-body text-[9px] font-semibold uppercase tracking-[0.08em] ${
+                  active ? 'text-mz-red' : 'text-mz-gray-300'
+                }`}
+              >
+                {label}
+              </span>
+              <span
+                aria-hidden="true"
+                className={`h-1 w-1 rounded-full bg-mz-red ${active ? 'visible' : 'invisible'}`}
+              />
             </NavLink>
           )
         })}

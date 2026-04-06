@@ -1,6 +1,4 @@
-import { CalendarDays, CarFront, Coins, Star } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Disc, Droplets, Star, CircleDot, Wrench, Hammer } from 'lucide-react'
 import type { ServiceLog } from '@/types'
 
 interface ServiceLogCardProps {
@@ -16,36 +14,107 @@ const SERVICE_LABELS: Record<ServiceLog['serviceType'], string> = {
   other: 'Other',
 }
 
+function serviceMeta(serviceType: ServiceLog['serviceType']) {
+  if (serviceType === 'minor') {
+    return {
+      icon: Wrench,
+      badgeClass: 'bg-mz-red-light text-mz-red',
+      badgeText: 'MINOR',
+    }
+  }
+
+  if (serviceType === 'major') {
+    return {
+      icon: Hammer,
+      badgeClass: 'bg-mz-black text-white',
+      badgeText: 'MAJOR',
+    }
+  }
+
+  if (serviceType === 'oil_change') {
+    return {
+      icon: Droplets,
+      badgeClass: 'bg-mz-gold-light text-[#7A5C14]',
+      badgeText: 'OIL',
+    }
+  }
+
+  if (serviceType === 'tyre_rotation') {
+    return {
+      icon: CircleDot,
+      badgeClass: 'bg-mz-gray-100 text-mz-gray-700',
+      badgeText: 'OTHER',
+    }
+  }
+
+  if (serviceType === 'brake_service') {
+    return {
+      icon: Disc,
+      badgeClass: 'bg-mz-gray-100 text-mz-gray-700',
+      badgeText: 'OTHER',
+    }
+  }
+
+  return {
+    icon: Wrench,
+    badgeClass: 'bg-mz-gray-100 text-mz-gray-700',
+    badgeText: 'OTHER',
+  }
+}
+
 export function ServiceLogCard({ log }: ServiceLogCardProps) {
+  const { icon: Icon, badgeClass, badgeText } = serviceMeta(log.serviceType)
+  const rating = typeof log.rating === 'number' ? log.rating : null
+
   return (
-    <Card className="border-white/70 bg-white/95 shadow-sm">
-      <CardContent className="space-y-2 pt-4">
-        <div className="flex items-center justify-between">
-          <Badge variant="secondary">{SERVICE_LABELS[log.serviceType]}</Badge>
-          <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-            <CalendarDays className="h-3.5 w-3.5" />
-            {new Date(log.serviceDate).toLocaleDateString()}
-          </span>
-        </div>
+    <article className="mb-2 flex items-start gap-3 rounded-xl border border-[0.5px] border-black/6 bg-white px-[14px] py-3">
+      <div className="flex h-9 w-9 min-w-9 items-center justify-center rounded-lg bg-mz-red-light">
+        <Icon className="h-4 w-4 text-mz-red" />
+      </div>
 
-        <p className="inline-flex items-center gap-1 text-sm font-medium text-slate-800">
-          <CarFront className="h-4 w-4 text-mazda-red" />
-          {log.mileageAtService.toLocaleString()} km
+      <div className="min-w-0 flex-1">
+        <p
+          className="truncate text-[13px] font-semibold text-mz-black"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          {SERVICE_LABELS[log.serviceType]}
+        </p>
+        <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          {log.garageName || 'No garage name'}
         </p>
 
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>{log.garageName || 'No garage name'}</span>
-          <span className="inline-flex items-center gap-1">
-            <Star className="h-4 w-4 text-amber-500" />
-            {log.rating ?? '-'}
-          </span>
-        </div>
+        {rating != null ? (
+          <div className="mt-[2px] flex gap-[2px]">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Star
+                key={n}
+                className={`h-[11px] w-[11px] ${n <= rating ? 'fill-current text-mz-gold' : 'text-[#E8E2E3]'}`}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
 
-        <p className="inline-flex items-center gap-1 text-sm text-slate-700">
-          <Coins className="h-4 w-4 text-emerald-600" />
-          {typeof log.serviceCost === 'number' ? `KES ${log.serviceCost.toLocaleString()}` : 'Cost not recorded'}
+      <div className="shrink-0 text-right" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <p className="text-[11px] text-mz-gray-500">
+          {new Date(log.serviceDate).toLocaleDateString('en-KE', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          })}
         </p>
-      </CardContent>
-    </Card>
+
+        <p className="mt-[2px] text-[12px] font-semibold text-mz-black">
+          {typeof log.serviceCost === 'number' ? `KES ${log.serviceCost.toLocaleString()}` : '—'}
+        </p>
+
+        <span
+          className={`mt-[4px] inline-flex rounded-[8px] px-[7px] py-[2px] text-[9px] font-bold uppercase ${badgeClass}`}
+          style={{ letterSpacing: '0.04em' }}
+        >
+          {badgeText}
+        </span>
+      </div>
+    </article>
   )
 }

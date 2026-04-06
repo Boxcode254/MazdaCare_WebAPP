@@ -1,14 +1,17 @@
 import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
 
 export function useAuth() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const user = useAppStore((state) => state.user)
   const session = useAppStore((state) => state.session)
   const loading = useAppStore((state) => state.loading)
   const setAuthState = useAppStore((state) => state.setAuthState)
   const setLoading = useAppStore((state) => state.setLoading)
-  const clearAuthState = useAppStore((state) => state.clearAuthState)
+  const clearAll = useAppStore((state) => state.clearAll)
 
   useEffect(() => {
     let mounted = true
@@ -22,7 +25,7 @@ export function useAuth() {
       }
 
       if (error) {
-        clearAuthState()
+        clearAll()
         return
       }
 
@@ -33,15 +36,29 @@ export function useAuth() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === 'SIGNED_OUT' || nextSession === null) {
+        clearAll()
+
+        if (location.pathname !== '/auth') {
+          navigate('/auth', { replace: true })
+        }
+
+        return
+      }
+
       setAuthState(nextSession?.user ?? null, nextSession ?? null)
+
+      if (event === 'TOKEN_REFRESHED') {
+        return
+      }
     })
 
     return () => {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [clearAuthState, setAuthState, setLoading])
+  }, [clearAll, location.pathname, navigate, setAuthState, setLoading])
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
@@ -49,7 +66,7 @@ export function useAuth() {
       throw error
     }
 
-    clearAuthState()
+    clearAll()
   }
 
   return {

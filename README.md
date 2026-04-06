@@ -1,4 +1,21 @@
 # React + TypeScript + Vite
+# MazdaCare PWA
+
+## PWA Icons
+
+The source icon is `src/assets/mazdacare-icon.svg` (512×512, dark background, wing mark).
+PNG files at 192×192 and 512×512 must exist at `public/icons/icon-192.png` and
+`public/icons/icon-512.png` for the PWA install prompt and Apple home screen icon to work.
+
+To generate them, export the SVG at both sizes using any of:
+- **Inkscape CLI:** `inkscape src/assets/mazdacare-icon.svg -w 192 -h 192 -o public/icons/icon-192.png`
+- **Sharp / Node:** `npx sharp-cli --input src/assets/mazdacare-icon.svg --output public/icons/icon-192.png resize 192`
+- Any design tool (Figma, Sketch) — export as PNG at 192 and 512px and place in `public/icons/`
+
+After generating the PNGs, commit them to `public/icons/` and redeploy.
+
+---
+
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

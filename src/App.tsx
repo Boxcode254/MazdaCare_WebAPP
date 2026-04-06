@@ -1,7 +1,10 @@
-import { Suspense, lazy } from 'react'
+import { Fragment, Suspense, lazy } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { SplashScreen } from '@/components/layout/SplashScreen'
+import { NetworkBanner } from '@/components/ui/NetworkBanner'
+import { useIdleTimer } from '@/hooks/useIdleTimer'
 
 const Auth = lazy(() => import('@/pages/Auth').then((m) => ({ default: m.Auth })))
 const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
@@ -23,14 +26,22 @@ function PageFallback() {
 }
 
 function ProtectedAppLayout() {
+  useIdleTimer()
   const location = useLocation()
   const showBottomNav = location.pathname !== '/auth'
+  const networkBannerOffsetClass =
+    location.pathname === '/'
+      ? 'top-[calc(env(safe-area-inset-top,0px)+104px)]'
+      : 'top-[calc(env(safe-area-inset-top,0px)+88px)]'
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-white/30 bg-white/80 shadow-[0_20px_80px_rgba(15,23,42,0.16)] backdrop-blur">
-      <main className="flex-1 px-4 pb-24 pt-6 animate-enter-up">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-white/30 bg-white/80 shadow-[0_20px_80px_rgba(15,23,42,0.16)] backdrop-blur">
+      <NetworkBanner className={`absolute inset-x-0 z-40 ${networkBannerOffsetClass}`} />
+      <main className="flex flex-col flex-1 px-4 pb-24 pt-6">
         <Suspense fallback={<PageFallback />}>
-          <Outlet />
+          <div key={location.pathname} className="page-enter flex flex-col flex-1">
+            <Outlet />
+          </div>
         </Suspense>
       </main>
       {showBottomNav ? <BottomNav /> : null}
@@ -40,7 +51,9 @@ function ProtectedAppLayout() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <Fragment>
+      <SplashScreen />
+      <BrowserRouter>
       <Routes>
         <Route
           path="/auth"
@@ -69,7 +82,8 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </Fragment>
   )
 }
 

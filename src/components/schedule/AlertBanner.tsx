@@ -1,17 +1,20 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, X } from 'lucide-react'
+import { AlertCircle, X } from 'lucide-react'
 import { useAlerts } from '@/hooks/useAlerts'
 import { useAppStore } from '@/stores/appStore'
 import { calculateNextService } from '@/hooks/useAlerts'
+import { haptics } from '@/lib/haptics'
 import type { Vehicle } from '@/types'
 
 interface AlertBannerProps {
   /** The active vehicle to check alerts for */
   vehicle: Vehicle | undefined
+  /** Optional explicit dismiss affordance */
+  dismissible?: boolean
 }
 
-export function AlertBanner({ vehicle }: AlertBannerProps) {
+export function AlertBanner({ vehicle, dismissible = false }: AlertBannerProps) {
   const navigate = useNavigate()
   const user = useAppStore((s) => s.user)
   const { alerts, fetchAlerts, dismissAlert } = useAlerts()
@@ -40,47 +43,58 @@ export function AlertBanner({ vehicle }: AlertBannerProps) {
         )
       : Infinity
 
-  const shouldShow = kmRemaining <= 500 || daysRemaining <= 14
+  const shouldShow = kmRemaining < 1500 || daysRemaining <= 14
   if (!shouldShow) return null
 
-  const urgency = kmRemaining <= 0 || daysRemaining <= 0 ? 'overdue' : 'soon'
+  const isOverdue = kmRemaining < 0 || daysRemaining <= 0
+  const line1 = isOverdue
+    ? 'Service overdue'
+    : isFinite(kmRemaining)
+      ? `Service due in ${Math.max(kmRemaining, 0).toLocaleString()} km`
+      : 'Service due in 0 km'
+
+  const stripBgClass = isOverdue
+    ? 'bg-mz-red-dark'
+    : kmRemaining < 500 || daysRemaining <= 14
+      ? 'bg-mz-red'
+      : 'bg-[#7A5C14]'
 
   return (
     <div
-      className={`relative flex items-start gap-3 rounded-xl px-4 py-3 text-sm ${
-        urgency === 'overdue'
-          ? 'bg-red-600 text-white'
-          : 'bg-red-50 text-red-800 ring-1 ring-red-200'
-      }`}
+      className={`relative -mx-4 flex items-center justify-between px-4 py-[10px] text-white ${stripBgClass}`}
     >
-      <Bell className="mt-0.5 h-4 w-4 shrink-0" />
+      <div className="flex items-center gap-[10px]">
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15">
+          <AlertCircle className="h-[14px] w-[14px] text-white" />
+        </div>
+        <div style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-xs font-medium text-white">{line1}</p>
+          <p className="text-[10px] text-white/60">{vehicle.registration}</p>
+        </div>
+      </div>
+
       <button
         type="button"
-        className="flex-1 text-left"
+        className="rounded-[20px] bg-white/20 px-[10px] py-[2px] text-[10px] font-bold tracking-[0.05em] text-white"
+        style={{ fontFamily: 'Outfit, sans-serif' }}
         onClick={() => navigate(`/schedule/${vehicle.id}`)}
       >
-        <span className="font-semibold">
-          {urgency === 'overdue' ? 'Service overdue!' : 'Service due soon'}
-        </span>
-        <span className="ml-1">
-          {kmRemaining > 0 && isFinite(kmRemaining)
-            ? `${kmRemaining.toLocaleString()} km`
-            : ''}
-          {kmRemaining > 0 && isFinite(kmRemaining) && daysRemaining > 0 && isFinite(daysRemaining)
-            ? ' · '
-            : ''}
-          {daysRemaining > 0 && isFinite(daysRemaining) ? `${daysRemaining}d` : ''}
-          {' remaining — tap to view'}
-        </span>
+        SCHEDULE →
       </button>
-      <button
-        type="button"
-        aria-label="Dismiss alert"
-        className="ml-auto mt-0.5 shrink-0 opacity-70 hover:opacity-100"
-        onClick={() => void dismissAlert(alert.id)}
-      >
-        <X className="h-4 w-4" />
-      </button>
+
+      {dismissible ? (
+        <button
+          type="button"
+          aria-label="Dismiss alert"
+          className="absolute right-[10px] top-1/2 -translate-y-1/2 text-white/40"
+          onClick={() => {
+            haptics.light()
+            void dismissAlert(alert.id)
+          }}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
     </div>
   )
 }

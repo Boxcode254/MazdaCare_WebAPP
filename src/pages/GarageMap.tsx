@@ -1,16 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, MapPin, List, X, Loader2, AlertTriangle } from 'lucide-react'
+import { Search, X, Loader2, AlertTriangle, MapPin } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
 import { GarageCard } from '@/components/map/GarageCard'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import {
   initMap,
   searchNearbyGarages,
@@ -24,6 +17,7 @@ import { toast } from 'sonner'
 
 export function GarageMap() {
   const navigate = useNavigate()
+  const { isOnline } = useNetworkStatus()
   const mapElRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
@@ -35,10 +29,11 @@ export function GarageMap() {
   const [selected, setSelected] = useState<GarageResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetExpanded, setSheetExpanded] = useState(false)
   const [apiMissing] = useState(
     !import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   )
+  const dragStartY = useRef<number | null>(null)
 
   const clearMarkers = useCallback(() => {
     markersRef.current.forEach((m) => m.setMap(null))
@@ -51,7 +46,7 @@ export function GarageMap() {
       results.forEach((g) => {
         const marker = addGarageMarker(map, g, (clicked) => {
           setSelected(clicked)
-          setSheetOpen(true)
+          setSheetExpanded(true)
         })
         markersRef.current.push(marker)
       })
@@ -60,7 +55,7 @@ export function GarageMap() {
   )
 
   useEffect(() => {
-    if (apiMissing) {
+    if (apiMissing || !isOnline) {
       setLoading(false)
       return
     }
@@ -112,11 +107,11 @@ export function GarageMap() {
     return () => {
       cancelled = true
     }
-  }, [apiMissing, plotGarages])
+  }, [apiMissing, isOnline, plotGarages])
 
   // Wire up search box once map + input are ready
   useEffect(() => {
-    if (!mapRef.current || !searchInputRef.current || apiMissing) return
+    if (!mapRef.current || !searchInputRef.current || apiMissing || !isOnline) return
     if (searchBoxRef.current) return // already wired
 
     const box = new google.maps.places.SearchBox(searchInputRef.current)
@@ -136,7 +131,7 @@ export function GarageMap() {
       })
       mapRef.current!.fitBounds(bounds)
     })
-  }, [apiMissing, loading])
+  }, [apiMissing, isOnline, loading])
 
   const filteredGarages = searchQuery.trim()
     ? garages.filter(
@@ -154,27 +149,43 @@ export function GarageMap() {
 
   if (apiMissing) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-6 py-20 text-center shadow-sm">
-        <AlertTriangle className="h-10 w-10 text-yellow-500" />
-        <h2 className="text-lg font-semibold text-slate-800">Google Maps API key not set</h2>
-        <p className="text-sm text-slate-500">
-          Add <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">VITE_GOOGLE_MAPS_API_KEY</code> to your{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">.env.local</code> file and restart the dev server.
-        </p>
-      </div>
+      <section className="space-y-4 pb-4 animate-enter-up">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-6 py-20 text-center shadow-sm">
+          <AlertTriangle className="h-10 w-10 text-yellow-500" />
+          <h2 className="text-[16px] font-semibold text-mz-black">Google Maps API key not set</h2>
+          <p className="text-[13px] text-mz-gray-500">
+            Add <code className="rounded bg-mz-gray-100 px-1 py-0.5 text-xs">VITE_GOOGLE_MAPS_API_KEY</code> to your{' '}
+            <code className="rounded bg-mz-gray-100 px-1 py-0.5 text-xs">.env.local</code> file and restart the dev server.
+          </p>
+        </div>
+      </section>
     )
   }
 
+  const onHandlePointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    dragStartY.current = event.clientY
+  }
+
+  const onHandlePointerUp = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (dragStartY.current == null) return
+    const delta = event.clientY - dragStartY.current
+    if (delta < -24) setSheetExpanded(true)
+    else if (delta > 24) setSheetExpanded(false)
+    else setSheetExpanded((prev) => !prev)
+    dragStartY.current = null
+  }
+
   return (
-    <div className="-mx-4 -mt-6 flex flex-col animate-enter-up" style={{ height: 'calc(100vh - 64px)' }}>
+    <section className="relative -mx-4 -mt-6 h-[calc(100dvh-56px-env(safe-area-inset-bottom,0px))] animate-enter-up overflow-hidden pb-0">
+      <div className="relative flex h-full flex-col">
       {/* Search bar overlay */}
-      <div className="absolute inset-x-0 top-0 z-10 mx-4 mt-4 flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+      <div className="absolute inset-x-0 top-0 z-20 m-3 rounded-xl bg-white px-[14px] py-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.10)]">
+        <div className="flex items-center gap-2.5">
+          <Search className="h-4 w-4 text-mz-gray-500" />
           <Input
             ref={searchInputRef}
-            placeholder="Search garages or areas…"
-            className="h-11 rounded-full border-white/80 bg-white/95 pl-9 pr-4 text-sm shadow-md backdrop-blur-sm"
+            placeholder="Search garages in Nairobi..."
+            className="h-auto flex-1 border-none bg-transparent px-0 py-0 text-[13px] text-mz-black shadow-none placeholder:text-[#9B6163] focus-visible:border-none focus-visible:ring-0"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -185,71 +196,85 @@ export function GarageMap() {
               className="absolute right-3 top-1/2 -translate-y-1/2"
               onClick={() => setSearchQuery('')}
             >
-              <X className="h-4 w-4 text-slate-400" />
+              <X className="h-4 w-4 text-mz-gray-300" />
             </button>
           )}
+          <span className="rounded-[20px] bg-mz-red-light px-[10px] py-1 text-[11px] font-semibold text-mz-red" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            Nearby
+          </span>
         </div>
+      </div>
 
-        {/* List view toggle */}
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger asChild>
-            <Button
-              size="icon"
-              className="h-11 w-11 shrink-0 rounded-full bg-white shadow-md hover:bg-slate-50"
-              variant="ghost"
-              aria-label="Show garage list"
-            >
-              <List className="h-5 w-5 text-slate-700" />
-            </Button>
-          </SheetTrigger>
+      {/* Map container */}
+      <div ref={mapElRef} className="relative flex-1">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-mz-gray-100/95 backdrop-blur-sm">
+            <Loader2 className="h-8 w-8 animate-spin text-mz-red" />
+            <p className="text-[13px] text-mz-gray-500">Loading map…</p>
+          </div>
+        )}
 
-          <SheetContent side="bottom" className="max-h-[72vh] overflow-y-auto rounded-t-3xl border-slate-200/80 bg-white/95 px-4 pb-8 pt-2 backdrop-blur">
-            <SheetHeader className="mb-3">
-              <SheetTitle className="flex items-center gap-2 text-base">
-                <MapPin className="h-4 w-4 text-[#C00000]" />
-                {selected ? selected.name : `Garages near you (${filteredGarages.length})`}
-              </SheetTitle>
-            </SheetHeader>
-
-            {/* Legend */}
-            <div className="mb-3 flex gap-3 text-xs text-slate-500">
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#C00000]" /> Garage
+        {!isOnline ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-mz-gray-100/88 px-5 backdrop-blur-[2px]">
+            <div className="flex max-w-[260px] flex-col items-center rounded-2xl bg-white px-5 py-6 text-center shadow-[0_10px_30px_rgba(17,16,16,0.12)]">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-mz-red-light">
+                <MapPin className="h-5 w-5 text-mz-red" />
               </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-full bg-blue-600" /> Petrol Station
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-full bg-yellow-400" /> Mazda Dealer
-              </span>
+              <p className="mt-4 text-[15px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Map requires internet — connect to view garages
+              </p>
             </div>
+          </div>
+        ) : null}
+      </div>
 
-            {selected ? (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mb-3 text-xs text-slate-500"
-                  onClick={() => setSelected(null)}
-                >
-                  ← Back to all garages
-                </Button>
-                <GarageCard
-                  garage={selected}
-                  distanceKm={
-                    userLocation
-                      ? haversineKm(userLocation, { lat: selected.lat, lng: selected.lng })
-                      : undefined
-                  }
-                  onLogThisGarage={handleLogThisGarage}
-                />
-              </>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {filteredGarages.length === 0 && (
-                  <p className="py-6 text-center text-sm text-slate-400">No garages found.</p>
-                )}
-                {filteredGarages.map((g) => (
+      {/* Bottom sheet */}
+      <div
+        className="absolute inset-x-0 bottom-0 z-20 rounded-t-2xl bg-white/98"
+        style={{ height: sheetExpanded ? '60vh' : '160px', transition: 'height 220ms ease' }}
+      >
+        <button
+          type="button"
+          aria-label="Toggle garage list"
+          className="w-full cursor-grab active:cursor-grabbing"
+          onPointerDown={onHandlePointerDown}
+          onPointerUp={onHandlePointerUp}
+        >
+          <span className="mx-auto my-2 block h-1 w-9 rounded-full bg-mz-gray-300" />
+        </button>
+
+        <div className="h-[calc(100%-20px)] overflow-y-auto pb-4">
+          {selected ? (
+            <>
+              <button
+                type="button"
+                className="mb-1 ml-3 text-xs text-mz-gray-500"
+                onClick={() => setSelected(null)}
+              >
+                ← Back to all garages
+              </button>
+              <GarageCard
+                garage={selected}
+                distanceKm={
+                  userLocation
+                    ? haversineKm(userLocation, { lat: selected.lat, lng: selected.lng })
+                    : undefined
+                }
+                onLogThisGarage={handleLogThisGarage}
+              />
+            </>
+          ) : (
+            <>
+              {filteredGarages.length === 0 ? (
+                <div className="flex flex-col items-center px-6 py-10 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mz-red-light">
+                    <Search className="h-6 w-6 text-mz-red" />
+                  </div>
+                  <p className="mt-4 text-[16px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>No garages found</p>
+                  <p className="mt-[6px] max-w-[240px] text-center text-[13px] text-mz-gray-500">Try a different search or expand the map view.</p>
+                </div>
+              ) : (
+                filteredGarages.map((g) => (
                   <GarageCard
                     key={g.placeId}
                     garage={g}
@@ -260,39 +285,13 @@ export function GarageMap() {
                     }
                     onLogThisGarage={handleLogThisGarage}
                   />
-                ))}
-              </div>
-            )}
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {/* Map container */}
-      <div ref={mapElRef} className="relative flex-1">
-        {loading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-100/95 backdrop-blur-sm">
-            <Loader2 className="h-8 w-8 animate-spin text-[#C00000]" />
-            <p className="text-sm text-slate-500">Loading map…</p>
-          </div>
-        )}
-      </div>
-
-      {/* Floating list button */}
-      {!loading && garages.length > 0 && (
-        <div className="absolute bottom-24 right-4 z-10">
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger asChild>
-              <Button
-                className="h-12 rounded-full bg-[#C00000] px-5 text-sm font-medium text-white shadow-[0_10px_25px_rgba(192,0,0,0.35)] hover:bg-[#a00000]"
-                aria-label={`View ${garages.length} garages`}
-              >
-                <MapPin className="mr-1.5 h-4 w-4" />
-                {garages.length} garages
-              </Button>
-            </SheetTrigger>
-          </Sheet>
+                ))
+              )}
+            </>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+      </div>
+    </section>
   )
 }

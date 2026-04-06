@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ClipboardList, Plus } from 'lucide-react'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { ServiceLogCard } from '@/components/service/ServiceLogCard'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
@@ -34,29 +35,24 @@ export function ServiceLog() {
   }, [filter, logs])
 
   if (!vehicleId) {
-    return <p className="text-sm text-slate-600">No vehicle selected.</p>
+    return <p className="text-[13px] text-mz-gray-500">No vehicle selected.</p>
   }
 
   return (
-    <section className="space-y-4 pb-20 animate-enter-up">
-      <div className="rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm backdrop-blur">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Service History</h1>
-            <p className="text-sm text-slate-600">Vehicle ID: {vehicleId}</p>
-          </div>
-          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-mazda-red">
-            <ClipboardList className="h-5 w-5" />
-          </div>
-        </div>
+    <section className="flex flex-col flex-1 gap-4 pb-4 animate-enter-up">
+      <PageHeader
+        title="Service History"
+        subtitle={`Vehicle ID: ${vehicleId}`}
+        backTo="/"
+        action={<ClipboardList className="h-5 w-5 text-white/60" />}
+      />
 
-        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-          {filteredLogs.length} records in this view
-        </div>
+      <div className="rounded-xl border border-[0.5px] border-black/6 bg-white px-3 py-2 text-[12px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        {filteredLogs.length} records in this view
       </div>
 
       <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterTab)}>
-        <TabsList className="grid h-11 w-full grid-cols-4 rounded-xl bg-slate-100 p-1">
+        <TabsList className="grid h-11 w-full grid-cols-4 rounded-xl bg-mz-gray-100 p-1">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="minor">Minor</TabsTrigger>
           <TabsTrigger value="major">Major</TabsTrigger>
@@ -64,12 +60,24 @@ export function ServiceLog() {
         </TabsList>
       </Tabs>
 
-      {loading ? <p className="text-sm text-slate-500">Loading service logs...</p> : null}
+      {loading ? (
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-[60px] rounded-[12px]" />
+          ))}
+        </div>
+      ) : null}
 
       {!loading && filteredLogs.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-600">
-          No logs found for this filter yet.
-        </p>
+        <div className="flex flex-col items-center px-6 py-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mz-red-light">
+            <ClipboardList className="h-6 w-6 text-mz-red" />
+          </div>
+          <h2 className="mt-4 text-[16px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>No service logs yet</h2>
+          <p className="mt-[6px] max-w-[240px] text-center text-[13px] text-mz-gray-500">
+            Tap the + button below to log your first service.
+          </p>
+        </div>
       ) : null}
 
       <div className="space-y-3">
@@ -86,10 +94,10 @@ export function ServiceLog() {
 
       <Link
         to={`/log-service/${vehicleId}`}
-        className="fixed bottom-24 right-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-mazda-red text-white shadow-[0_10px_25px_rgba(192,0,0,0.35)]"
+        className="mt-auto self-end inline-flex h-[52px] w-[52px] items-center justify-center rounded-full bg-mz-red text-white"
         aria-label="Add service log"
       >
-        <Plus className="h-5 w-5" />
+        <Plus strokeWidth={2.5} className="h-[22px] w-[22px]" />
       </Link>
     </section>
   )
