@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { CarFront, Fuel, MapPin, NotebookText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -182,20 +183,30 @@ export function LogService() {
   }
 
   return (
-    <section className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Log Service</h1>
-        <p className="text-sm text-slate-600">
-          {selectedVehicle
-            ? `${selectedVehicle.model} ${selectedVehicle.year} - ${selectedVehicle.registration}`
-            : 'Loading vehicle details...'}
-        </p>
+    <section className="space-y-4 pb-4 animate-enter-up">
+      <div className="rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm backdrop-blur">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">Log Service</h1>
+            <p className="text-sm text-slate-600">
+              {selectedVehicle
+                ? `${selectedVehicle.model} ${selectedVehicle.year} - ${selectedVehicle.registration}`
+                : 'Loading vehicle details...'}
+            </p>
+          </div>
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-mazda-red">
+            <CarFront className="h-5 w-5" />
+          </div>
+        </div>
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <Card>
+        <Card className="border-white/70 bg-white/92 shadow-sm">
           <CardHeader>
-            <CardTitle>Section A - Service details</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <NotebookText className="h-4 w-4 text-mazda-red" />
+              Section A - Service details
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
@@ -243,9 +254,12 @@ export function LogService() {
         </Card>
 
         {showOilSection ? (
-          <Card>
+          <Card className="border-white/70 bg-white/92 shadow-sm">
             <CardHeader>
-              <CardTitle>Section B - Engine oil</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Fuel className="h-4 w-4 text-mazda-red" />
+                Section B - Engine oil
+              </CardTitle>
               <CardDescription>Recommended oils filtered by your Mazda model and fuel type.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -306,9 +320,12 @@ export function LogService() {
           </Card>
         ) : null}
 
-        <Card>
+        <Card className="border-white/70 bg-white/92 shadow-sm">
           <CardHeader>
-            <CardTitle>Section C - Where was it serviced</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-mazda-red" />
+              Section C - Where was it serviced
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
@@ -369,7 +386,7 @@ export function LogService() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/70 bg-white/92 shadow-sm">
           <CardHeader>
             <CardTitle>Section D - Notes and cost</CardTitle>
           </CardHeader>
@@ -395,7 +412,7 @@ export function LogService() {
           <p className="text-sm text-red-600">Please fix required fields before saving.</p>
         ) : null}
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="h-11 w-full bg-[#C00000] text-white hover:bg-[#a00000]" disabled={loading}>
           {loading ? 'Saving log...' : 'Save service log'}
         </Button>
       </form>

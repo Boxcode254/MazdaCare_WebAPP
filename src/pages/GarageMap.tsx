@@ -154,7 +154,7 @@ export function GarageMap() {
 
   if (apiMissing) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 px-6 py-20 text-center">
+      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-6 py-20 text-center shadow-sm">
         <AlertTriangle className="h-10 w-10 text-yellow-500" />
         <h2 className="text-lg font-semibold text-slate-800">Google Maps API key not set</h2>
         <p className="text-sm text-slate-500">
@@ -166,7 +166,7 @@ export function GarageMap() {
   }
 
   return (
-    <div className="-mx-4 -mt-6 flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="-mx-4 -mt-6 flex flex-col animate-enter-up" style={{ height: 'calc(100vh - 64px)' }}>
       {/* Search bar overlay */}
       <div className="absolute inset-x-0 top-0 z-10 mx-4 mt-4 flex items-center gap-2">
         <div className="relative flex-1">
@@ -174,7 +174,7 @@ export function GarageMap() {
           <Input
             ref={searchInputRef}
             placeholder="Search garages or areas…"
-            className="h-10 rounded-full border-white/80 bg-white/90 pl-9 pr-4 text-sm shadow-md backdrop-blur-sm"
+            className="h-11 rounded-full border-white/80 bg-white/95 pl-9 pr-4 text-sm shadow-md backdrop-blur-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -195,7 +195,7 @@ export function GarageMap() {
           <SheetTrigger asChild>
             <Button
               size="icon"
-              className="h-10 w-10 shrink-0 rounded-full bg-white shadow-md hover:bg-slate-50"
+              className="h-11 w-11 shrink-0 rounded-full bg-white shadow-md hover:bg-slate-50"
               variant="ghost"
               aria-label="Show garage list"
             >
@@ -203,7 +203,7 @@ export function GarageMap() {
             </Button>
           </SheetTrigger>
 
-          <SheetContent side="bottom" className="max-h-[72vh] overflow-y-auto rounded-t-2xl px-4 pb-8">
+          <SheetContent side="bottom" className="max-h-[72vh] overflow-y-auto rounded-t-3xl border-slate-200/80 bg-white/95 px-4 pb-8 pt-2 backdrop-blur">
             <SheetHeader className="mb-3">
               <SheetTitle className="flex items-center gap-2 text-base">
                 <MapPin className="h-4 w-4 text-[#C00000]" />
@@ -270,7 +270,7 @@ export function GarageMap() {
       {/* Map container */}
       <div ref={mapElRef} className="relative flex-1">
         {loading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-100">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-100/95 backdrop-blur-sm">
             <Loader2 className="h-8 w-8 animate-spin text-[#C00000]" />
             <p className="text-sm text-slate-500">Loading map…</p>
           </div>
@@ -283,7 +283,7 @@ export function GarageMap() {
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <Button
-                className="h-12 rounded-full bg-[#C00000] px-5 text-sm font-medium text-white shadow-lg hover:bg-[#a00000]"
+                className="h-12 rounded-full bg-[#C00000] px-5 text-sm font-medium text-white shadow-[0_10px_25px_rgba(192,0,0,0.35)] hover:bg-[#a00000]"
                 aria-label={`View ${garages.length} garages`}
               >
                 <MapPin className="mr-1.5 h-4 w-4" />

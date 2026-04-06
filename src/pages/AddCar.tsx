@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { CarFront, CircleCheckBig, Fuel, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -92,13 +93,44 @@ export function AddCar() {
   }
 
   return (
-    <section className="space-y-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-mazda-red">Step {step} of 3</p>
-        <h1 className="text-2xl font-semibold text-slate-900">Add Your Mazda</h1>
+    <section className="space-y-4 pb-4">
+      <div className="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm backdrop-blur">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-mazda-red">Step {step} of 3</p>
+            <h1 className="mt-1 text-2xl font-semibold text-slate-900">Add Your Mazda</h1>
+            <p className="mt-1 text-xs text-slate-500">Create a complete service baseline for accurate reminders.</p>
+          </div>
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-mazda-red">
+            <CarFront className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {[1, 2, 3].map((n) => {
+            const done = step > n
+            const current = step === n
+
+            return (
+              <div
+                key={n}
+                className={`flex min-h-11 items-center justify-center gap-1 rounded-xl border text-xs font-semibold ${
+                  done
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : current
+                      ? 'border-red-200 bg-red-50 text-mazda-red'
+                      : 'border-slate-200 bg-white text-slate-500'
+                }`}
+              >
+                {done ? <CircleCheckBig className="h-3.5 w-3.5" /> : null}
+                {n === 1 ? 'Basics' : n === 2 ? 'Usage' : 'Confirm'}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
-      <Card>
+      <Card className="border-white/70 bg-white/92 shadow-sm">
         <CardHeader>
           <CardTitle>
             {step === 1 && 'Vehicle details'}
@@ -153,10 +185,11 @@ export function AddCar() {
                         key={fuel}
                         type="button"
                         onClick={() => setValue('fuelType', fuel, { shouldValidate: true })}
-                        className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                        className={`flex min-h-11 items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
                           values.fuelType === fuel ? 'border-mazda-red bg-red-50 text-mazda-red' : 'border-slate-200 text-slate-600'
                         }`}
                       >
+                        <Fuel className="h-3.5 w-3.5" />
                         {fuel === 'petrol' ? 'Petrol' : 'Diesel'}
                       </button>
                     ))}
@@ -194,7 +227,7 @@ export function AddCar() {
                         key={interval}
                         type="button"
                         onClick={() => setValue('mileageInterval', interval as 5000 | 10000, { shouldValidate: true })}
-                        className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                        className={`flex min-h-11 items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium transition ${
                           values.mileageInterval === interval
                             ? 'border-mazda-red bg-red-50 text-mazda-red'
                             : 'border-slate-200 text-slate-600'
@@ -209,13 +242,13 @@ export function AddCar() {
 
                 <div className="space-y-1.5">
                   <Label>Car color</Label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {colorOptions.map((color) => (
                       <button
                         key={color}
                         type="button"
                         onClick={() => setValue('color', color, { shouldValidate: true })}
-                        className={`rounded-lg border px-2 py-2 text-xs font-medium transition ${
+                        className={`min-h-11 rounded-lg border px-2 py-2 text-xs font-medium transition ${
                           values.color === color ? 'border-mazda-red bg-red-50 text-mazda-red' : 'border-slate-200 text-slate-600'
                         }`}
                       >
@@ -254,20 +287,25 @@ export function AddCar() {
                 <p>
                   <span className="font-semibold">Color:</span> {values.color}
                 </p>
+                <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
+                  Confirm to add this vehicle to your dashboard and activate next-service tracking.
+                </div>
               </div>
             ) : null}
 
             <div className="flex items-center justify-between gap-3">
-              <Button type="button" variant="outline" onClick={previousStep} disabled={step === 1 || loading}>
+              <Button type="button" variant="outline" className="min-h-11" onClick={previousStep} disabled={step === 1 || loading}>
                 Back
               </Button>
 
               {step < 3 ? (
-                <Button type="button" onClick={nextStep}>
+                <Button type="button" className="min-h-11 gap-1" onClick={nextStep}>
+                  <Plus className="h-4 w-4" />
                   Continue
                 </Button>
               ) : (
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" className="min-h-11 gap-1 bg-[#C00000] text-white hover:bg-[#a00000]" disabled={loading}>
+                  <CircleCheckBig className="h-4 w-4" />
                   {loading ? 'Saving...' : 'Confirm and Save'}
                 </Button>
               )}

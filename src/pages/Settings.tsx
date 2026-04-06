@@ -53,13 +53,13 @@ export function Settings() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pb-4 animate-enter-up">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/90 p-3 shadow-sm">
         <button
           type="button"
           aria-label="Go back"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200"
           onClick={() => navigate(-1)}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -68,7 +68,7 @@ export function Settings() {
       </div>
 
       {/* Profile */}
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
         <CardContent className="flex items-center gap-4 pt-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <User className="h-6 w-6 text-[#C00000]" />
@@ -87,7 +87,7 @@ export function Settings() {
         </p>
 
         {/* Notifications toggle */}
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-slate-200/80 bg-white/95 shadow-sm">
           <CardContent className="flex items-center justify-between pt-4 pb-4">
             <div className="flex items-center gap-3">
               {notifEnabled ? (
@@ -122,7 +122,7 @@ export function Settings() {
         </Card>
 
         {/* Mileage unit (display only — km is fixed for Kenya) */}
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-slate-200/80 bg-white/95 shadow-sm">
           <CardContent className="flex items-center justify-between pt-4 pb-4">
             <div>
               <p className="text-sm font-medium text-slate-800">Mileage unit</p>
@@ -138,7 +138,7 @@ export function Settings() {
       {/* Sign out */}
       <Button
         variant="outline"
-        className="w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+        className="h-11 w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
         onClick={handleSignOut}
         disabled={signingOut}
       >

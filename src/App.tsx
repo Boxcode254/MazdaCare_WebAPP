@@ -1,23 +1,37 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { BottomNav } from '@/components/layout/BottomNav'
-import { AddCar } from '@/pages/AddCar'
-import { Auth } from '@/pages/Auth'
-import { Dashboard } from '@/pages/Dashboard'
-import { GarageMap } from '@/pages/GarageMap'
-import { LogService } from '@/pages/LogService'
-import { Schedule } from '@/pages/Schedule'
-import { ServiceLog } from '@/pages/ServiceLog'
-import { Settings } from '@/pages/Settings'
+
+const Auth = lazy(() => import('@/pages/Auth').then((m) => ({ default: m.Auth })))
+const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
+const AddCar = lazy(() => import('@/pages/AddCar').then((m) => ({ default: m.AddCar })))
+const ServiceLog = lazy(() => import('@/pages/ServiceLog').then((m) => ({ default: m.ServiceLog })))
+const LogService = lazy(() => import('@/pages/LogService').then((m) => ({ default: m.LogService })))
+const GarageMap = lazy(() => import('@/pages/GarageMap').then((m) => ({ default: m.GarageMap })))
+const Schedule = lazy(() => import('@/pages/Schedule').then((m) => ({ default: m.Schedule })))
+const Settings = lazy(() => import('@/pages/Settings').then((m) => ({ default: m.Settings })))
+
+function PageFallback() {
+  return (
+    <div className="space-y-3 pt-1">
+      <div className="h-8 w-40 animate-pulse rounded-xl bg-slate-200/80" />
+      <div className="h-24 w-full animate-pulse rounded-2xl bg-slate-200/70" />
+      <div className="h-24 w-full animate-pulse rounded-2xl bg-slate-200/70" />
+    </div>
+  )
+}
 
 function ProtectedAppLayout() {
   const location = useLocation()
   const showBottomNav = location.pathname !== '/auth'
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-white shadow-lg">
-      <main className="flex-1 px-4 pb-24 pt-6">
-        <Outlet />
+    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-white/30 bg-white/80 shadow-[0_20px_80px_rgba(15,23,42,0.16)] backdrop-blur">
+      <main className="flex-1 px-4 pb-24 pt-6 animate-enter-up">
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
       {showBottomNav ? <BottomNav /> : null}
     </div>
@@ -28,7 +42,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/auth" element={<Auth />} />
+        <Route
+          path="/auth"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <Auth />
+            </Suspense>
+          }
+        />
 
         <Route
           element={

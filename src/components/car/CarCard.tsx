@@ -1,4 +1,4 @@
-import { CarFront, Gauge, Pencil } from 'lucide-react'
+import { CarFront, Fuel, Gauge, Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,7 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
   const progress = Math.min((vehicle.currentMileage / nextServiceMileage) * 100, 100)
 
   return (
-    <Card className="cursor-pointer" onClick={() => navigate(`/service/${vehicle.id}`)}>
+    <Card className="cursor-pointer border-white/70 bg-white/95 shadow-sm" onClick={() => navigate(`/service/${vehicle.id}`)}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-base">
           <span className="inline-flex items-center gap-2">
@@ -25,6 +25,7 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
             {vehicle.model} {vehicle.year}
           </span>
           <Badge className={vehicle.fuelType === 'petrol' ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'}>
+            <Fuel className="mr-1 h-3 w-3" />
             {vehicle.fuelType}
           </Badge>
         </CardTitle>
@@ -47,6 +48,7 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
           type="button"
           variant="outline"
           size="sm"
+          className="min-h-10"
           onClick={(event) => {
             event.stopPropagation()
             onEditMileage?.(vehicle)

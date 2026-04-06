@@ -18,7 +18,7 @@ const SERVICE_LABELS: Record<ServiceLog['serviceType'], string> = {
 
 export function ServiceLogCard({ log }: ServiceLogCardProps) {
   return (
-    <Card>
+    <Card className="border-white/70 bg-white/95 shadow-sm">
       <CardContent className="space-y-2 pt-4">
         <div className="flex items-center justify-between">
           <Badge variant="secondary">{SERVICE_LABELS[log.serviceType]}</Badge>

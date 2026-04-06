@@ -10,6 +10,7 @@ import {
   CalendarDays,
   TrendingUp,
   ChevronRight,
+  CarFront,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -164,16 +165,26 @@ export function Schedule() {
         : 'bg-green-100 text-green-700'
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">
-          {vehicle.model} {vehicle.year}
-        </h1>
-        <Badge className={urgencyColour}>{urgencyLabel}</Badge>
+    <div className="space-y-5 pb-4 animate-enter-up">
+      <div className="rounded-2xl border border-white/70 bg-white/92 p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold text-slate-900">
+              {vehicle.model} {vehicle.year}
+            </h1>
+            <p className="text-xs text-slate-500">Next service readiness and timeline</p>
+          </div>
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-mazda-red">
+            <CarFront className="h-5 w-5" />
+          </div>
+        </div>
+        <div className="mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold">
+          <Badge className={urgencyColour}>{urgencyLabel}</Badge>
+        </div>
       </div>
 
       {/* ── Next service countdown ── */}
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
             <TrendingUp className="h-4 w-4 text-[#C00000]" />
@@ -213,7 +224,7 @@ export function Schedule() {
 
       {/* ── Reminder button ── */}
       <Button
-        className="w-full gap-2"
+        className="h-11 w-full gap-2"
         variant="outline"
         onClick={requestReminder}
         disabled={notifState === 'denied' || notifState === 'unsupported'}
@@ -242,7 +253,7 @@ export function Schedule() {
       </Button>
 
       {/* ── Service checklist ── */}
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
             <CheckCircle2 className="h-4 w-4 text-[#C00000]" />
@@ -262,7 +273,7 @@ export function Schedule() {
       </Card>
 
       {/* ── Estimated cost card ── */}
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
             <Wrench className="h-4 w-4 text-[#C00000]" />
@@ -343,7 +354,7 @@ export function Schedule() {
 
       {/* ── Log new service CTA ── */}
       <Button
-        className="w-full bg-[#C00000] text-white hover:bg-[#a00000]"
+        className="h-11 w-full bg-[#C00000] text-white hover:bg-[#a00000]"
         onClick={() => navigate(`/log-service/${vehicleId}`)}
       >
         Log a Service
