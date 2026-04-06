@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -48,7 +48,11 @@
   }
 
   body {
-    @apply m-0 min-h-screen font-sans antialiased bg-background text-foreground;
+    @apply m-0 min-h-screen font-sans antialiased text-foreground;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(192, 0, 0, 0.1), transparent 42%),
+      radial-gradient(circle at 80% 0%, rgba(245, 158, 11, 0.12), transparent 36%),
+      linear-gradient(180deg, #fff8f3 0%, #f8fafc 35%, #f1f5f9 100%);
   }
 
   /* Prevent iOS auto-zoom on input focus — must be 16px minimum */
@@ -56,12 +60,25 @@
     font-size: 16px;
   }
 
+  button, a, input, textarea, select {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid rgba(192, 0, 0, 0.35);
+    outline-offset: 2px;
+  }
+
   #root {
     @apply min-h-screen;
   }
   .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Inter', sans-serif;
+    --font-heading: 'Space Grotesk', 'Manrope', sans-serif;
+    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
   }
   .dark {
     --background: oklch(0.145 0 0);
@@ -98,5 +115,43 @@
   }
   html {
     @apply font-sans;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  @keyframes enter-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-enter-up {
+    animation: enter-up 0.45s ease-out;
+  }
+
+  .stagger-enter {
+    opacity: 0;
+    animation: enter-up 0.45s ease-out forwards;
+    animation-delay: var(--stagger-delay, 0ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-enter-up,
+    .stagger-enter {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 }

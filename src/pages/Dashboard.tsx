@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CarFront, MapPin, ClipboardList, CalendarDays, Settings, Plus, Star } from 'lucide-react'
+import { CarFront, MapPin, ClipboardList, CalendarDays, Plus, Star, UserCircle, Fuel } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -146,6 +147,13 @@ export function Dashboard() {
   const nextSvc =
     activeVehicle && lastLog ? calculateNextService(activeVehicle, lastLog) : null
 
+  const onEnterActivate = (event: React.KeyboardEvent<HTMLElement>, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      action()
+    }
+  }
+
   const name = firstName(user?.user_metadata?.full_name ?? user?.email)
 
   // ── Loading skeleton ──
@@ -169,8 +177,8 @@ export function Dashboard() {
   // ── Empty state ──
   if (vehicles.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-6 py-20 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+      <div className="flex flex-col items-center gap-6 rounded-2xl border border-white/70 bg-white/90 py-20 text-center shadow-sm backdrop-blur">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50 ring-8 ring-red-50/60">
           <CarFront className="h-10 w-10 text-[#C00000]" />
         </div>
         <div>
@@ -189,23 +197,35 @@ export function Dashboard() {
   }
 
   return (
-    <div className="space-y-5 pb-4">
+    <div className="space-y-5 pb-4 animate-enter-up">
       {/* ── Header ── */}
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-slate-500">{greeting()}</p>
-          <h1 className="text-xl font-semibold text-slate-900">
-            {name ? `Hello, ${name}` : 'Welcome back'}
-          </h1>
+      <div className="rounded-2xl bg-gradient-to-br from-[#C00000] via-[#a31207] to-[#7f1d1d] p-4 text-white shadow-[0_14px_34px_rgba(127,29,29,0.35)]">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium text-white/80">{greeting()}</p>
+            <h1 className="text-xl font-semibold text-white">
+              {name ? `Hello, ${name}` : 'Welcome back'}
+            </h1>
+            <p className="mt-1 text-xs text-white/80">Keep your Mazda running smoothly across Nairobi roads.</p>
+          </div>
+          <button
+            type="button"
+            aria-label="Settings"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white transition hover:bg-white/20"
+            onClick={() => navigate('/settings')}
+          >
+            <UserCircle className="h-5 w-5" />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="Settings"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
-          onClick={() => navigate('/settings')}
-        >
-          <Settings className="h-4.5 w-4.5 h-[18px] w-[18px]" />
-        </button>
+
+        {activeVehicle ? (
+          <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs">
+            <Fuel className="h-3.5 w-3.5" />
+            <span className="capitalize">
+              {activeVehicle.fuelType} service profile · {activeVehicle.registration}
+            </span>
+          </div>
+        ) : null}
       </div>
 
       {/* ── Install app prompt ── */}
@@ -259,8 +279,11 @@ export function Dashboard() {
       {/* ── Next service countdown ── */}
       {activeVehicle && (
         <Card
-          className="cursor-pointer border-slate-200 shadow-sm"
+          className="cursor-pointer border-slate-200/80 bg-white/95 shadow-sm"
+          role="button"
+          tabIndex={0}
           onClick={() => navigate(`/schedule/${activeVehicle.id}`)}
+          onKeyDown={(event) => onEnterActivate(event, () => navigate(`/schedule/${activeVehicle.id}`))}
         >
           <CardContent className="flex items-center gap-5 pt-4">
             <div className="relative shrink-0">
@@ -298,8 +321,11 @@ export function Dashboard() {
       {/* ── Last service card ── */}
       {lastLog && activeVehicle && (
         <Card
-          className="cursor-pointer border-slate-200 shadow-sm"
+          className="cursor-pointer border-slate-200/80 bg-white/95 shadow-sm"
+          role="button"
+          tabIndex={0}
           onClick={() => navigate(`/service/${activeVehicle.id}`)}
+          onKeyDown={(event) => onEnterActivate(event, () => navigate(`/service/${activeVehicle.id}`))}
         >
           <CardContent className="pt-4">
             <div className="flex items-start justify-between gap-2">
@@ -350,11 +376,12 @@ export function Dashboard() {
               to: `/schedule/${activeVehicle.id}`,
               colour: 'bg-green-50 text-green-600',
             },
-          ].map(({ label, icon: Icon, to, colour }) => (
+          ].map(({ label, icon: Icon, to, colour }, idx) => (
             <button
               key={label}
               type="button"
-              className={`flex flex-col items-center gap-2 rounded-xl py-4 text-xs font-medium transition hover:opacity-80 ${colour}`}
+              className={`stagger-enter flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-3 text-xs font-semibold transition active:scale-[0.98] hover:opacity-80 ${colour}`}
+              style={{ '--stagger-delay': `${80 + idx * 60}ms` } as CSSProperties}
               onClick={() => navigate(to)}
             >
               <Icon className="h-5 w-5" />
@@ -394,10 +421,12 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="space-y-2">
-              {recentLogs.map((log) => (
-                <div
+              {recentLogs.map((log, idx) => (
+                <button
                   key={log.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
+                  type="button"
+                  className="stagger-enter flex items-center justify-between rounded-xl border border-slate-100 bg-white/95 px-4 py-3 shadow-sm transition active:scale-[0.995]"
+                  style={{ '--stagger-delay': `${140 + idx * 55}ms` } as CSSProperties}
                   onClick={() => navigate(`/service/${activeVehicle.id}`)}
                 >
                   <div>
@@ -428,7 +457,7 @@ export function Dashboard() {
                       </p>
                     )}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
