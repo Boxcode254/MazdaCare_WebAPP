@@ -28,16 +28,17 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-[9999] flex items-center justify-center"
       style={{
-        background: '#111010',
+        background:
+          'radial-gradient(circle at top, rgba(194, 38, 61, 0.28), transparent 30%), linear-gradient(180deg, #171213 0%, #120d0f 100%)',
         opacity: fading ? 0 : 1,
         transition: 'opacity 300ms ease-out',
       }}
     >
       <div className="flex flex-col items-center gap-6">
         <MazdaLogo variant="full" theme="dark" size="xl" />
-        <div className="h-[2px] w-[120px] overflow-hidden rounded-[1px] bg-white/10">
+        <div className="h-[3px] w-[132px] overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-[1px] bg-[#9B1B30]"
+            className="h-full rounded-full bg-[linear-gradient(90deg,#991728,#E46B80)]"
             style={{
               animation: 'mc-splash-progress 600ms ease-out forwards',
               transformOrigin: 'left center',

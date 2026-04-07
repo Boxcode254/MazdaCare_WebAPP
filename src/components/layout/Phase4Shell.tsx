@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  ExternalLink,
   Gauge,
   HeartHandshake,
   Home,
@@ -34,10 +35,12 @@ import MazdaLogo from '@/components/ui/MazdaLogo'
 import { CostAnalytics } from '@/components/service/CostAnalytics'
 import { LogService } from '@/pages/LogService'
 import { Sheet, SheetClose, SheetContent } from '@/components/ui/sheet'
+import { Switch } from '@/components/ui/switch'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
 import { useIdleTimer } from '@/hooks/useIdleTimer'
 import { useVehicles } from '@/hooks/useVehicles'
 import { haptics } from '@/lib/haptics'
+import { lookupMazdaManuals, type MazdaManualLookupResult } from '@/lib/mazdaManuals'
 import { sanitizeMileage, sanitizeText } from '@/lib/sanitize'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
@@ -105,11 +108,6 @@ function maskVin(vin: string): string {
   return `${vin.slice(0, 3)}...${vin.slice(-4)}`
 }
 
-function getMazdaManualLink(model: string, year: number): string {
-  const encodedQuery = encodeURIComponent(`${year} Mazda ${model} owners manual`)
-  return `https://www.mazda.co.uk/owners/manuals/?q=${encodedQuery}`
-}
-
 type TabId = 'home' | 'garage' | 'map' | 'profile'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -151,6 +149,17 @@ interface MileageUpdateSheetProps {
   onOpenChange: (open: boolean) => void
   onSave: (mileage: number) => Promise<void>
   onLogService: (mileage: number) => void
+}
+
+interface ManualsSheetProps {
+  vehicle: {
+    model: string
+    year: number
+    registration: string
+  }
+  lookup: MazdaManualLookupResult
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 function getMileageProgressColor(progress: number) {
@@ -337,16 +346,175 @@ function MileageUpdateSheet({
   )
 }
 
+function ManualsSheet({ vehicle, lookup, open, onOpenChange }: ManualsSheetProps) {
+  const hasSections = lookup.sections.length > 0
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" showCloseButton={false} className="rounded-t-[28px] border-0 bg-white p-0">
+        <AnimatePresence initial={false}>
+          {open ? (
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="rounded-t-[28px] bg-white px-5 pb-[calc(env(safe-area-inset-bottom,0px)+20px)] pt-5"
+            >
+              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-200" />
+
+              <div className="border-b border-gray-100 pb-4">
+                <h2
+                  className="text-[#111010]"
+                  style={{
+                    fontFamily: 'Cormorant Garamond, serif',
+                    fontSize: '22px',
+                    fontStyle: 'italic',
+                    fontWeight: 300,
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Official Mazda manuals
+                </h2>
+                <p className="mt-1 text-[11px] text-black/40" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  {vehicle.registration} · {vehicle.model} {vehicle.year}
+                </p>
+                <p className="mt-2 text-[12px] text-gray-600" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  PDF manuals sourced from Mazda owner resources.
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-5">
+                {lookup.note ? (
+                  <div className="rounded-2xl border border-[#E3CDD1] bg-[#FCF5F6] px-4 py-3 text-[12px] text-[#7F2432]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    {lookup.note}
+                  </div>
+                ) : null}
+
+                {hasSections ? (
+                  <div className="space-y-3">
+                    {lookup.sections.map((section) => (
+                      <div key={`${section.catalogModel}-${section.matchedYearLabel}-${section.sectionLabel}`} className="rounded-[22px] border border-[#EDE2E4] bg-[#FCFAFA] p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                              {section.sectionLabel}
+                            </p>
+                            <p className="mt-1 text-[16px] font-semibold text-[#111010]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                              {section.matchedYearLabel} manual set
+                            </p>
+                          </div>
+                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${section.exactYear ? 'bg-[#EEF6F1] text-[#2E7D4F]' : 'bg-[#F7E8EA] text-[#9B1B30]'}`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+                            {section.exactYear ? 'Exact year' : 'Closest match'}
+                          </span>
+                        </div>
+
+                        <div className="mt-4 space-y-2.5">
+                          {section.links.map((link) => (
+                            <div key={`${section.catalogModel}-${section.matchedYearLabel}-${link.title}`} className="rounded-2xl border border-white bg-white/90 px-3 py-3 shadow-sm">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <p className="text-[14px] font-semibold text-[#111010]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                                    {link.title}
+                                  </p>
+                                  <p className="mt-1 text-[11px] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                                    Official Mazda documentation
+                                  </p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-2">
+                                  {link.pdfUrl ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        haptics.tap()
+                                        window.open(link.pdfUrl!, '_blank', 'noopener,noreferrer')
+                                      }}
+                                      className="inline-flex items-center gap-1 rounded-full bg-[#9B1B30] px-3 py-2 text-[11px] font-semibold text-white"
+                                      style={{ fontFamily: 'Outfit, sans-serif' }}
+                                    >
+                                      <Download className="h-3.5 w-3.5" />
+                                      PDF
+                                    </button>
+                                  ) : null}
+                                  {link.onlineUrl ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        haptics.tap()
+                                        window.open(link.onlineUrl!, '_blank', 'noopener,noreferrer')
+                                      }}
+                                      className="inline-flex items-center gap-1 rounded-full border border-[#D7C1C5] bg-white px-3 py-2 text-[11px] font-semibold text-[#7F2432]"
+                                      style={{ fontFamily: 'Outfit, sans-serif' }}
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                      Online
+                                    </button>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-[22px] border border-[#EDE2E4] bg-[#FCFAFA] p-4">
+                    <p className="text-[14px] font-semibold text-[#111010]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      Manual not matched yet
+                    </p>
+                    <p className="mt-2 text-[12px] text-gray-600" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      We could not find a direct PDF match for this exact vehicle in the bundled official catalog.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <SheetClose asChild>
+                    <button
+                      type="button"
+                      className="flex-1 rounded-xl border border-[#E3CDD1] bg-white px-4 py-3.5 text-[14px] font-semibold text-[#9B1B30]"
+                      style={{ fontFamily: 'Outfit, sans-serif' }}
+                    >
+                      Close
+                    </button>
+                  </SheetClose>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      haptics.tap()
+                      window.open(lookup.generalFallbackUrl, '_blank', 'noopener,noreferrer')
+                    }}
+                    className="flex-1 rounded-xl bg-[#A31526] px-4 py-3.5 text-[14px] font-semibold text-white"
+                    style={{ fontFamily: 'Outfit, sans-serif' }}
+                  >
+                    Browse Mazda owner site
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
 function NavButton({ icon, label, isActive, onClick }: NavButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex h-12 w-16 flex-col items-center justify-center transition-colors ${
-        isActive ? 'text-[#A31526]' : 'text-gray-400 hover:text-gray-600'
+      className={`relative flex h-12 w-16 flex-col items-center justify-center rounded-2xl transition-all ${
+        isActive ? 'text-[#991728]' : 'text-gray-400 hover:text-gray-600'
       }`}
     >
+      <span
+        className={`absolute inset-x-3 top-0 h-[3px] rounded-full transition-all ${
+          isActive ? 'bg-[#C2263D] opacity-100' : 'bg-transparent opacity-0'
+        }`}
+      />
       <div className={`mb-1 transition-transform ${isActive ? 'scale-110' : 'scale-100'}`}>{icon}</div>
-      <span className={`text-[10px] font-bold tracking-wide ${isActive ? 'text-[#A31526]' : 'text-gray-500'}`}>
+      <span className={`text-[10px] font-bold tracking-[0.08em] ${isActive ? 'text-[#991728]' : 'text-gray-500'}`}>
         {label}
       </span>
     </button>
@@ -959,7 +1127,7 @@ function SettingsView({
   onLogout,
   isLoggingOut,
 }: {
-  user: { fullName: string; email: string }
+  user: { fullName: string; email: string; phone: string }
   primaryVehicle: {
     id: string
     model: string
@@ -971,7 +1139,68 @@ function SettingsView({
   isLoggingOut: boolean
 }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false)
-  const [subView, setSubView] = useState<'menu' | 'cost-analytics'>('menu')
+  const [subView, setSubView] = useState<'menu' | 'cost-analytics' | 'personal-details' | 'garage-display'>('menu')
+  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true)
+
+  const garageVisitStats = useMemo(() => {
+    const grouped = new Map<
+      string,
+      {
+        garageName: string
+        visits: number
+        latestVisit: number
+      }
+    >()
+
+    for (const log of serviceLogs) {
+      const garageName = log.garageName?.trim() || 'Garage not specified'
+      const serviceDate = new Date(log.serviceDate).getTime()
+      const existing = grouped.get(garageName)
+
+      if (!existing) {
+        grouped.set(garageName, {
+          garageName,
+          visits: 1,
+          latestVisit: serviceDate,
+        })
+        continue
+      }
+
+      existing.visits += 1
+      existing.latestVisit = Math.max(existing.latestVisit, serviceDate)
+    }
+
+    return Array.from(grouped.values()).sort((a, b) => {
+      if (b.visits !== a.visits) {
+        return b.visits - a.visits
+      }
+
+      return b.latestVisit - a.latestVisit
+    })
+  }, [serviceLogs])
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('mc_push_notifications_enabled')
+      if (stored === null) {
+        return
+      }
+      setPushNotificationsEnabled(stored === 'true')
+    } catch {
+      // storage unavailable; keep default
+    }
+  }, [])
+
+  const handlePushToggle = (enabled: boolean) => {
+    setPushNotificationsEnabled(enabled)
+    haptics.tap()
+
+    try {
+      window.localStorage.setItem('mc_push_notifications_enabled', String(enabled))
+    } catch {
+      // storage unavailable
+    }
+  }
 
   if (subView === 'cost-analytics') {
     return (
@@ -1017,6 +1246,86 @@ function SettingsView({
     )
   }
 
+  if (subView === 'personal-details') {
+    return (
+      <div className="p-6 pb-32">
+        <button
+          type="button"
+          onClick={() => setSubView('menu')}
+          className="mb-4 inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1.5 text-[12px] font-semibold text-gray-600"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Settings
+        </button>
+
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-bold text-gray-900">Personal Details</h2>
+          <p className="mt-1 text-[13px] text-gray-500">Profile details used across MazdaCare.</p>
+
+          <div className="mt-5 space-y-4">
+            <div className="rounded-xl border border-gray-100 bg-[#FCFAFA] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Full name</p>
+              <p className="mt-1 text-sm font-medium text-[#111010]">{user.fullName}</p>
+            </div>
+            <div className="rounded-xl border border-gray-100 bg-[#FCFAFA] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Email</p>
+              <p className="mt-1 text-sm font-medium text-[#111010]">{user.email}</p>
+            </div>
+            <div className="rounded-xl border border-gray-100 bg-[#FCFAFA] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Phone number</p>
+              <p className="mt-1 text-sm font-medium text-[#111010]">{user.phone || 'Not set yet'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (subView === 'garage-display') {
+    return (
+      <div className="p-6 pb-32">
+        <button
+          type="button"
+          onClick={() => setSubView('menu')}
+          className="mb-4 inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1.5 text-[12px] font-semibold text-gray-600"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Settings
+        </button>
+
+        <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-bold text-gray-900">Garage Display</h2>
+          <p className="mt-1 text-[13px] text-gray-500">
+            Garages visited, sorted by number of visits.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {garageVisitStats.length === 0 ? (
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm">
+              <p className="text-[13px] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                No garages logged yet.
+              </p>
+            </div>
+          ) : (
+            garageVisitStats.map((garage) => (
+              <div key={garage.garageName} className="rounded-2xl border border-gray-100 bg-white px-4 py-3.5 shadow-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[14px] font-semibold text-[#111010]">{garage.garageName}</p>
+                  <span className="rounded-full bg-[#F5E8EA] px-3 py-1 text-[11px] font-semibold text-[#9B1B30]">
+                    {garage.visits} visit{garage.visits === 1 ? '' : 's'}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-6 pb-32">
       <div className="space-y-6">
@@ -1027,55 +1336,116 @@ function SettingsView({
           <div>
             <h2 className="text-lg font-bold text-gray-900">{user.fullName}</h2>
             <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="text-xs text-gray-400">{user.phone || 'No phone number yet'}</p>
           </div>
         </div>
 
-        {[
-          {
-            title: 'Account',
-            items: [
-              { icon: User, title: 'Personal Details' },
-              { icon: Shield, title: 'Password & Security' },
-              { icon: ChartNoAxesColumn, title: 'Cost Analytics', onClick: () => setSubView('cost-analytics') },
-            ],
-          },
-          {
-            title: 'Preferences',
-            items: [
-              { icon: Bell, title: 'Push Notifications' },
-              { icon: Car, title: 'Garage Display' },
-            ],
-          },
-          {
-            title: 'Support',
-            items: [
-              { icon: MessageSquare, title: 'Contact Dealership' },
-              { icon: Info, title: 'App Feedback' },
-            ],
-          },
-        ].map((group) => (
-          <div key={group.title} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-            <div className="border-b border-gray-100 bg-gray-50/50 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">
-              {group.title}
-            </div>
-            {group.items.map((item, index) => (
-              <button
-                key={item.title}
-                type="button"
-                onClick={item.onClick}
-                className={`flex items-center justify-between bg-white p-4 active:bg-gray-50 ${
-                  index !== group.items.length - 1 ? 'border-b border-gray-50' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="h-5 w-5 text-gray-400" />
-                  <span className="text-[15px] font-medium text-gray-800">{item.title}</span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-300" />
-              </button>
-            ))}
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="border-b border-gray-100 bg-gray-50/50 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">
+            Account
           </div>
-        ))}
+          <button
+            type="button"
+            onClick={() => {
+              haptics.tap()
+              setSubView('personal-details')
+            }}
+            className="flex w-full items-center justify-between border-b border-gray-50 bg-white p-4 active:bg-gray-50"
+          >
+            <div className="flex items-center gap-3">
+              <User className="h-5 w-5 text-gray-400" />
+              <span className="text-[15px] font-medium text-gray-800">Personal Details</span>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-300" />
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border-b border-gray-50 bg-white p-4 active:bg-gray-50"
+          >
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-gray-400" />
+              <span className="text-[15px] font-medium text-gray-800">Password & Security</span>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-300" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              haptics.tap()
+              setSubView('cost-analytics')
+            }}
+            className="flex w-full items-center justify-between bg-white p-4 active:bg-gray-50"
+          >
+            <div className="flex items-center gap-3">
+              <ChartNoAxesColumn className="h-5 w-5 text-gray-400" />
+              <span className="text-[15px] font-medium text-gray-800">Cost Analytics</span>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-300" />
+          </button>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="border-b border-gray-100 bg-gray-50/50 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">
+            Preferences
+          </div>
+          <div className="flex items-center justify-between border-b border-gray-50 bg-white p-4">
+            <div className="flex items-center gap-3">
+              <Bell className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-[15px] font-medium text-gray-800">Push Notifications</p>
+                <p className="text-[12px] text-gray-500">
+                  {pushNotificationsEnabled ? 'Enabled' : 'Disabled'}
+                </p>
+              </div>
+            </div>
+            <Switch checked={pushNotificationsEnabled} onCheckedChange={handlePushToggle} />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              haptics.tap()
+              setSubView('garage-display')
+            }}
+            className="flex w-full items-center justify-between bg-white p-4 active:bg-gray-50"
+          >
+            <div className="flex items-center gap-3">
+              <Car className="h-5 w-5 text-gray-400" />
+              <div className="text-left">
+                <p className="text-[15px] font-medium text-gray-800">Garage Display</p>
+                <p className="text-[12px] text-gray-500">
+                  {garageVisitStats.length} garage{garageVisitStats.length === 1 ? '' : 's'} visited
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-300" />
+          </button>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="border-b border-gray-100 bg-gray-50/50 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">
+            Support
+          </div>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border-b border-gray-50 bg-white p-4 active:bg-gray-50"
+          >
+            <div className="flex items-center gap-3">
+              <MessageSquare className="h-5 w-5 text-gray-400" />
+              <span className="text-[15px] font-medium text-gray-800">Contact Dealership</span>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-300" />
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between bg-white p-4 active:bg-gray-50"
+          >
+            <div className="flex items-center gap-3">
+              <Info className="h-5 w-5 text-gray-400" />
+              <span className="text-[15px] font-medium text-gray-800">App Feedback</span>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-300" />
+          </button>
+        </div>
 
         <button
           onClick={() => setShowLogoutModal(true)}
@@ -1166,6 +1536,7 @@ export function Phase4Shell() {
   const [pwaDismissed, setPwaDismissed] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isMileageSheetOpen, setIsMileageSheetOpen] = useState(false)
+  const [isManualSheetOpen, setIsManualSheetOpen] = useState(false)
   const [isSavingMileage, setIsSavingMileage] = useState(false)
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [showFullVin, setShowFullVin] = useState(false)
@@ -1229,6 +1600,10 @@ export function Phase4Shell() {
     primaryVehicle && nextServiceMileage
       ? Math.max(nextServiceMileage - primaryVehicle.currentMileage, 0)
       : null
+  const manualLookup = useMemo(
+    () => (primaryVehicle ? lookupMazdaManuals(primaryVehicle.model, primaryVehicle.year) : null),
+    [primaryVehicle],
+  )
 
   useEffect(() => {
     if (!vehicles.length) {
@@ -1467,8 +1842,8 @@ export function Phase4Shell() {
   }
 
   return (
-    <div className="flex min-h-screen w-full justify-center overflow-hidden bg-neutral-100 font-sans">
-      <div className="relative flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-white shadow-2xl">
+    <div className="brand-shell flex min-h-screen w-full justify-center overflow-hidden font-sans">
+      <div className="relative flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-[rgba(255,251,250,0.9)] shadow-[0_24px_80px_rgba(90,12,24,0.16)] backdrop-blur-sm">
         <AnimatePresence>
           {showPWAPrompt && !pwaDismissed && !isAddingCar && activeTab === 'garage' ? (
             <motion.div
@@ -1477,12 +1852,10 @@ export function Phase4Shell() {
               exit={{ y: -100, opacity: 0 }}
               className="absolute top-0 z-50 w-full p-4 pt-6"
             >
-              <div className="flex items-center justify-between rounded-2xl bg-gray-900 p-4 text-white shadow-2xl">
+              <div className="brand-panel-strong flex items-center justify-between rounded-[24px] p-4 text-white">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1">
-                    <span className="text-lg font-black tracking-tighter text-[#A31526]">
-                      M<span className="text-gray-900">C</span>
-                    </span>
+                    <MazdaLogo variant="icon" theme="dark" size="sm" />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold">Install MazdaCare</h3>
@@ -1506,7 +1879,7 @@ export function Phase4Shell() {
           ) : null}
         </AnimatePresence>
 
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-100 bg-white px-5 pb-4 pt-12">
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.86)] px-5 pb-4 pt-12 backdrop-blur-xl">
           <div className="flex items-center gap-3">
             {isAddingCar || isLoggingService ? (
               <button
@@ -1525,7 +1898,7 @@ export function Phase4Shell() {
                 <ChevronLeft className="h-6 w-6" />
               </button>
             ) : null}
-            <h1 className="text-xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-[24px] font-semibold tracking-tight text-gray-900">
               {!isAddingCar && activeTab === 'garage' && !hasCars ? (
                 <>
                   Mazda<span className="text-[#A31526]">Care</span>
@@ -1537,7 +1910,7 @@ export function Phase4Shell() {
           </div>
         </div>
 
-        <div className="relative flex-1 overflow-y-auto bg-gray-50/50 pb-24">
+        <div className="relative flex-1 overflow-y-auto bg-transparent pb-24">
           <AnimatePresence mode="wait">
             {isAddingCar ? (
               <motion.div key="add-car" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="h-full">
@@ -1553,6 +1926,7 @@ export function Phase4Shell() {
                     setIsLoggingService(false)
                     setPrefilledServiceMileage(undefined)
                     void fetchVehicles().catch(() => undefined)
+                    void fetchLogs(primaryVehicle.id).catch(() => undefined)
                   }}
                 />
               </motion.div>
@@ -1560,7 +1934,7 @@ export function Phase4Shell() {
               <motion.div key="main-tabs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
                 {activeTab === 'garage' && (!hasCars ? <EmptyGarageState onAdd={() => setIsAddingCar(true)} /> : <ServicesLog serviceLogs={logs} />)}
                 {activeTab === 'map' ? <MapFinder /> : null}
-                {activeTab === 'profile' ? <SettingsView user={{ fullName: profileName, email: profileEmail }} primaryVehicle={primaryVehicle ? { id: primaryVehicle.id, model: primaryVehicle.model, year: primaryVehicle.year, registration: primaryVehicle.registration } : null} serviceLogs={logs} onLogout={handleLogout} isLoggingOut={isLoggingOut} /> : null}
+                {activeTab === 'profile' ? <SettingsView user={{ fullName: profileName, email: profileEmail, phone: profilePhone }} primaryVehicle={primaryVehicle ? { id: primaryVehicle.id, model: primaryVehicle.model, year: primaryVehicle.year, registration: primaryVehicle.registration } : null} serviceLogs={logs} onLogout={handleLogout} isLoggingOut={isLoggingOut} /> : null}
                 {activeTab === 'home' ? (
                   !hasCars ? (
                     needsProfileSetup ? (
@@ -1779,6 +2153,18 @@ export function Phase4Shell() {
                         onLogService={handleOpenLogService}
                       />
                     ) : null}
+                    {primaryVehicle && manualLookup ? (
+                      <ManualsSheet
+                        vehicle={{
+                          model: primaryVehicle.model,
+                          year: primaryVehicle.year,
+                          registration: primaryVehicle.registration,
+                        }}
+                        lookup={manualLookup}
+                        open={isManualSheetOpen}
+                        onOpenChange={setIsManualSheetOpen}
+                      />
+                    ) : null}
                     {primaryVehicle && kmToNextService !== null ? (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -1844,7 +2230,7 @@ export function Phase4Shell() {
                             type="button"
                             onClick={() => {
                               haptics.tap()
-                              window.open(getMazdaManualLink(primaryVehicle.model, primaryVehicle.year), '_blank', 'noopener,noreferrer')
+                              setIsManualSheetOpen(true)
                             }}
                             className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
                           >
@@ -1853,7 +2239,11 @@ export function Phase4Shell() {
                             </span>
                             <span className="flex-1">
                               <span className="block text-sm font-semibold text-gray-900">Open Mazda manuals</span>
-                              <span className="block text-xs text-gray-500">From Mazda official owner resources</span>
+                              <span className="block text-xs text-gray-500">
+                                {manualLookup?.sections[0]
+                                  ? `${manualLookup.sections[0].matchedYearLabel} official PDFs${manualLookup.note ? ' · closest match' : ''}`
+                                  : 'From Mazda official owner resources'}
+                              </span>
                             </span>
                             <ChevronRight className="h-4 w-4 text-gray-300" />
                           </button>
@@ -1887,7 +2277,7 @@ export function Phase4Shell() {
         </div>
 
         {!isAddingCar ? (
-          <div className="absolute bottom-0 z-40 w-full max-w-md border-t border-gray-200 bg-white pb-[calc(env(safe-area-inset-bottom,0px)+8px)] shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
+          <div className="absolute bottom-0 z-40 w-full max-w-md border-t border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.94)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] shadow-[0_-10px_40px_rgba(90,12,24,0.08)] backdrop-blur-xl">
             <div className="flex items-center justify-around px-2 py-2.5">
               <NavButton icon={<Home className="h-6 w-6" />} label="Home" isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
               <NavButton icon={<Car className="h-6 w-6" />} label="Garage" isActive={activeTab === 'garage'} onClick={() => setActiveTab('garage')} />

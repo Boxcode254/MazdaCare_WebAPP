@@ -1,3 +1,8 @@
+import type { CSSProperties } from 'react'
+import emblemRed from '@/assets/logos/mazdacare-emblem-red.png'
+import logoRed from '@/assets/logos/mazdacare-logo-red.png'
+import wordmarkRed from '@/assets/logos/mazdacare-wordmark-red.png'
+
 type Variant = 'icon' | 'wordmark' | 'full'
 type Theme = 'dark' | 'light' | 'red'
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -9,111 +14,67 @@ interface MazdaLogoProps {
   className?: string
 }
 
-const SIZE_MAP: Record<Size, { iconHeight: number; fontSize: number }> = {
-  xs: { iconHeight: 20, fontSize: 12 },
-  sm: { iconHeight: 28, fontSize: 17 },
-  md: { iconHeight: 40, fontSize: 24 },
-  lg: { iconHeight: 52, fontSize: 31 },
-  xl: { iconHeight: 72, fontSize: 43 },
+const SIZE_MAP: Record<Size, { iconHeight: number; wordmarkHeight: number; fullHeight: number }> = {
+  xs: { iconHeight: 18, wordmarkHeight: 14, fullHeight: 30 },
+  sm: { iconHeight: 24, wordmarkHeight: 18, fullHeight: 38 },
+  md: { iconHeight: 34, wordmarkHeight: 24, fullHeight: 50 },
+  lg: { iconHeight: 44, wordmarkHeight: 30, fullHeight: 62 },
+  xl: { iconHeight: 56, wordmarkHeight: 38, fullHeight: 76 },
 }
 
-function getColors(theme: Theme) {
-  return {
-    primary: theme === 'red' ? '#FFFFFF' : '#9B1B30',
-    text: theme === 'light' ? '#111010' : '#FFFFFF',
-    knockout: theme === 'dark' ? '#111010' : theme === 'red' ? '#9B1B30' : '#FDFBFB',
+function getImageStyle(theme: Theme): CSSProperties {
+  if (theme === 'red') {
+    return {
+      filter: 'brightness(0) invert(1)',
+    }
   }
+
+  if (theme === 'dark') {
+    return {
+      filter: 'drop-shadow(0 1px 2px rgba(17,16,16,0.18))',
+    }
+  }
+
+  return {}
 }
 
-function WingIcon({ iconHeight, theme }: { iconHeight: number; theme: Theme }) {
-  const colors = getColors(theme)
-
-  return (
-    <svg
-      width={iconHeight}
-      height={iconHeight}
-      viewBox="0 0 52 52"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path d="M26 6C26 6 19 13 19 26C19 39 26 46 26 46C26 46 33 39 33 26C33 13 26 6 26 6Z" fill={colors.primary} />
-      <path d="M26 6C26 6 8 11 3 22C-2 33 5 43 12 46C12 46 20 38 21 26C22 15 26 6 26 6Z" fill={colors.primary} opacity="0.7" />
-      <path d="M26 6C26 6 44 11 49 22C54 33 47 43 40 46C40 46 32 38 31 26C30 15 26 6 26 6Z" fill={colors.primary} opacity="0.7" />
-      <circle cx="26" cy="26" r="5" fill={colors.primary} />
-      <circle cx="26" cy="26" r="2.5" fill={colors.knockout} />
-    </svg>
-  )
-}
-
-function WordmarkText({ fontSize, theme }: { fontSize: number; theme: Theme }) {
-  const colors = getColors(theme)
-  const careFontSize = fontSize * 0.38
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1 }}>
-      <span
-        style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontStyle: 'italic',
-          fontWeight: 300,
-          fontSize: `${fontSize}px`,
-          color: colors.text,
-          lineHeight: 1,
-        }}
-      >
-        Mazda
-      </span>
-      <span
-        style={{
-          fontFamily: "'Outfit', sans-serif",
-          fontWeight: 500,
-          fontSize: `${careFontSize}px`,
-          letterSpacing: '3px',
-          textTransform: 'uppercase',
-          color: colors.text,
-          opacity: 0.55,
-          lineHeight: 1,
-          marginTop: `${Math.max(2, fontSize * 0.06)}px`,
-        }}
-      >
-        CARE
-      </span>
-    </div>
-  )
-}
-
-export default function MazdaLogo({ variant = 'full', theme = 'dark', size = 'md', className }: MazdaLogoProps) {
-  const { iconHeight, fontSize } = SIZE_MAP[size]
-  const gap = iconHeight * 0.25
+export default function MazdaLogo({
+  variant = 'full',
+  theme = 'dark',
+  size = 'md',
+  className,
+}: MazdaLogoProps) {
+  const { iconHeight, wordmarkHeight, fullHeight } = SIZE_MAP[size]
+  const imageStyle = getImageStyle(theme)
 
   if (variant === 'icon') {
     return (
-      <div className={className} style={{ display: 'inline-flex' }}>
-        <WingIcon iconHeight={iconHeight} theme={theme} />
-      </div>
+      <img
+        src={emblemRed}
+        alt="MazdaCare logo"
+        className={className}
+        style={{ height: `${iconHeight}px`, width: 'auto', ...imageStyle }}
+      />
     )
   }
 
   if (variant === 'wordmark') {
     return (
-      <div className={className} style={{ display: 'inline-flex' }}>
-        <WordmarkText fontSize={fontSize} theme={theme} />
-      </div>
+      <img
+        src={wordmarkRed}
+        alt="MazdaCare"
+        className={className}
+        style={{ height: `${wordmarkHeight}px`, width: 'auto', ...imageStyle }}
+      />
     )
   }
 
   return (
-    <div
+    <img
+      src={logoRed}
+      alt="MazdaCare"
       className={className}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: `${gap}px`,
-      }}
-    >
-      <WingIcon iconHeight={iconHeight} theme={theme} />
-      <WordmarkText fontSize={fontSize} theme={theme} />
-    </div>
+      style={{ height: `${fullHeight}px`, width: 'auto', ...imageStyle }}
+    />
   )
 }

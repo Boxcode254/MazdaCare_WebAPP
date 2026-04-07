@@ -21,10 +21,10 @@
 <!-- AUTO_STATUS_START -->
 ## Auto Snapshot
 
-- Last auto update: 2026-04-07T16:57:45.944Z
+- Last auto update: 2026-04-07T18:34:42.474Z
 - Branch: main
-- Latest commit: 096ec32
-- Git status: dirty (32 file(s) changed, main...origin/main)
+- Latest commit: 8240e25
+- Git status: dirty (15 file(s) changed, main...origin/main [ahead 1])
 - Production app URL: https://mazdacare-app.vercel.app
 - Vercel project: mazdacare-app
 - Supabase project ref: rmfkykcijcndwvsursmu
@@ -49,6 +49,12 @@
 - Phase 1 redesign pass - DONE
 - Phase 2 performance and interaction pass - DONE
 - Phase 3 final UX QA pass - DONE
+- P2-2 VIN decoder integration in Add Car flow - DONE
+- P2-3 multi-vehicle switcher rail + active context - DONE
+- P3-2 calendar actions + reminder preferences - DONE
+- Home-first onboarding + garage history simplification pass - DONE
+- Settings refinements (personal details, push toggle, garage visit ranking) - DONE
+- Auth password recovery flow ("Forgot Password?" + email reset) - DONE
 
 ## Phase 4 — Logo, Refinements & Security
 
@@ -56,6 +62,7 @@
 - LOGO-2 Apply logo to auth page - DONE
 - LOGO-3 PWA icons and splash screen - DONE
 - LOGO-4 Dashboard and nav logo placement - DONE
+- LOGO-5 Official custom logo asset integration (crystal red) - DONE
 - SEC-1 CSP headers via vercel.json - DONE
 - SEC-2 Input sanitization (DOMPurify) - DONE
 - SEC-3 API key and env variable audit - DONE
@@ -67,6 +74,13 @@
 - REFINE-3 Offline indicator and network state - DONE
 
 ## Deployment and Infra Status
+
+### Recent Code/Data Updates
+
+- **Mazda Manual Catalog Integration (2026-04-07):**
+  - Added `src/data/mazdaManualCatalog.json` (official Mazda Canada manual links, 2000+ lines, all models/years)
+  - Added `src/lib/mazdaManuals.ts` utility for programmatic lookup of manuals by model/year
+  - Enables in-app manual lookup and future user-facing features
 
 ### Vercel
 
@@ -108,9 +122,6 @@
    - Vercel env (production, preview, development)
    After adding: verify map loads, then add HTTP referrer restrictions
    in Google Cloud Console for https://mazdacare-app.vercel.app/*
-
-2. PWA icon PNG files — after LOGO-3 is applied, export the SVG icon to
-   192×192 and 512×512 PNG and commit to public/icons/
 
 ## Useful Resume Commands
 

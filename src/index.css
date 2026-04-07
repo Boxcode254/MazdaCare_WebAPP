@@ -10,24 +10,27 @@
     color-scheme: light;
 
     /* ── MZ Design Tokens ─────────────────────────────────── */
-    --mz-red:        #A31526;
-    --mz-red-mid:    #BC2133;
-    --mz-red-dark:   #7F0F1D;
-    --mz-red-light:  #F8E7EA;
-    --mz-red-pale:   #FDF4F5;
-    --mz-black:      #111010;
-    --mz-gray-900:   #1E1A1B;
-    --mz-gray-700:   #3D3536;
-    --mz-gray-600:   #6A625D;
-    --mz-gray-500:   #6B6163;
-    --mz-gray-300:   #C4BABB;
-    --mz-gray-100:   #F6F1F0;
-    --mz-white:      #FFFCFB;
+    --mz-red:        #991728;
+    --mz-red-mid:    #C2263D;
+    --mz-red-dark:   #5A0C18;
+    --mz-red-light:  #F8DCE2;
+    --mz-red-pale:   #FFF5F7;
+    --mz-rose:       #E46B80;
+    --mz-black:      #151112;
+    --mz-gray-900:   #231C1E;
+    --mz-gray-700:   #43393B;
+    --mz-gray-600:   #615658;
+    --mz-gray-500:   #75686A;
+    --mz-gray-300:   #D3C5C8;
+    --mz-gray-100:   #F6EEEE;
+    --mz-white:      #FFF9F8;
     --mz-gold:       #C49A3C;
-    --mz-gold-light: #F5EDD6;
+    --mz-gold-light: #F8EFD9;
+    --mz-surface:    rgba(255, 249, 248, 0.92);
+    --mz-panel:      rgba(255, 255, 255, 0.74);
 
-    --font-body:     'Outfit', sans-serif;
-    --font-display:  'Cormorant Garamond', serif;
+    --font-body:     'Space Grotesk', sans-serif;
+    --font-display:  'Fraunces', serif;
 
     --radius-sm:  6px;
     --radius-md:  8px;
@@ -40,22 +43,22 @@
     --primary-foreground:   #FAFAFA;
     --ring:                 #A31526;
     --radius:               0.5rem;
-    --background:           #F6F1F0;
+    --background:           #F7EEEE;
     --foreground:           #6A625D;
-    --card:                 #FFFCFB;
+    --card:                 #FFF9F8;
     --card-foreground:      #6A625D;
-    --popover:              #FFFCFB;
+    --popover:              #FFF9F8;
     --popover-foreground:   #6A625D;
-    --secondary:            #F6F1F0;
+    --secondary:            #F6EEEE;
     --secondary-foreground: #6A625D;
-    --muted:                #F6F1F0;
+    --muted:                #F8F1F2;
     --muted-foreground:     #6A625D;
-    --accent:               #F8E7EA;
+    --accent:               #F8DCE2;
     --accent-foreground:    #A31526;
     --destructive:          #A31526;
     --destructive-foreground: #FAFAFA;
-    --border:               #C4BABB;
-    --input:                #C4BABB;
+    --border:               #D9CBCE;
+    --input:                #D9CBCE;
   }
 
   /* Dark mode Mazda palette overrides */
@@ -95,20 +98,36 @@
   body {
     font-family: var(--font-body);
     background:
-      radial-gradient(circle at top, rgba(163, 21, 38, 0.08), transparent 36%),
-      linear-gradient(180deg, #fbf7f6 0%, #f6f1f0 100%);
+      radial-gradient(circle at top left, rgba(153, 23, 40, 0.16), transparent 34%),
+      radial-gradient(circle at top right, rgba(228, 107, 128, 0.12), transparent 28%),
+      linear-gradient(180deg, #fff8f7 0%, #f8eeee 52%, #f4e8e9 100%);
     color: var(--mz-gray-600);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    color: #111827;
-    font-weight: 700;
+    color: var(--mz-gray-900);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-variation-settings: "SOFT" 60, "WONK" 0;
+    letter-spacing: -0.03em;
   }
 
   p, li, span, label {
     color: var(--mz-gray-600);
+  }
+
+  [style*="Outfit, sans-serif"] {
+    font-family: var(--font-body) !important;
+  }
+
+  [style*="Cormorant Garamond, serif"] {
+    font-family: var(--font-display) !important;
+    font-style: normal !important;
+    font-variation-settings: "SOFT" 60, "WONK" 0;
+    letter-spacing: -0.03em;
   }
 
   /* Prevent zoom on input focus on iOS */
@@ -139,6 +158,31 @@
 }
 
 @layer utilities {
+  .brand-shell {
+    background:
+      radial-gradient(circle at top left, rgba(153, 23, 40, 0.22), transparent 28%),
+      radial-gradient(circle at 100% 0, rgba(228, 107, 128, 0.12), transparent 26%),
+      linear-gradient(180deg, #fff7f6 0%, #f7eded 100%);
+  }
+
+  .brand-panel {
+    background: linear-gradient(180deg, rgba(255, 249, 248, 0.96) 0%, rgba(255, 244, 244, 0.9) 100%);
+    border: 1px solid rgba(153, 23, 40, 0.08);
+    box-shadow: 0 20px 60px rgba(90, 12, 24, 0.08);
+    backdrop-filter: blur(18px);
+  }
+
+  .brand-panel-strong {
+    background:
+      linear-gradient(135deg, rgba(90, 12, 24, 0.96) 0%, rgba(153, 23, 40, 0.94) 58%, rgba(194, 38, 61, 0.88) 100%);
+    box-shadow: 0 24px 60px rgba(90, 12, 24, 0.26);
+  }
+
+  .brand-outline {
+    border: 1px solid rgba(153, 23, 40, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+
   @keyframes enter-up {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }

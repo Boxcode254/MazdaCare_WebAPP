@@ -20,7 +20,7 @@ const initialFormState: AuthFormState = {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-transparent bg-mz-gray-100 px-3 py-[9px] text-[13px] text-mz-black outline-none transition focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(155,27,48,0.1)]'
+  'w-full rounded-xl border border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.92)] px-3.5 py-[11px] text-[13px] text-mz-black outline-none transition focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(153,23,40,0.12)]'
 
 const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500'
 
@@ -33,12 +33,37 @@ export function Auth() {
   const [signInForm, setSignInForm] = useState<AuthFormState>(initialFormState)
   const [signUpForm, setSignUpForm] = useState<AuthFormState>(initialFormState)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('')
+  const [sendingReset, setSendingReset] = useState(false)
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
 
   useEffect(() => {
-    if (user) {
+    if (user && !isRecoveryMode) {
       navigate('/', { replace: true })
     }
-  }, [navigate, user])
+  }, [isRecoveryMode, navigate, user])
+
+  useEffect(() => {
+    const checkRecoveryMode = () => {
+      const hash = window.location.hash.replace(/^#/, '')
+      const hashParams = new URLSearchParams(hash)
+      const searchParams = new URLSearchParams(window.location.search)
+      const hasRecoveryToken = hashParams.get('type') === 'recovery'
+      const hasRecoveryHint =
+        searchParams.get('mode') === 'reset-password' && Boolean(hashParams.get('access_token'))
+      setIsRecoveryMode(hasRecoveryToken || hasRecoveryHint)
+    }
+
+    checkRecoveryMode()
+    window.addEventListener('hashchange', checkRecoveryMode)
+
+    return () => {
+      window.removeEventListener('hashchange', checkRecoveryMode)
+    }
+  }, [])
 
   const isSubmitting = useMemo(() => workingMode !== null, [workingMode])
 
@@ -125,10 +150,158 @@ export function Auth() {
     }
   }
 
+  const handleForgotPassword = async () => {
+    setAuthError(null)
+
+    const email = (forgotPasswordEmail || signInForm.email).trim()
+    if (!email) {
+      setAuthError('Please enter your account email.')
+      return
+    }
+
+    setSendingReset(true)
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset-password`,
+      })
+
+      if (error) {
+        setAuthError(error.message)
+        return
+      }
+
+      toast.success('Password reset email sent. Please check your inbox.')
+      setShowForgotPassword(false)
+      setForgotPasswordEmail('')
+    } catch {
+      setAuthError('Could not send reset email right now. Please try again.')
+    } finally {
+      setSendingReset(false)
+    }
+  }
+
+  const handleUpdatePassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setAuthError(null)
+
+    if (newPassword.length < 6) {
+      setAuthError('Password must be at least 6 characters.')
+      return
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setAuthError('Passwords do not match.')
+      return
+    }
+
+    setWorkingMode('signin')
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (error) {
+        setAuthError(error.message)
+        return
+      }
+
+      toast.success('Password updated successfully.')
+      setIsRecoveryMode(false)
+      setNewPassword('')
+      setConfirmNewPassword('')
+      window.history.replaceState({}, document.title, '/auth')
+      navigate('/', { replace: true })
+    } catch {
+      setAuthError('Could not update your password. Please try again.')
+    } finally {
+      setWorkingMode(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-mz-black">
         <p className="text-[13px] text-white/40">Loading…</p>
+      </div>
+    )
+  }
+
+  if (isRecoveryMode) {
+    return (
+      <div className="relative min-h-screen" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${authBg})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-mz-black/80 via-mz-black/85 to-mz-black/95" />
+
+        <div className="relative z-10 mx-auto max-w-[390px] px-4">
+          <div
+            className="flex flex-col items-center"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top, 40px) + 40px)' }}
+          >
+            <MazdaLogo variant="full" theme="dark" size="lg" />
+          </div>
+
+          <div className="mt-8 rounded-[20px] bg-white p-6">
+            <h2 className="text-[20px] font-bold text-[#111010]">Reset your password</h2>
+            <p className="mt-1 text-[13px] text-[#6B6163]">Choose a new password for your MazdaCare account.</p>
+
+            <form className="mt-4 space-y-3" onSubmit={handleUpdatePassword}>
+              <div>
+                <label htmlFor="new-password" className={labelClass}>New password</label>
+                <input
+                  id="new-password"
+                  type="password"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  placeholder="At least 6 characters"
+                  className={inputClass}
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="confirm-new-password" className={labelClass}>Confirm password</label>
+                <input
+                  id="confirm-new-password"
+                  type="password"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  placeholder="Re-enter new password"
+                  className={inputClass}
+                  value={confirmNewPassword}
+                  onChange={(event) => setConfirmNewPassword(event.target.value)}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full rounded-xl bg-mz-red py-3.5 text-[14px] font-semibold text-white transition hover:bg-mz-red-mid disabled:opacity-60"
+              >
+                {isSubmitting ? 'Updating password…' : 'Update password'}
+              </button>
+            </form>
+
+            {authError && (
+              <div
+                className="mt-3 rounded-[6px] text-[12px]"
+                style={{
+                  background: '#F5E8EA',
+                  borderLeft: '3px solid #9B1B30',
+                  color: '#9B1B30',
+                  padding: '10px 12px',
+                }}
+              >
+                {authError}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     )
   }
@@ -144,7 +317,8 @@ export function Auth() {
         style={{ backgroundImage: `url(${authBg})` }}
       />
       {/* Dark overlay to reduce clashing */}
-      <div className="absolute inset-0 bg-gradient-to-b from-mz-black/80 via-mz-black/85 to-mz-black/95" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(194,38,61,0.28),transparent_30%),linear-gradient(180deg,rgba(21,17,18,0.74)_0%,rgba(21,17,18,0.88)_48%,rgba(21,17,18,0.96)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.05)_0%,transparent_32%,transparent_68%,rgba(255,255,255,0.04)_100%)]" />
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-[390px] px-4">
@@ -170,20 +344,24 @@ export function Auth() {
         </div>
 
         {/* White form card */}
-        <div className="mt-8 rounded-[20px] bg-white p-6">
+        <div className="mt-8 overflow-hidden rounded-[28px] border border-white/15 bg-[rgba(255,250,249,0.94)] p-6 shadow-[0_28px_80px_rgba(21,17,18,0.28)] backdrop-blur-xl">
+          <div className="mb-5 rounded-[18px] border border-[rgba(153,23,40,0.08)] bg-[linear-gradient(135deg,rgba(255,255,255,0.88),rgba(248,220,226,0.7))] px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#991728]">MazdaCare</p>
+            <h1 className="mt-1 text-[27px] leading-none text-[#161213]">Service history, made beautiful.</h1>
+          </div>
 
           {/* Tab switcher */}
-          <div className="flex rounded-[10px] p-[3px]" style={{ background: '#F0ECEC' }}>
+          <div className="flex rounded-[14px] p-[4px]" style={{ background: 'rgba(153,23,40,0.08)' }}>
             {(['signin', 'signup'] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => { setActiveTab(tab); setAuthError(null) }}
-                className="flex-1 rounded-[8px] py-[7px] text-[13px] font-semibold transition"
+                className="flex-1 rounded-[12px] py-[9px] text-[13px] font-semibold transition"
                 style={
                   activeTab === tab
-                    ? { background: 'white', color: '#111010', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
-                    : { background: 'transparent', color: '#6B6163' }
+                    ? { background: 'rgba(255,255,255,0.96)', color: '#161213', boxShadow: '0 10px 24px rgba(90,12,24,0.08)' }
+                    : { background: 'transparent', color: '#75686A' }
                 }
               >
                 {tab === 'signin' ? 'Sign in' : 'Sign up'}
@@ -220,7 +398,44 @@ export function Auth() {
                     value={signInForm.password}
                     onChange={(e) => setSignInForm((prev) => ({ ...prev, password: e.target.value }))}
                   />
+                  <div className="mt-1 text-right">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword((current) => !current)
+                        setAuthError(null)
+                      }}
+                      className="text-[12px] font-medium text-[#9B1B30] underline-offset-2 hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 </div>
+                {showForgotPassword ? (
+                  <div className="rounded-[10px] border border-[#E8D9DC] bg-[#FCFAFA] p-3">
+                    <div className="space-y-2.5">
+                      <label htmlFor="forgot-email" className={labelClass}>Reset email</label>
+                      <input
+                        id="forgot-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        className={inputClass}
+                        value={forgotPasswordEmail}
+                        onChange={(event) => setForgotPasswordEmail(event.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleForgotPassword()}
+                        disabled={sendingReset}
+                        className="w-full rounded-lg bg-[#9B1B30] py-2.5 text-[13px] font-semibold text-white transition disabled:opacity-60"
+                      >
+                        {sendingReset ? 'Sending reset link…' : 'Send reset link'}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
                 <button
                   type="submit"
                   disabled={isSubmitting}

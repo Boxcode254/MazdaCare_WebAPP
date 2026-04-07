@@ -1,0 +1,2078 @@
+{
+  "source": {
+    "page": "https://www.mazda.ca/en/mazda-owners/Overview/owner-manuals/",
+    "csvBase": "https://www.mazda.ca/globalassets/mazda-canada/mazda-owners/owners/owner-manuals/CSVs/en/",
+    "fetchedAt": "2026-04-07T18:30:57.471Z"
+  },
+  "models": {
+    "CX-3": {
+      "label": "CX-3",
+      "csvFile": "Owners_Manuals_CX-3.csv",
+      "years": {
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-3/2016_cx-3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2016cx-3/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-3/2017_cx-3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2018": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-3/2018_cx-3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2018cx-3/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2019": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-3/2019_cx-3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2020": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-3/2020_cx-3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2020cx-3/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2021": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-3/2021_cx-3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2021cx3/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2022": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-3/2022_cx-3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2022cx-3/howto.html"
+          }
+        ]
+      }
+    },
+    "CX-5": {
+      "label": "CX-5",
+      "csvFile": "Owners_Manuals_CX-5.csv",
+      "years": {
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2013_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2014_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2015": [
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2016_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2016/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2017_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2017/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2018": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2018_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2019": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2019_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2019/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2020": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2020_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2021": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2021_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue013.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2022": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2022_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2022/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/navigation-manuals-6.5g/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2023": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2023_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2023-cx-5/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2023_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/navigation-manuals-6.5g/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2024": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2024_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2024/cx-5/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2024cx-5/howto.html"
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2025": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/cx-5_2025my_8mr5ea24g_202601_edition3_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/2025_mazda-connect-infotainment-manual-7g_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/2025_navigation-manual-7g_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/2025_connected-vehicle-manual_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2026": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2026_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2026/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda_connect_infotainment_manual_7g_2026/howto.html"
+          }
+        ],
+        "2021.5": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2021.5_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/cx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/navigation-manuals-6.5g/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue013.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2016.5": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-5/2016.5_cx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    },
+    "CX-7": {
+      "label": "CX-7",
+      "csvFile": "Owners_Manuals_CX-7.csv",
+      "years": {
+        "2007": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-7/2007_cx-7_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-7/2008_cx-7_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-7/2009_cx-7_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-7/2010_cx-7_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-7/2011_cx-7_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-7/2012_cx-7_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    },
+    "CX-9": {
+      "label": "CX-9",
+      "csvFile": "Owners_Manuals_CX-9.csv",
+      "years": {
+        "2007": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2007_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2009_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2009_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2010_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2011_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2012_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2013_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2014_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2015": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2015_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2016_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2016/cx-9/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2017_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2017/cx-9/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2018": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2018_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2019": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2019_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2019/cx-9/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2020": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2020_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/cx-9/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2021": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2021_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/cx-9/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2021_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/connected-services/"
+          }
+        ],
+        "2022": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2022_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2022/cx-9/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/navigation-manuals-6.5g/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/connected-services/"
+          }
+        ],
+        "2023": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/cx-9_2023my_8lj2ea22h_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/cx-9/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/navigation-manuals-6.5g/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/connected-services/"
+          }
+        ],
+        "2021.5": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/cx-9/2021.5_cx-9_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/cx-9/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/navigation-manuals-6.5g/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue013.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/connected-services/"
+          }
+        ]
+      }
+    },
+    "MX-5": {
+      "label": "MX-5",
+      "csvFile": "Owners_Manuals_MX-5.csv",
+      "years": {
+        "2002": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2002_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2003": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2003_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2004": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2004_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2005": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2005_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2006": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2006_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2007": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2007_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2008_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2009_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2010_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2011_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2012_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2013_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2014_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/android-apple/owners-manual-english.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2015": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2015_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/android-apple/owners-manual-english.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2016_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2016/mx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2017_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2017/mx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2018": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2019": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2019_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2019/mx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2020": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2020_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2021": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2021_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/mx-5/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2022": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2022_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2022/mx-5/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2023": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/mx-5_2023my_8le7ea22k_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/mx-5/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2024": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/mx5_2024_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2024/mx-5/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/navigation-manuals-6.5g/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/mazda-connect/mazda_connect_7g_2024.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navigation_manual_7g_2024.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2025": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2025_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2025_mx5/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/2025_mazda-connect-infotainment-manual-7g_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda-connect-infotainment-manual_2025/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/2025_navigation-manual-7g_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/2025_connected-vehicle-manual_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2026": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2026/mx-5/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda_connect_infotainment_manual_7g_2026/howto.html"
+          }
+        ],
+        "2021.5": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mx-5/2021_mx-5_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/mx-5/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    },
+    "Mazda2": {
+      "label": "Mazda2",
+      "csvFile": "Owners_Manuals_Mazda2.csv",
+      "years": {
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda2/2011_mazda2_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda2/2012_mazda2_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda2/2013_mazda2_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda2/2014_mazda2_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    },
+    "Mazda3": {
+      "label": "Mazda3",
+      "csvFile": "Owners_Manuals_Mazda3.csv",
+      "years": {
+        "2004": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2004_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2005": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2005_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2006": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2006_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2007": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2007_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2009_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2009_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2010_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2012_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2012_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2013_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2014_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2015": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2015_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2016_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2017_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2017/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2018": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2018_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2019": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2019_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2019/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2020": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2020_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2021": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2021_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2022": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2022_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2022/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2023": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2023-mazda3s_manual_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2023mazda3/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2024": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2024_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2024/mazda3/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/mazda-connect/mazda_connect_7g_2024.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda_connect_infotainment_manual_7g_2025/index.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navigation_manual_7g_2024.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2025": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/2025_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2025/mazda3/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/2025_mazda-connect-infotainment-manual-7g_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda-connect-infotainment-manual_2025/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navigation_manual_7g_2024.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2026": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/mazda3_2026my_8nr3ea25g_202601_edition2_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda_connect_infotainment_manual_7g_2026/howto.html"
+          }
+        ]
+      }
+    },
+    "Mazda3 Sport": {
+      "label": "Mazda3 Sport",
+      "csvFile": "Owners_Manuals_Mazda3Sport.csv",
+      "years": {
+        "2004": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2004_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2005": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2005_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2006": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2006_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2007": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2007_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2008_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2009_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2010_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2011_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2012_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2013_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2014_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2015": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2015_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2016_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2017_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2017/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2018": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2018_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2019": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2019_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2019/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2020": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2020_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2021": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2021_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2022": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2022_mazda3_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2022/mazda3/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2023": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3-sport/2023-mazda3s_manual_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2023/mazda3-sport/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_nawzea23g_edition1_en.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2024": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/mazda3_2024_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_2024_mazda3_v2/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/mazda-connect/mazda_connect_7g_2024.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda_connect_infotainment_manual_7g_2025/index.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navigation_manual_7g_2024.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/csg-ue015.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2025": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda3/mazda3-2025-en.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2025/mazda3-sport/howto.html"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/2025_mazda-connect-infotainment-manual-7g_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda-connect-infotainment-manual_2025/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navigation_manual_7g_2024.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Connected Vehicle Service Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/connected-vehicle/2025_connected-vehicle-manual_en.pdf",
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_connected-vehicle-service-manual_2025/index.html"
+          }
+        ],
+        "2026": [
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": null,
+            "onlineUrl": "https://www.mazda.ca/globalassets/digitalownersmanual/en_mazda_connect_infotainment_manual_7g_2026/howto.html"
+          }
+        ]
+      }
+    },
+    "Mazda5": {
+      "label": "Mazda5",
+      "csvFile": "Owners_Manuals_Mazda5.csv",
+      "years": {
+        "2006": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2006_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2007": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2007_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2008_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2009_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2010_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2012_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2013_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2014_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2015": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2015_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2016_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda5/2017_mazda5_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    },
+    "Mazda6": {
+      "label": "Mazda6",
+      "csvFile": "Owners_Manuals_Mazda6.csv",
+      "years": {
+        "2004": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2004_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2005": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2005_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2006": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2006_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2007": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2007_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2009_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2009_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2010_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2011_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2012": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2012_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2013": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2013_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2014": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2014_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2015": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2015_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/nav-tomtom-en.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2016": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2016_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2016/mazda6/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2017": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2017_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2017/mazda6/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2018": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2018_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": null
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2019": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2019_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2019/mazda6/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2020": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2020_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2020/mazda6/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8lg5ea22l_edition1_web.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2021": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mazda6/2021_mazda6_manual_en_optimized.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2021/mazda6/"
+          },
+          {
+            "title": "Mazda Connect Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/infotainment/mazdaconnect_8kl9ea21g_edition2.pdf",
+            "onlineUrl": "https://www.mazda.ca/en/digital-owners-manual/2018/mazda-connect/howto.html"
+          },
+          {
+            "title": "Navigation Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/navigation/navi_navaea20g_edition1.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    },
+    "MPV": {
+      "label": "MPV",
+      "csvFile": "Owners_Manuals_MPV.csv",
+      "years": {
+        "2003": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mpv/2003_mpv_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2004": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mpv/2004_mpv_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2005": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mpv/2005_mpv_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2006": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/mpv/2006_mpv_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    },
+    "Tribute": {
+      "label": "Tribute",
+      "csvFile": "Owners_Manuals_Tribute.csv",
+      "years": {
+        "2001": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2001_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2002": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2002_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2003": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2003_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2004": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2004_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2005": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2005_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2006": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2006_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2008": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2008_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2009": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2009_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2010": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2010_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ],
+        "2011": [
+          {
+            "title": "Owner's Manual",
+            "pdfUrl": "https://www.mazda.ca/globalassets/mazda-canada/en/pdf/manuals/vehicles/tribute/2011_tribute_manual_en_optimized.pdf",
+            "onlineUrl": null
+          }
+        ]
+      }
+    }
+  }
+}

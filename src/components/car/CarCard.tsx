@@ -46,61 +46,60 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
 
   return (
     <article
-      className="cursor-pointer overflow-hidden rounded-[16px] border border-[0.5px] border-black/6 bg-mz-white"
+      className="brand-panel brand-outline cursor-pointer overflow-hidden rounded-[22px]"
       onClick={() => {
         haptics.tap()
         navigate(`/service/${vehicle.id}`)
       }}
     >
-      <div className="relative min-h-[90px] bg-mz-black px-[14px] pb-[20px] pt-[14px]">
+      <div className="brand-panel-strong relative min-h-[104px] overflow-hidden px-[16px] pb-[22px] pt-[16px]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_28%)]" />
         <h3
-          className="text-white"
+          className="relative z-10 text-white"
           style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '24px',
-            fontWeight: 300,
-            fontStyle: 'italic',
-            letterSpacing: '-0.01em',
+            fontSize: '26px',
+            fontWeight: 520,
+            letterSpacing: '-0.03em',
           }}
         >
           Mazda {vehicle.model}
         </h3>
-        <p className="mt-[2px] text-xs text-white/45" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <p className="relative z-10 mt-[3px] text-xs text-white/65" style={{ letterSpacing: '0.03em' }}>
           {vehicle.year} • {vehicle.engineSize}
         </p>
 
         <span
-          className="absolute right-[14px] top-[14px] rounded-[4px] bg-white/10 px-[9px] py-[3px] text-[11px] font-semibold text-white"
-          style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}
+          className="absolute right-[14px] top-[14px] z-10 rounded-full border border-white/15 bg-white/12 px-[10px] py-[4px] text-[11px] font-semibold text-white backdrop-blur-md"
+          style={{ letterSpacing: '0.05em' }}
         >
           {vehicle.registration}
         </span>
 
         <span
-          className={`absolute bottom-[14px] right-[14px] rounded-[20px] px-[9px] py-[3px] text-[10px] font-semibold uppercase text-white ${fuelBadgeClass}`}
-          style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}
+          className={`absolute bottom-[14px] right-[14px] z-10 rounded-full px-[10px] py-[4px] text-[10px] font-semibold uppercase text-white shadow-sm ${fuelBadgeClass}`}
+          style={{ letterSpacing: '0.06em' }}
         >
           {vehicle.fuelType}
         </span>
       </div>
 
-      <div className="space-y-2 bg-mz-white px-[14px] py-[12px]">
+      <div className="space-y-3 bg-transparent px-[16px] py-[14px]">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[18px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-[20px] font-semibold text-mz-black">
             {vehicle.currentMileage.toLocaleString()} km
           </p>
-          <p className="text-right text-xs text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-right text-[11px] text-mz-gray-500">
             Next service: {nextServiceMileage.toLocaleString()} km
           </p>
         </div>
 
-        <div className="space-y-1.5 rounded-xl border border-mz-gray-100 bg-mz-gray-50 px-3 py-2">
-          <div className="flex items-center justify-between text-[11px]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <div className="space-y-1.5 rounded-[16px] border border-[rgba(153,23,40,0.08)] bg-[rgba(255,255,255,0.66)] px-3.5 py-3 backdrop-blur-sm">
+          <div className="flex items-center justify-between text-[11px]">
             <span className="font-medium uppercase tracking-[0.04em] text-mz-gray-500">Registration</span>
             <span className="font-semibold text-mz-black">{vehicle.registration}</span>
           </div>
           {vehicle.vin ? (
-            <div className="flex items-center justify-between text-[11px]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            <div className="flex items-center justify-between text-[11px]">
               <span className="font-medium uppercase tracking-[0.04em] text-mz-gray-500">VIN</span>
               <button
                 type="button"
@@ -123,7 +122,7 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
           />
         </div>
 
-        <div className="flex items-center justify-between text-[10px]" style={{ fontFamily: 'Outfit, sans-serif', color: '#9B6163' }}>
+        <div className="flex items-center justify-between text-[10px]" style={{ color: '#8F666D' }}>
           <span>{Math.round(intervalUsed)}% of interval used</span>
           <span style={{ color: progressColor, fontWeight: 600 }}>{kmLeft.toLocaleString()} km left</span>
         </div>
