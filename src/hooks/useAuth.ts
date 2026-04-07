@@ -10,26 +10,32 @@ export function useAuth() {
   const session = useAppStore((state) => state.session)
   const loading = useAppStore((state) => state.loading)
   const setAuthState = useAppStore((state) => state.setAuthState)
-  const setLoading = useAppStore((state) => state.setLoading)
   const clearAll = useAppStore((state) => state.clearAll)
 
   useEffect(() => {
     let mounted = true
 
     const initializeSession = async () => {
-      setLoading(true)
-      const { data, error } = await supabase.auth.getSession()
+      try {
+        const { data, error } = await supabase.auth.getSession()
 
-      if (!mounted) {
-        return
+        if (!mounted) {
+          return
+        }
+
+        if (error) {
+          console.error('Session init error:', error)
+          clearAll()
+          return
+        }
+
+        setAuthState(data.session?.user ?? null, data.session ?? null)
+      } catch (error) {
+        if (mounted) {
+          console.error('Session initialization failed:', error)
+          clearAll()
+        }
       }
-
-      if (error) {
-        clearAll()
-        return
-      }
-
-      setAuthState(data.session?.user ?? null, data.session ?? null)
     }
 
     void initializeSession()
@@ -48,17 +54,13 @@ export function useAuth() {
       }
 
       setAuthState(nextSession?.user ?? null, nextSession ?? null)
-
-      if (event === 'TOKEN_REFRESHED') {
-        return
-      }
     })
 
     return () => {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [clearAll, location.pathname, navigate, setAuthState, setLoading])
+  }, [clearAll, location.pathname, navigate, setAuthState])
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()

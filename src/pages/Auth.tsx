@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRateLimit } from '@/hooks/useRateLimit'
 import { supabase } from '@/lib/supabase'
 import MazdaLogo from '@/components/ui/MazdaLogo'
+import authBg from '@/assets/auth-bg.jpg'
 
 type AuthMode = 'signin' | 'signup' | 'google'
 
@@ -133,8 +134,20 @@ export function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
-      <div className="mx-auto max-w-[390px] px-4">
+    <div
+      className="relative min-h-screen"
+      style={{ fontFamily: 'Outfit, sans-serif' }}
+    >
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${authBg})` }}
+      />
+      {/* Dark overlay to reduce clashing */}
+      <div className="absolute inset-0 bg-gradient-to-b from-mz-black/80 via-mz-black/85 to-mz-black/95" />
+
+      {/* Content */}
+      <div className="relative z-10 mx-auto max-w-[390px] px-4">
 
         {/* Brand header */}
         <div

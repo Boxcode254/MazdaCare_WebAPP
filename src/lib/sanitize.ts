@@ -21,6 +21,10 @@ export function sanitizePlate(input: string): string {
   return input.replace(/[^A-Z0-9\s]/gi, '').toUpperCase().trim().slice(0, 10)
 }
 
+export function sanitizeVin(input: string): string {
+  return input.replace(/[^A-HJ-NPR-Z0-9]/gi, '').toUpperCase().trim().slice(0, 17)
+}
+
 export function sanitizeMileage(input: number): number {
   const numericValue = Math.floor(Number(input))
   if (isNaN(numericValue) || numericValue < 0) return 0

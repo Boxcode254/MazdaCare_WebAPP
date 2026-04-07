@@ -3,10 +3,10 @@
 <!-- AUTO_STATUS_START -->
 ## Auto Snapshot
 
-- Last auto update: 2026-04-07T08:31:31.844Z
+- Last auto update: 2026-04-07T10:56:29.012Z
 - Branch: main
-- Latest commit: d6999e1
-- Git status: dirty (23 file(s) changed, main...origin/main [ahead 1])
+- Latest commit: 2b4fa06
+- Git status: dirty (14 file(s) changed, main...origin/main)
 - Production app URL: https://mazdacare-app.vercel.app
 - Vercel project: mazdacare-app
 - Supabase project ref: rmfkykcijcndwvsursmu
@@ -37,16 +37,16 @@
 - LOGO-1 MazdaCare SVG icon component - PENDING
 - LOGO-2 Apply logo to auth page - PENDING
 - LOGO-3 PWA icons and splash screen - PENDING
-- LOGO-4 Dashboard and nav logo placement - PENDING
+- LOGO-4 Dashboard and nav logo placement - DONE
 - SEC-1 CSP headers via vercel.json - PENDING
-- SEC-2 Input sanitization (DOMPurify) - PENDING
+- SEC-2 Input sanitization (DOMPurify) - DONE
 - SEC-3 API key and env variable audit - PENDING
-- SEC-4 Supabase RLS edge case hardening - PENDING
+- SEC-4 Supabase RLS edge case hardening - DONE (remote migration applied)
 - SEC-5 Auth guard and session hardening - PENDING
-- SEC-6 Client-side form rate limiting - PENDING
+- SEC-6 Client-side form rate limiting - DONE
 - REFINE-1 Micro-interactions and haptics - PENDING
-- REFINE-2 Onboarding empty state - PENDING
-- REFINE-3 Offline indicator and network state - PENDING
+- REFINE-2 Onboarding empty state - DONE
+- REFINE-3 Offline indicator and network state - DONE
 
 ## Deployment and Infra Status
 
@@ -64,6 +64,9 @@
 
 - Core schema migration applied (vehicles, service logs, garages, service alerts)
 - RLS enabled and policies applied for core tables
+- Remote migrations applied through `20260407090500_add_vehicle_vin_column.sql`
+- `vehicles.vin` column added on linked hosted database
+- Local Docker-based Supabase stack still needs migration replay if local DB testing is required
 - `push_subscriptions` table created with RLS and policies
 - Edge function deployed: `check-alerts` (ACTIVE)
 - Function secrets configured: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,

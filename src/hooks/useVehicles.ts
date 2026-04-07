@@ -2,17 +2,18 @@ import { useCallback, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
 import type { MazdaModel } from '@/lib/mazda-models'
-import { sanitizeInput, sanitizeMileage, sanitizePlate, sanitizeText } from '@/lib/sanitize'
+import { sanitizeInput, sanitizeMileage, sanitizePlate, sanitizeText, sanitizeVin } from '@/lib/sanitize'
 import type { Vehicle } from '@/types'
 
 interface VehiclePayload {
   model: MazdaModel
   year: number
+  vin?: string
   fuelType: 'petrol' | 'diesel'
   engineSize: string
   registration: string
   currentMileage: number
-  mileageInterval: 5000 | 10000
+  mileageInterval: 5000 | 7000 | 9000 | 10000
   color?: string
 }
 
@@ -22,11 +23,12 @@ interface VehicleRow {
   make: string
   model: string
   year: number
+  vin: string | null
   fuel_type: 'petrol' | 'diesel'
   engine_size: string
   registration: string
   current_mileage: number
-  mileage_interval: 5000 | 10000
+  mileage_interval: 5000 | 7000 | 9000 | 10000
   color: string | null
   created_at: string
 }
@@ -38,6 +40,7 @@ function toVehicle(row: VehicleRow): Vehicle {
     make: row.make,
     model: row.model,
     year: row.year,
+    vin: row.vin ?? undefined,
     fuelType: row.fuel_type,
     engineSize: row.engine_size,
     registration: row.registration,
@@ -112,6 +115,7 @@ export function useVehicles() {
         const sanitizedEngineSize = sanitizeText(payload.engineSize)
         const sanitizedColor = payload.color ? sanitizeText(payload.color) : null
         const sanitizedMileage = sanitizeMileage(payload.currentMileage)
+        const sanitizedVin = payload.vin ? sanitizeVin(payload.vin) : null
 
         const { data, error: insertError } = await supabase
           .from('vehicles')
@@ -120,6 +124,7 @@ export function useVehicles() {
             make: 'Mazda',
             model: (sanitizedModel || payload.model) as MazdaModel,
             year: payload.year,
+            vin: sanitizedVin,
             fuel_type: payload.fuelType,
             engine_size: sanitizedEngineSize,
             registration: sanitizedRegistration,
