@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertCircle,
+  ChartNoAxesColumn,
   Bell,
   BookOpen,
-  Calendar,
   Car,
   CheckCircle2,
   ChevronLeft,
@@ -17,6 +17,7 @@ import {
   MapPin,
   MessageSquare,
   Navigation,
+  Pencil,
   Phone,
   Plus,
   Search,
@@ -28,10 +29,19 @@ import {
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { toast } from 'sonner'
+import { CarCard } from '@/components/car/CarCard'
+import MazdaLogo from '@/components/ui/MazdaLogo'
+import { CostAnalytics } from '@/components/service/CostAnalytics'
+import { LogService } from '@/pages/LogService'
+import { Sheet, SheetClose, SheetContent } from '@/components/ui/sheet'
+import { useServiceLogs } from '@/hooks/useServiceLogs'
 import { useIdleTimer } from '@/hooks/useIdleTimer'
 import { useVehicles } from '@/hooks/useVehicles'
+import { haptics } from '@/lib/haptics'
+import { sanitizeMileage, sanitizeText } from '@/lib/sanitize'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
+import { decodeVIN, formatVIN, type VINInfo } from '@/lib/vinDecoder'
 
 const VEHICLES = [
   {
@@ -72,23 +82,6 @@ const VEHICLES = [
   },
 ]
 
-const MOCK_SERVICES = [
-  {
-    id: 1,
-    title: '15,000 Mile Service',
-    date: 'Mar 12, 2024',
-    location: 'Mazda Downtown Dealership',
-    details: ['Oil & Filter Change', 'Tire Rotation', 'Multi-Point Inspection'],
-  },
-  {
-    id: 2,
-    title: 'Brake Pad Replacement',
-    date: 'Nov 05, 2023',
-    location: 'Mazda Downtown Dealership',
-    details: ['Front Brake Pads', 'Rotor Resurfacing'],
-  },
-]
-
 const DEALERSHIPS = [
   {
     id: 1,
@@ -102,6 +95,19 @@ const DEALERSHIPS = [
 function getVehicleImage(model: string): string {
   const vehicle = VEHICLES.find((v) => v.model === model)
   return vehicle?.image || 'https://images.unsplash.com/photo-1743114713503-b698b8433f03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYXpkYSUyMGN4NSUyMGdyZXklMjBzdXZ8ZW58MXx8fHwxNzc1NTQ3MDIzfDA&ixlib=rb-4.1.0&q=80&w=1080'
+}
+
+function maskVin(vin: string): string {
+  if (vin.length <= 7) {
+    return vin
+  }
+
+  return `${vin.slice(0, 3)}...${vin.slice(-4)}`
+}
+
+function getMazdaManualLink(model: string, year: number): string {
+  const encodedQuery = encodeURIComponent(`${year} Mazda ${model} owners manual`)
+  return `https://www.mazda.co.uk/owners/manuals/?q=${encodedQuery}`
 }
 
 type TabId = 'home' | 'garage' | 'map' | 'profile'
@@ -126,6 +132,209 @@ interface AddCarWizardValues {
   fuelType: 'petrol' | 'diesel'
   engineSize: string
   mileageInterval: 5000 | 7000 | 9000 | 10000
+}
+
+interface MileageUpdateSheetProps {
+  vehicle: {
+    id: string
+    model: string
+    year: number
+    registration: string
+    currentMileage: number
+    nextServiceMileage?: number
+    mileageInterval: 5000 | 7000 | 9000 | 10000
+  }
+  open: boolean
+  lastUpdateLabel: string
+  saving: boolean
+  initialValue?: number
+  onOpenChange: (open: boolean) => void
+  onSave: (mileage: number) => Promise<void>
+  onLogService: (mileage: number) => void
+}
+
+function getMileageProgressColor(progress: number) {
+  if (progress < 60) return '#2E7D4F'
+  if (progress <= 90) return '#C49A3C'
+  return '#9B1B30'
+}
+
+function formatDisplayDate(dateValue?: string) {
+  if (!dateValue) {
+    return 'your last reading'
+  }
+
+  const parsed = new Date(dateValue)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return 'your last reading'
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(parsed)
+}
+
+function MileageUpdateSheet({
+  vehicle,
+  open,
+  lastUpdateLabel,
+  saving,
+  initialValue,
+  onOpenChange,
+  onSave,
+  onLogService,
+}: MileageUpdateSheetProps) {
+  const [displayValue, setDisplayValue] = useState('')
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const startValue = initialValue ?? vehicle.currentMileage
+    setDisplayValue(startValue.toLocaleString())
+  }, [initialValue, open, vehicle.currentMileage])
+
+  const parsedMileage = displayValue ? Number(displayValue.replace(/,/g, '')) : NaN
+  const hasInput = displayValue.trim().length > 0
+  const isHigherThanCurrent = parsedMileage > vehicle.currentMileage
+  const isTooHigh = parsedMileage > vehicle.currentMileage + 200000
+  const isValid = hasInput && Number.isFinite(parsedMileage) && isHigherThanCurrent && !isTooHigh
+  const delta = isValid ? parsedMileage - vehicle.currentMileage : 0
+  const nextServiceMileage = vehicle.nextServiceMileage ?? vehicle.currentMileage + vehicle.mileageInterval
+  const remainingKm = Math.max(nextServiceMileage - (Number.isFinite(parsedMileage) ? parsedMileage : vehicle.currentMileage), 0)
+  const previewProgress = Math.min((((Number.isFinite(parsedMileage) ? parsedMileage : vehicle.currentMileage)) / nextServiceMileage) * 100, 100)
+  const previewColor = getMileageProgressColor(previewProgress)
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" showCloseButton={false} className="rounded-t-[28px] border-0 bg-white p-0">
+        <AnimatePresence initial={false}>
+          {open ? (
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="rounded-t-[28px] bg-white px-5 pb-[calc(env(safe-area-inset-bottom,0px)+20px)] pt-5"
+            >
+              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-200" />
+
+              <div className="border-b border-gray-100 pb-4">
+                <h2
+                  className="text-[#111010]"
+                  style={{
+                    fontFamily: 'Cormorant Garamond, serif',
+                    fontSize: '22px',
+                    fontStyle: 'italic',
+                    fontWeight: 300,
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Update mileage
+                </h2>
+                <p className="mt-1 text-[11px] text-black/40" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  {vehicle.registration} · {vehicle.model} {vehicle.year}
+                </p>
+              </div>
+
+              <div className="space-y-5 pt-5">
+                <div className="rounded-[20px] border border-gray-100 bg-[#FCFAFA] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    New reading (km)
+                  </p>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={displayValue}
+                    onChange={(event) => {
+                      const digits = event.target.value.replace(/\D/g, '')
+                      if (!digits) {
+                        setDisplayValue('')
+                        return
+                      }
+
+                      setDisplayValue(Number(digits).toLocaleString())
+                    }}
+                    placeholder={(vehicle.currentMileage + 1).toLocaleString()}
+                    className="mt-3 w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-[20px] font-semibold text-[#111010] outline-none focus:border-[#A31526] focus:ring-2 focus:ring-[#A31526]/15"
+                    style={{ fontFamily: 'Outfit, sans-serif' }}
+                  />
+                  <div className="mt-3 min-h-[18px] text-[12px]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    {hasInput && !isHigherThanCurrent ? (
+                      <p className="text-[#C43B3B]">Must be higher than current reading ({vehicle.currentMileage.toLocaleString()} km)</p>
+                    ) : null}
+                    {isTooHigh ? <p className="text-[#C43B3B]">That seems too high</p> : null}
+                    {isValid ? (
+                      <p className="text-[#2E7D4F]">+{delta.toLocaleString()} km since {lastUpdateLabel} · looks right</p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="rounded-[20px] border border-gray-100 bg-[#FCFAFA] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    Service proximity
+                  </p>
+                  <p className="mt-3 text-[14px] text-gray-700" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    After this update, next service in <span className="font-semibold" style={{ color: previewColor }}>{remainingKm.toLocaleString()} km</span>
+                  </p>
+                  <div className="mt-3 h-[6px] overflow-hidden rounded-full bg-gray-200">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${previewProgress}%`, backgroundColor: previewColor }} />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!Number.isFinite(parsedMileage)) {
+                      onLogService(vehicle.currentMileage)
+                      return
+                    }
+
+                    onLogService(parsedMileage)
+                  }}
+                  className="w-full text-center text-[13px] font-medium text-[#9B1B30]"
+                  style={{ fontFamily: 'Outfit, sans-serif' }}
+                >
+                  Need to log a full service instead? →
+                </button>
+                <div className="flex gap-3">
+                  <SheetClose asChild>
+                    <button
+                      type="button"
+                      className="flex-1 rounded-xl border border-[#E3CDD1] bg-white px-4 py-3.5 text-[14px] font-semibold text-[#9B1B30]"
+                      style={{ fontFamily: 'Outfit, sans-serif' }}
+                    >
+                      Cancel
+                    </button>
+                  </SheetClose>
+                  <button
+                    type="button"
+                    disabled={!isValid || saving}
+                    onClick={() => {
+                      if (!isValid) {
+                        return
+                      }
+
+                      haptics.medium()
+                      void onSave(parsedMileage)
+                    }}
+                    className="flex-1 rounded-xl bg-[#A31526] px-4 py-3.5 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{ fontFamily: 'Outfit, sans-serif' }}
+                  >
+                    {saving ? 'Saving…' : 'Save mileage'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </SheetContent>
+    </Sheet>
+  )
 }
 
 function NavButton({ icon, label, isActive, onClick }: NavButtonProps) {
@@ -187,6 +396,98 @@ function EmptyHomeState({ userName, onAdd }: { userName: string; onAdd: () => vo
   )
 }
 
+function NewUserOnboardingState({
+  email,
+  fullName,
+  phoneNumber,
+  onSaveProfile,
+  saving,
+}: {
+  email: string
+  fullName: string
+  phoneNumber: string
+  onSaveProfile: (values: { fullName: string; phoneNumber: string }) => Promise<void>
+  saving: boolean
+}) {
+  const [draftName, setDraftName] = useState(fullName)
+  const [draftPhone, setDraftPhone] = useState(phoneNumber)
+
+  const isFormValid = draftName.trim().length >= 2 && draftPhone.trim().length >= 8
+
+  useEffect(() => {
+    setDraftName(fullName)
+    setDraftPhone(phoneNumber)
+  }, [fullName, phoneNumber])
+
+  return (
+    <div className="flex h-full flex-col space-y-6 p-6">
+      <div className="pt-4">
+        <h2 className="text-2xl font-bold text-gray-900">Let&apos;s finish your profile</h2>
+        <p className="mt-1 text-[15px] text-gray-600">
+          Add your details once, then we&apos;ll set up your first Mazda.
+        </p>
+      </div>
+
+      <div className="space-y-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">
+            Email
+          </label>
+          <p className="mt-2 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700">
+            {email}
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="onboarding-full-name" className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">
+            Full name
+          </label>
+          <input
+            id="onboarding-full-name"
+            type="text"
+            value={draftName}
+            onChange={(event) => setDraftName(event.target.value)}
+            placeholder="e.g. Natasha Wanjiru"
+            className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-900 outline-none transition focus:border-[#A31526] focus:ring-2 focus:ring-[#A31526]/10"
+            autoComplete="name"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="onboarding-phone" className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">
+            Phone number
+          </label>
+          <input
+            id="onboarding-phone"
+            type="tel"
+            value={draftPhone}
+            onChange={(event) => {
+              const cleaned = event.target.value.replace(/[^\d+\s()-]/g, '')
+              setDraftPhone(cleaned)
+            }}
+            placeholder="e.g. +254 712 345678"
+            className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-900 outline-none transition focus:border-[#A31526] focus:ring-2 focus:ring-[#A31526]/10"
+            autoComplete="tel"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void onSaveProfile({ fullName: draftName, phoneNumber: draftPhone })}
+          disabled={!isFormValid || saving}
+          className="w-full rounded-xl bg-[#A31526] px-5 py-3.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {saving ? 'Saving profile…' : 'Continue'}
+        </button>
+      </div>
+
+      <p className="text-center text-xs text-gray-500">
+        Step 1 of 2: profile details. Step 2: add your Mazda vehicle.
+      </p>
+    </div>
+  )
+}
+
 function EmptyGarageState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="mt-8 flex h-full flex-col items-center justify-center p-8 text-center">
@@ -210,79 +511,117 @@ function EmptyGarageState({ onAdd }: { onAdd: () => void }) {
 }
 
 function ServicesLog({
-  onAdd,
-  primaryVehicle,
+  serviceLogs,
 }: {
-  onAdd: () => void
-  primaryVehicle: {
-    model: string
-    year: number
-    registration: string
-  } | null
+  serviceLogs: import('@/types').ServiceLog[]
 }) {
-  const title = primaryVehicle ? `${primaryVehicle.year} Mazda ${primaryVehicle.model}` : 'Your Primary Vehicle'
-  const subtitle = primaryVehicle ? `Plate: ${primaryVehicle.registration}` : 'Your garage is ready'
+  const formatServiceType = (value: import('@/types').ServiceLog['serviceType']) => {
+    if (value === 'oil_change') return 'Oil change'
+    if (value === 'tyre_rotation') return 'Tyre rotation'
+    if (value === 'brake_service') return 'Brake service'
+    return value.charAt(0).toUpperCase() + value.slice(1)
+  }
+
+  const garageSummaries = useMemo(() => {
+    const groupedByGarage = new Map<
+      string,
+      {
+        garageName: string
+        totalCost: number
+        lastVisited: number
+        services: import('@/types').ServiceLog[]
+      }
+    >()
+
+    const orderedLogs = [...serviceLogs].sort(
+      (a, b) => new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime()
+    )
+
+    for (const log of orderedLogs) {
+      const garageName = log.garageName?.trim() || 'Garage not specified'
+      const existing = groupedByGarage.get(garageName)
+      const numericCost = Math.max(0, Number(log.serviceCost ?? 0))
+      const serviceDate = new Date(log.serviceDate).getTime()
+
+      if (!existing) {
+        groupedByGarage.set(garageName, {
+          garageName,
+          totalCost: numericCost,
+          lastVisited: serviceDate,
+          services: [log],
+        })
+        continue
+      }
+
+      existing.totalCost += numericCost
+      existing.lastVisited = Math.max(existing.lastVisited, serviceDate)
+      existing.services.push(log)
+    }
+
+    return Array.from(groupedByGarage.values()).sort(
+      (a, b) => b.lastVisited - a.lastVisited
+    )
+  }, [serviceLogs])
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-[#A31526] p-5 text-white shadow-lg">
-        <div className="absolute right-0 top-0 -mr-10 -mt-10 h-32 w-32 rounded-full bg-white/10 blur-xl" />
-        <div className="relative z-10">
-          <p className="mb-1 text-sm font-semibold text-red-100">Your Primary Vehicle</p>
-          <h2 className="text-2xl font-bold">{title}</h2>
-          <p className="mt-1 text-sm text-red-100">{subtitle}</p>
-        </div>
-        <button
-          onClick={onAdd}
-          className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-colors hover:bg-white/30"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
+    <div className="space-y-5 p-6 pb-28">
+      <div className="rounded-2xl border border-[#E8D9DC] bg-[#F8EEF0] p-4 shadow-sm">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B1B30]">
+          Garage Visits
+        </p>
+        <h2 className="mt-1 text-xl font-bold text-[#111010]">Visited garages and service costs</h2>
+        <p className="mt-1 text-[13px] text-[#6B6163]">
+          A clean summary of where your car was serviced and what each visit cost.
+        </p>
       </div>
 
-      <div className="flex items-start gap-4 rounded-2xl border border-orange-100 bg-orange-50 p-4 shadow-sm">
-        <div className="shrink-0 rounded-full bg-orange-100 p-2">
-          <AlertCircle className="h-5 w-5 text-orange-600" />
+      {garageSummaries.length === 0 ? (
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm">
+          <p className="text-[13px] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            No garages visited yet. Log a service to start your history.
+          </p>
         </div>
-        <div>
-          <h3 className="text-[15px] font-semibold text-orange-900">Next Service Due</h3>
-          <p className="mb-3 mt-0.5 text-sm text-orange-700">Oil change recommended in 500 miles.</p>
-          <button className="w-full rounded-lg border border-orange-200 bg-white px-4 py-2 text-sm font-bold text-orange-700 shadow-sm active:scale-95">
-            Book Appointment
-          </button>
-        </div>
-      </div>
+      ) : (
+        garageSummaries.map((garage) => (
+          <section key={garage.garageName} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-[16px] font-semibold text-[#111010]">
+                  {garage.garageName}
+                </h3>
+                <p className="mt-0.5 text-[12px] text-gray-500">
+                  {garage.services.length} service{garage.services.length === 1 ? '' : 's'}
+                </p>
+              </div>
+              <div className="rounded-full bg-[#F5E8EA] px-3 py-1 text-[11px] font-semibold text-[#9B1B30]">
+                Total KES {Math.round(garage.totalCost).toLocaleString('en-KE')}
+              </div>
+            </div>
 
-      <div className="space-y-4 pt-2">
-        <h3 className="ml-1 text-sm font-bold uppercase tracking-wider text-gray-400">Past Services</h3>
-        {MOCK_SERVICES.map((service) => (
-          <div key={service.id} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex justify-between">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-                <Calendar className="h-4 w-4" />
-                {service.date}
-              </div>
-              <div className="flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-bold text-green-700">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Done
-              </div>
-            </div>
-            <h4 className="mb-1 text-lg font-bold text-gray-900">{service.title}</h4>
-            <div className="mb-4 flex items-center gap-1.5 text-sm text-gray-500">
-              <MapPin className="h-4 w-4" />
-              {service.location}
-            </div>
-            <div className="space-y-1.5 rounded-xl bg-gray-50 p-3">
-              {service.details.map((detail) => (
-                <div key={detail} className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="h-1.5 w-1.5 rounded-full bg-gray-300" />
-                  {detail}
+            <div className="mt-3 space-y-2.5">
+              {garage.services.map((service) => (
+                <div key={service.id} className="rounded-xl border border-gray-100 bg-[#FCFAFA] px-3.5 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[13px] font-semibold text-[#111010]">
+                      {formatServiceType(service.serviceType)}
+                    </p>
+                    <p className="text-[13px] font-semibold text-[#9B1B30]">
+                      KES {Math.round(service.serviceCost ?? 0).toLocaleString('en-KE')}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-[12px] text-gray-500">
+                    {new Date(service.serviceDate).toLocaleDateString('en-KE', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </p>
                 </div>
               ))}
             </div>
-          </div>
-        ))}
-      </div>
+          </section>
+        ))
+      )}
     </div>
   )
 }
@@ -296,6 +635,8 @@ function AddCarWizard({
 }) {
   const [step, setStep] = useState(1)
   const [selected, setSelected] = useState<string | null>(null)
+  const [vinInfo, setVinInfo] = useState<VINInfo | null>(null)
+  const [fuelTypeTouched, setFuelTypeTouched] = useState(false)
   const [details, setDetails] = useState({
     year: '',
     registration: '',
@@ -304,6 +645,20 @@ function AddCarWizard({
     engineSize: '',
     mileageInterval: 5000 as 5000 | 7000 | 9000 | 10000,
   })
+
+  const handleVinChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = event.target.value
+    const formatted = formatVIN(raw)
+    const info = formatted.length === 17 ? decodeVIN(formatted) : null
+    setVinInfo(info)
+
+    setDetails((prev) => ({
+      ...prev,
+      vin: formatted,
+      year: info?.isValid && prev.year === '' && info.year ? String(info.year) : prev.year,
+      fuelType: info?.isValid && !fuelTypeTouched && info.fuelHint ? info.fuelHint : prev.fuelType,
+    }))
+  }
 
   const ENGINE_OPTIONS = [
     { value: '1.5L Petrol', label: '1.5L Petrol' },
@@ -335,6 +690,7 @@ function AddCarWizard({
               <h2 className="text-2xl font-bold text-gray-900">Which Mazda?</h2>
               <p className="mt-1 text-sm text-gray-500">Select your model to begin.</p>
             </div>
+
             <div className="grid gap-4">
               {VEHICLES.map((vehicle) => (
                 <button
@@ -388,23 +744,45 @@ function AddCarWizard({
                   className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 uppercase outline-none focus:border-[#A31526] focus:ring-2 focus:ring-[#A31526]/20"
                 />
               </div>
-              <div>
-                <div className="flex items-baseline justify-between">
-                  <label className="ml-1 text-sm font-semibold text-gray-700">VIN</label>
-                  <span className="text-[11px] font-medium text-gray-400">Optional</span>
+              <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                <div className="mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-sm font-semibold text-gray-700">VIN (optional)</label>
+                  </div>
                 </div>
+                <div className="mb-3 flex items-start gap-1.5 text-gray-500">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-500" />
+                  <p className="text-[11px] leading-relaxed">Found on your logbook, windscreen, or driver door jamb.</p>
+                </div>
+
                 <input
                   type="text"
-                  placeholder="JM3KF..."
+                  placeholder="17-CHARACTER VIN"
                   maxLength={17}
                   value={details.vin}
-                  onChange={(event) => setDetails({ ...details, vin: event.target.value.toUpperCase() })}
-                  className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 uppercase outline-none focus:border-[#A31526] focus:ring-2 focus:ring-[#A31526]/20"
+                  onChange={handleVinChange}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 font-mono text-sm uppercase tracking-widest outline-none transition-colors focus:border-[#A31526] focus:ring-2 focus:ring-[#A31526]/20 placeholder:tracking-normal"
                 />
-                <div className="mt-2 flex gap-2 px-1 text-gray-500">
-                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-                  <p className="text-xs leading-relaxed">Find your VIN on the driver&apos;s side dashboard or registration card.</p>
+                <div className="mt-1 flex justify-end">
+                  <span className="text-[11px] font-medium text-gray-500">
+                    {details.vin.length} / 17
+                  </span>
                 </div>
+
+                {vinInfo && details.vin.length === 17 && (
+                  <div className="mt-2 text-[12px] font-medium">
+                    {vinInfo.isValid ? (
+                      <div className="flex items-center gap-1.5 text-[#2E7D4F]">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        <span>Mazda confirmed — {vinInfo.year} · {vinInfo.fuelHint}</span>
+                      </div>
+                    ) : (
+                      <div className="ml-1 text-[#A31526]">
+                        Invalid VIN — you can skip this field
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="ml-1 text-sm font-semibold text-gray-700">Fuel Type</label>
@@ -413,7 +791,10 @@ function AddCarWizard({
                     <button
                       key={fuel}
                       type="button"
-                      onClick={() => setDetails({ ...details, fuelType: fuel })}
+                      onClick={() => {
+                        setFuelTypeTouched(true)
+                        setDetails({ ...details, fuelType: fuel })
+                      }}
                       className={`rounded-2xl border px-4 py-3.5 text-sm font-semibold capitalize transition ${
                         details.fuelType === fuel
                           ? fuel === 'petrol'
@@ -487,6 +868,7 @@ function AddCarWizard({
           <button
             onClick={() => {
               if (!selected) return
+              haptics.medium()
               void onComplete({
                 selectedVehicleId: selected,
                 year: Number(details.year),
@@ -572,14 +954,68 @@ function MapFinder() {
 
 function SettingsView({
   user,
+  primaryVehicle,
+  serviceLogs,
   onLogout,
   isLoggingOut,
 }: {
   user: { fullName: string; email: string }
+  primaryVehicle: {
+    id: string
+    model: string
+    year: number
+    registration: string
+  } | null
+  serviceLogs: import('@/types').ServiceLog[]
   onLogout: () => Promise<void>
   isLoggingOut: boolean
 }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [subView, setSubView] = useState<'menu' | 'cost-analytics'>('menu')
+
+  if (subView === 'cost-analytics') {
+    return (
+      <div className="p-6 pb-32">
+        <button
+          type="button"
+          onClick={() => setSubView('menu')}
+          className="mb-4 inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1.5 text-[12px] font-semibold text-gray-600"
+          style={{ fontFamily: 'Outfit, sans-serif' }}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Settings
+        </button>
+
+        <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <h2
+            className="text-[#111010]"
+            style={{
+              fontFamily: 'Cormorant Garamond, serif',
+              fontSize: '28px',
+              fontStyle: 'italic',
+              fontWeight: 300,
+              lineHeight: 1.1,
+            }}
+          >
+            Cost analytics
+          </h2>
+          <p className="mt-1 text-[11px] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            {primaryVehicle ? `${primaryVehicle.registration} · ${primaryVehicle.model} ${primaryVehicle.year}` : 'Add a vehicle to view analytics'}
+          </p>
+        </div>
+
+        {primaryVehicle ? (
+          <CostAnalytics serviceLogs={serviceLogs} vehicleId={primaryVehicle.id} />
+        ) : (
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm">
+            <p className="text-[13px] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              No vehicle found for analytics yet.
+            </p>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 pb-32">
@@ -600,6 +1036,7 @@ function SettingsView({
             items: [
               { icon: User, title: 'Personal Details' },
               { icon: Shield, title: 'Password & Security' },
+              { icon: ChartNoAxesColumn, title: 'Cost Analytics', onClick: () => setSubView('cost-analytics') },
             ],
           },
           {
@@ -622,8 +1059,10 @@ function SettingsView({
               {group.title}
             </div>
             {group.items.map((item, index) => (
-              <div
+              <button
                 key={item.title}
+                type="button"
+                onClick={item.onClick}
                 className={`flex items-center justify-between bg-white p-4 active:bg-gray-50 ${
                   index !== group.items.length - 1 ? 'border-b border-gray-50' : ''
                 }`}
@@ -633,7 +1072,7 @@ function SettingsView({
                   <span className="text-[15px] font-medium text-gray-800">{item.title}</span>
                 </div>
                 <ChevronRight className="h-5 w-5 text-gray-300" />
-              </div>
+              </button>
             ))}
           </div>
         ))}
@@ -698,8 +1137,18 @@ function SettingsView({
 }
 
 export function Phase4Shell() {
-  useIdleTimer()
+  const handleIdleSignOut = useCallback(async () => {
+    await supabase.auth.signOut()
+    useAppStore.getState().clearAll()
+  }, [])
+
+  useIdleTimer(handleIdleSignOut)
   const user = useAppStore((state) => state.user)
+  const session = useAppStore((state) => state.session)
+  const activeVehicleId = useAppStore((state) => state.activeVehicleId)
+  const setActiveVehicleId = useAppStore((state) => state.setActiveVehicleId)
+  const setDisplayName = useAppStore((state) => state.setDisplayName)
+  const setAuthState = useAppStore((state) => state.setAuthState)
   const clearAll = useAppStore((state) => state.clearAll)
 
   const signOut = async () => {
@@ -707,13 +1156,23 @@ export function Phase4Shell() {
     if (error) throw error
     clearAll()
   }
-  const { vehicles, fetchVehicles, addVehicle, loading } = useVehicles()
-  const [activeTab, setActiveTab] = useState<TabId>('garage')
+  const { vehicles, fetchVehicles, addVehicle, updateVehicle, loading } = useVehicles()
+  const { logs, fetchLogs } = useServiceLogs()
+  const [activeTab, setActiveTab] = useState<TabId>('home')
   const [isAddingCar, setIsAddingCar] = useState(false)
+  const [isLoggingService, setIsLoggingService] = useState(false)
   const [showPWAPrompt, setShowPWAPrompt] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [pwaDismissed, setPwaDismissed] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isMileageSheetOpen, setIsMileageSheetOpen] = useState(false)
+  const [isSavingMileage, setIsSavingMileage] = useState(false)
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [showFullVin, setShowFullVin] = useState(false)
+  const [activeRailIndex, setActiveRailIndex] = useState(0)
+  const [prefilledServiceMileage, setPrefilledServiceMileage] = useState<number | undefined>(undefined)
+  const [serviceReturnTab, setServiceReturnTab] = useState<TabId>('home')
+  const railSlotRefs = useRef<Array<HTMLDivElement | null>>([])
 
   useEffect(() => {
     void fetchVehicles().catch(() => undefined)
@@ -751,12 +1210,113 @@ export function Phase4Shell() {
   }, [])
 
   const hasCars = vehicles.length > 0
-  const primaryVehicle = vehicles[0] ?? null
-  const profileName = useMemo(() => user?.user_metadata?.full_name ?? user?.email ?? 'MazdaCare Driver', [user])
+  const shouldUseVehicleRail = vehicles.length >= 2
+  const canAddVehicle = vehicles.length < 10
+  const railSlotCount = vehicles.length + (canAddVehicle ? 1 : 0)
+  const profileFullName = user?.user_metadata?.full_name?.trim() ?? ''
+  const profilePhone = (user?.user_metadata?.phone_number as string | undefined)?.trim() || user?.phone || ''
+  const isProfileComplete = profileFullName.length > 0 && profilePhone.length > 0
+  const needsProfileSetup = Boolean(user) && !isProfileComplete
+  const primaryVehicle =
+    vehicles.find((vehicle) => vehicle.id === activeVehicleId) ??
+    vehicles[0] ??
+    null
+  const latestPrimaryLog = logs[0]
+  const profileName = useMemo(() => profileFullName || user?.email || 'MazdaCare Driver', [profileFullName, user?.email])
   const profileEmail = user?.email ?? 'No email available'
+  const nextServiceMileage = primaryVehicle?.nextServiceMileage ?? null
+  const kmToNextService =
+    primaryVehicle && nextServiceMileage
+      ? Math.max(nextServiceMileage - primaryVehicle.currentMileage, 0)
+      : null
+
+  useEffect(() => {
+    if (!vehicles.length) {
+      if (activeVehicleId !== null) {
+        setActiveVehicleId(null)
+      }
+      return
+    }
+
+    const activeExists = activeVehicleId
+      ? vehicles.some((vehicle) => vehicle.id === activeVehicleId)
+      : false
+
+    if (!activeExists) {
+      setActiveVehicleId(vehicles[0].id)
+    }
+  }, [activeVehicleId, setActiveVehicleId, vehicles])
+
+  useEffect(() => {
+    if (!shouldUseVehicleRail) {
+      setActiveRailIndex(0)
+      return
+    }
+
+    const selectedIndex = vehicles.findIndex((vehicle) => vehicle.id === primaryVehicle?.id)
+    setActiveRailIndex(selectedIndex >= 0 ? selectedIndex : 0)
+  }, [primaryVehicle?.id, shouldUseVehicleRail, vehicles])
+
+  useEffect(() => {
+    if (!shouldUseVehicleRail) {
+      return
+    }
+
+    const slotNodes = railSlotRefs.current.filter((node): node is HTMLDivElement => Boolean(node))
+    if (!slotNodes.length) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting || entry.intersectionRatio < 0.6) {
+            continue
+          }
+
+          const slot = entry.target as HTMLDivElement
+          const slotIndex = Number(slot.dataset.slotIndex ?? '-1')
+          const slotType = slot.dataset.slotType
+          const vehicleId = slot.dataset.vehicleId ?? null
+
+          if (slotIndex >= 0) {
+            setActiveRailIndex(slotIndex)
+          }
+
+          if (slotType === 'vehicle' && vehicleId) {
+            useAppStore.getState().setActiveVehicleId(vehicleId)
+          }
+        }
+      },
+      {
+        threshold: [0.6],
+      }
+    )
+
+    for (const node of slotNodes) {
+      observer.observe(node)
+    }
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [railSlotCount, shouldUseVehicleRail, vehicles])
+
+  useEffect(() => {
+    setShowFullVin(false)
+  }, [primaryVehicle?.id])
+
+  useEffect(() => {
+    if (!primaryVehicle?.id) {
+      return
+    }
+
+    void fetchLogs(primaryVehicle.id).catch(() => undefined)
+  }, [fetchLogs, primaryVehicle?.id])
 
   const getHeaderTitle = () => {
     if (isAddingCar) return 'Add Your Mazda'
+    if (isLoggingService) return 'Log Service'
     switch (activeTab) {
       case 'garage':
         return hasCars ? 'My Garage' : 'Welcome'
@@ -793,7 +1353,7 @@ export function Phase4Shell() {
     }
 
     try {
-      await addVehicle({
+      const createdVehicle = await addVehicle({
         model: selectedVehicle.model,
         year: values.year,
         vin: values.vin,
@@ -804,12 +1364,55 @@ export function Phase4Shell() {
         mileageInterval: values.mileageInterval,
         color: selectedVehicle.color,
       })
+      setActiveVehicleId(createdVehicle.id)
       setIsAddingCar(false)
-      setActiveTab('garage')
+      setActiveTab('home')
+      haptics.success()
       toast.success('Vehicle added successfully.')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not save vehicle.'
       toast.error(message)
+    }
+  }
+
+  async function handleCompleteProfile(values: { fullName: string; phoneNumber: string }) {
+    const normalizedName = sanitizeText(values.fullName).trim()
+    const normalizedPhone = values.phoneNumber.replace(/[^\d+]/g, '').trim()
+
+    if (!normalizedName || normalizedPhone.length < 8) {
+      haptics.error()
+      toast.error('Please provide a valid name and phone number.')
+      return
+    }
+
+    setIsSavingProfile(true)
+    haptics.medium()
+
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          full_name: normalizedName,
+          phone_number: normalizedPhone,
+        },
+      })
+
+      if (error) {
+        throw error
+      }
+
+      if (data.user) {
+        setAuthState(data.user, session)
+      }
+
+      setDisplayName(normalizedName)
+      haptics.success()
+      toast.success('Profile saved. You can now add your first Mazda.')
+    } catch (error) {
+      haptics.error()
+      const message = error instanceof Error ? error.message : 'Unable to save profile details right now.'
+      toast.error(message)
+    } finally {
+      setIsSavingProfile(false)
     }
   }
 
@@ -822,6 +1425,45 @@ export function Phase4Shell() {
     } finally {
       setIsLoggingOut(false)
     }
+  }
+
+  async function handleSaveMileage(nextMileageValue: number) {
+    if (!primaryVehicle) {
+      return
+    }
+
+    const sanitizedValue = sanitizeMileage(nextMileageValue)
+    setIsSavingMileage(true)
+
+    try {
+      await updateVehicle(primaryVehicle.id, { currentMileage: sanitizedValue })
+      haptics.success()
+      toast.success(`Mileage updated to ${sanitizedValue.toLocaleString()} km`)
+
+      if ((primaryVehicle.nextServiceMileage ?? primaryVehicle.currentMileage + primaryVehicle.mileageInterval) <= sanitizedValue) {
+        toast('Service overdue — log your service or adjust your schedule', {
+          style: {
+            background: '#FFF7ED',
+            color: '#B45309',
+            border: '1px solid #FCD34D',
+          },
+        })
+      }
+
+      setIsMileageSheetOpen(false)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to update mileage.'
+      toast.error(message)
+    } finally {
+      setIsSavingMileage(false)
+    }
+  }
+
+  function handleOpenLogService(initialMileage: number) {
+    setPrefilledServiceMileage(sanitizeMileage(initialMileage))
+    setServiceReturnTab(activeTab)
+    setIsMileageSheetOpen(false)
+    setIsLoggingService(true)
   }
 
   return (
@@ -866,8 +1508,20 @@ export function Phase4Shell() {
 
         <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-100 bg-white px-5 pb-4 pt-12">
           <div className="flex items-center gap-3">
-            {isAddingCar ? (
-              <button onClick={() => setIsAddingCar(false)} className="-ml-2 rounded-full p-2 text-gray-400 hover:bg-gray-50">
+            {isAddingCar || isLoggingService ? (
+              <button
+                onClick={() => {
+                  if (isAddingCar) {
+                    setIsAddingCar(false)
+                    return
+                  }
+
+                  setIsLoggingService(false)
+                  setPrefilledServiceMileage(undefined)
+                  setActiveTab(serviceReturnTab)
+                }}
+                className="-ml-2 rounded-full p-2 text-gray-400 hover:bg-gray-50"
+              >
                 <ChevronLeft className="h-6 w-6" />
               </button>
             ) : null}
@@ -889,87 +1543,214 @@ export function Phase4Shell() {
               <motion.div key="add-car" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="h-full">
                 <AddCarWizard onComplete={handleVehicleComplete} saving={loading} />
               </motion.div>
+            ) : isLoggingService && primaryVehicle ? (
+              <motion.div key="log-service" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="h-full px-4 pt-4">
+                <LogService
+                  embedded
+                  vehicleIdOverride={primaryVehicle.id}
+                  initialMileage={prefilledServiceMileage}
+                  onSuccess={() => {
+                    setIsLoggingService(false)
+                    setPrefilledServiceMileage(undefined)
+                    void fetchVehicles().catch(() => undefined)
+                  }}
+                />
+              </motion.div>
             ) : (
               <motion.div key="main-tabs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                {activeTab === 'garage' && (!hasCars ? <EmptyGarageState onAdd={() => setIsAddingCar(true)} /> : <ServicesLog onAdd={() => setIsAddingCar(true)} primaryVehicle={primaryVehicle ? { model: primaryVehicle.model, year: primaryVehicle.year, registration: primaryVehicle.registration } : null} />)}
+                {activeTab === 'garage' && (!hasCars ? <EmptyGarageState onAdd={() => setIsAddingCar(true)} /> : <ServicesLog serviceLogs={logs} />)}
                 {activeTab === 'map' ? <MapFinder /> : null}
-                {activeTab === 'profile' ? <SettingsView user={{ fullName: profileName, email: profileEmail }} onLogout={handleLogout} isLoggingOut={isLoggingOut} /> : null}
+                {activeTab === 'profile' ? <SettingsView user={{ fullName: profileName, email: profileEmail }} primaryVehicle={primaryVehicle ? { id: primaryVehicle.id, model: primaryVehicle.model, year: primaryVehicle.year, registration: primaryVehicle.registration } : null} serviceLogs={logs} onLogout={handleLogout} isLoggingOut={isLoggingOut} /> : null}
                 {activeTab === 'home' ? (
                   !hasCars ? (
-                    <EmptyHomeState userName={profileName?.split(' ')[0] || 'Driver'} onAdd={() => setIsAddingCar(true)} />
+                    needsProfileSetup ? (
+                      <NewUserOnboardingState
+                        email={profileEmail}
+                        fullName={profileFullName}
+                        phoneNumber={profilePhone}
+                        saving={isSavingProfile}
+                        onSaveProfile={handleCompleteProfile}
+                      />
+                    ) : (
+                      <EmptyHomeState userName={profileName?.split(' ')[0] || 'Driver'} onAdd={() => setIsAddingCar(true)} />
+                    )
                   ) : (
                     <div className="flex h-full flex-col justify-start space-y-6 p-6">
                       {/* Personalized Greeting */}
                       <div className="pt-4">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                          Good morning, {profileName?.split(' ')[0] || 'Driver'}!
-                      </h2>
-                      <p className="mt-1 text-[15px] text-gray-600">
-                        Here is your daily vehicle overview.
-                      </p>
-                    </div>
-
-                    {/* Hero Vehicle Card */}
-                    {primaryVehicle ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-md"
-                      >
-                        {/* Car Image Container */}
-                        <div className="relative h-48 w-full overflow-hidden bg-gray-200">
-                          <img
-                            src={getVehicleImage(primaryVehicle.model)}
-                            alt={`${primaryVehicle.year} Mazda ${primaryVehicle.model}`}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                          {/* Black-to-Transparent Gradient Overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
-
-                          {/* Status Badge - Top Right */}
-                          <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 backdrop-blur-md">
-                            <CheckCircle2 className="h-4 w-4 text-green-400" strokeWidth={2.5} />
-                            <span className="text-xs font-semibold text-white">All Good</span>
-                          </div>
-
-                          {/* Year & Model - Bottom Left */}
-                          <div className="absolute bottom-4 left-4 space-y-0.5">
-                            <p className="text-sm font-semibold text-white">
-                              {primaryVehicle.year} Mazda
+                        <div className="flex items-start gap-3">
+                          <MazdaLogo variant="icon" theme="dark" size="sm" className="mt-1 shrink-0" />
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              Good morning, {profileName?.split(' ')[0] || 'Driver'}!
+                            </h2>
+                            <p className="mt-1 text-[15px] text-gray-600">
+                              Here is your daily vehicle overview.
                             </p>
-                            <p className="text-lg font-bold text-white">{primaryVehicle.model}</p>
-                          </div>
-
-                          {/* Mileage - Bottom Right */}
-                          <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 backdrop-blur-md">
-                            <Gauge className="h-4 w-4 text-white" strokeWidth={2.5} />
-                            <span className="text-sm font-semibold text-white">
-                              {primaryVehicle.currentMileage.toLocaleString()} mi
-                            </span>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Vehicle Details Footer */}
-                        <div className="space-y-3 border-t border-gray-100 px-4 py-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                              Registration
-                            </span>
-                            <span className="text-sm font-semibold text-gray-900">
-                              {primaryVehicle.registration}
-                            </span>
+                    {/* Vehicle Card / Rail */}
+                    {primaryVehicle ? (
+                      shouldUseVehicleRail ? (
+                        <div className="-mx-6 space-y-3">
+                          <div className="flex snap-x snap-mandatory gap-[10px] overflow-x-auto px-[14px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                            {vehicles.map((vehicle, index) => (
+                              <div
+                                key={vehicle.id}
+                                ref={(node) => {
+                                  railSlotRefs.current[index] = node
+                                }}
+                                data-slot-index={index}
+                                data-slot-type="vehicle"
+                                data-vehicle-id={vehicle.id}
+                                className="min-w-[calc(100%-28px)] snap-start"
+                              >
+                                <CarCard
+                                  vehicle={vehicle}
+                                  onEditMileage={(target) => {
+                                    setActiveVehicleId(target.id)
+                                    setPrefilledServiceMileage(target.currentMileage)
+                                    setIsMileageSheetOpen(true)
+                                  }}
+                                />
+                              </div>
+                            ))}
+
+                            {canAddVehicle ? (
+                              <div
+                                ref={(node) => {
+                                  railSlotRefs.current[vehicles.length] = node
+                                }}
+                                data-slot-index={vehicles.length}
+                                data-slot-type="add"
+                                className="min-w-[calc(100%-28px)] snap-start"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    haptics.tap()
+                                    setIsAddingCar(true)
+                                  }}
+                                  className="flex min-h-[250px] w-full flex-col items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-[#9B1B30] bg-[#F5E8EA] text-[#9B1B30]"
+                                >
+                                  <Plus className="h-8 w-8" />
+                                  <span className="text-sm font-bold">Add Mazda</span>
+                                </button>
+                              </div>
+                            ) : null}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                              Next Service
-                            </span>
-                            <span className="text-sm font-semibold text-[#A31526]">
-                              {primaryVehicle.nextServiceMileage?.toLocaleString() || 'N/A'} mi
-                            </span>
-                          </div>
+
+                          {railSlotCount > 0 ? (
+                            <div className="flex items-center justify-center gap-1.5 px-[14px]">
+                              {Array.from({ length: railSlotCount }).map((_, index) => (
+                                <span
+                                  key={`vehicle-dot-${index}`}
+                                  className={`block transition-all ${
+                                    activeRailIndex === index
+                                      ? 'h-[5px] w-[16px] rounded-[999px] bg-[#9B1B30]'
+                                      : 'h-[5px] w-[5px] rounded-full bg-[#C4BABB]'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          ) : null}
                         </div>
-                      </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-md"
+                        >
+                          {/* Car Image Container */}
+                          <div className="relative h-48 w-full overflow-hidden bg-gray-200">
+                            <img
+                              src={getVehicleImage(primaryVehicle.model)}
+                              alt={`${primaryVehicle.year} Mazda ${primaryVehicle.model}`}
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            {/* Black-to-Transparent Gradient Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
+
+                            {/* Status Badge - Top Right */}
+                            <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 backdrop-blur-md">
+                              <CheckCircle2 className="h-4 w-4 text-green-400" strokeWidth={2.5} />
+                              <span className="text-xs font-semibold text-white">All Good</span>
+                            </div>
+
+                            {/* Year & Model - Bottom Left */}
+                            <div className="absolute bottom-4 left-4 space-y-0.5">
+                              <p className="text-sm font-semibold text-white">
+                                {primaryVehicle.year} Mazda
+                              </p>
+                              <p className="text-lg font-bold text-white">{primaryVehicle.model}</p>
+                            </div>
+
+                            {/* Mileage - Bottom Right */}
+                            <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 backdrop-blur-md">
+                              <Gauge className="h-4 w-4 text-white" strokeWidth={2.5} />
+                              <span className="text-sm font-semibold text-white">
+                                {primaryVehicle.currentMileage.toLocaleString()} km
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Vehicle Details Footer */}
+                          <div className="space-y-3 border-t border-gray-100 px-4 py-3">
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                                  Current Mileage
+                                </span>
+                                <p className="mt-1 text-sm font-semibold text-gray-900">
+                                  {primaryVehicle.currentMileage.toLocaleString()} km
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setIsMileageSheetOpen(true)}
+                                className="inline-flex items-center gap-1 rounded-[6px] px-[10px] py-[4px] text-[11px] font-semibold text-[#9B1B30]"
+                                style={{ background: '#F5E8EA', fontFamily: 'Outfit, sans-serif' }}
+                              >
+                                <Pencil className="h-3 w-3 text-[#9B1B30]" />
+                                Update km
+                              </button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                                Registration
+                              </span>
+                              <span className="text-sm font-semibold text-gray-900">
+                                {primaryVehicle.registration}
+                              </span>
+                            </div>
+                            {primaryVehicle.vin ? (
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                                  VIN
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowFullVin((current) => !current)}
+                                  className="text-sm font-semibold text-gray-900 underline-offset-2 hover:underline"
+                                >
+                                  {showFullVin ? `VIN: ${primaryVehicle.vin}` : `VIN: ${maskVin(primaryVehicle.vin)}`}
+                                </button>
+                              </div>
+                            ) : null}
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                                Next Service
+                              </span>
+                              <span className="text-sm font-semibold text-[#A31526]">
+                                {primaryVehicle.nextServiceMileage?.toLocaleString() || 'N/A'} km
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
                     ) : (
                       <div className="flex h-64 items-center justify-center rounded-3xl border border-gray-100 bg-white">
                         <div className="text-center">
@@ -981,133 +1762,122 @@ export function Phase4Shell() {
                       </div>
                     )}
 
-                    {/* Service Due Alert Banner */}
-                    {primaryVehicle && primaryVehicle.nextServiceMileage && primaryVehicle.nextServiceMileage - primaryVehicle.currentMileage < 1000 && (
+                    {primaryVehicle ? (
+                      <MileageUpdateSheet
+                        vehicle={primaryVehicle}
+                        open={isMileageSheetOpen}
+                        lastUpdateLabel={formatDisplayDate(latestPrimaryLog?.serviceDate)}
+                        saving={isSavingMileage}
+                        initialValue={prefilledServiceMileage}
+                        onOpenChange={(open) => {
+                          setIsMileageSheetOpen(open)
+                          if (!open) {
+                            setPrefilledServiceMileage(undefined)
+                          }
+                        }}
+                        onSave={handleSaveMileage}
+                        onLogService={handleOpenLogService}
+                      />
+                    ) : null}
+                    {primaryVehicle && kmToNextService !== null ? (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex gap-4 rounded-2xl border border-orange-100 bg-orange-50 p-4"
+                        transition={{ duration: 0.25 }}
+                        className={`rounded-2xl border p-4 shadow-sm ${
+                          kmToNextService < 1000 ? 'border-orange-100 bg-orange-50' : 'border-gray-100 bg-white'
+                        }`}
                       >
-                        <AlertCircle className="h-5 w-5 flex-shrink-0 text-orange-600" strokeWidth={2} />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-orange-900">
-                            Oil change recommended soon.
-                          </p>
-                          <p className="mt-1 text-xs text-orange-700">
-                            {primaryVehicle.nextServiceMileage - primaryVehicle.currentMileage} miles remaining
-                          </p>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">
+                              Next Service
+                            </p>
+                            <p className="mt-1 text-[24px] font-bold text-[#111010]">
+                              {kmToNextService.toLocaleString()} km
+                            </p>
+                            <p className="mt-1 text-[12px] text-gray-600">
+                              Due at {nextServiceMileage?.toLocaleString()} km
+                            </p>
+                          </div>
+                          {kmToNextService < 1000 ? (
+                            <div className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-100 px-2.5 py-1 text-[11px] font-semibold text-orange-700">
+                              <AlertCircle className="h-3.5 w-3.5" />
+                              Service soon
+                            </div>
+                          ) : null}
                         </div>
                       </motion.div>
-                    )}
+                    ) : null}
 
-                    {/* Quick Actions Header */}
-                    <div>
-                      <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">
-                        Quick Actions
-                      </h3>
-                    </div>
-
-                    {/* Quick Actions Grid */}
-                    {primaryVehicle && (
+                    {primaryVehicle ? (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: 0.05 }}
-                        className="grid grid-cols-2 gap-3"
+                        className="space-y-3"
                       >
-                        {/* Find Service Button */}
-                        <button
-                          onClick={() => setActiveTab('map')}
-                          className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm hover:border-gray-200 active:bg-gray-50"
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50">
-                            <MapPin className="h-5 w-5 text-[#A31526]" strokeWidth={2} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                              Find Service
-                            </p>
-                            <p className="text-xs text-gray-600">Nearby garages</p>
-                          </div>
-                        </button>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">
+                          Owner Essentials
+                        </h3>
 
-                        {/* Book Appointment Button */}
-                        <button
-                          onClick={() => setActiveTab('garage')}
-                          className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm hover:border-gray-200 active:bg-gray-50"
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-                            <Calendar className="h-5 w-5 text-blue-600" strokeWidth={2} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                              Book Appt
-                            </p>
-                            <p className="text-xs text-gray-600">Schedule now</p>
-                          </div>
-                        </button>
+                        <div className="space-y-2.5 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              haptics.tap()
+                              handleOpenLogService(primaryVehicle.currentMileage)
+                            }}
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+                          >
+                            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5E8EA]">
+                              <Wrench className="h-5 w-5 text-[#9B1B30]" strokeWidth={2} />
+                            </span>
+                            <span className="flex-1">
+                              <span className="block text-sm font-semibold text-gray-900">Log service</span>
+                              <span className="block text-xs text-gray-500">Record your latest maintenance</span>
+                            </span>
+                            <ChevronRight className="h-4 w-4 text-gray-300" />
+                          </button>
 
-                        {/* Roadside Assistance Button */}
-                        <button
-                          className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm hover:border-gray-200 active:bg-gray-50"
-                          disabled
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-50">
-                            <HeartHandshake className="h-5 w-5 text-yellow-600" strokeWidth={2} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                              Roadside
-                            </p>
-                            <p className="text-xs text-gray-600">Emergency help</p>
-                          </div>
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              haptics.tap()
+                              window.open(getMazdaManualLink(primaryVehicle.model, primaryVehicle.year), '_blank', 'noopener,noreferrer')
+                            }}
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+                          >
+                            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                              <BookOpen className="h-5 w-5 text-gray-700" strokeWidth={2} />
+                            </span>
+                            <span className="flex-1">
+                              <span className="block text-sm font-semibold text-gray-900">Open Mazda manuals</span>
+                              <span className="block text-xs text-gray-500">From Mazda official owner resources</span>
+                            </span>
+                            <ChevronRight className="h-4 w-4 text-gray-300" />
+                          </button>
 
-                        {/* Manuals Button */}
-                        <button
-                          className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm hover:border-gray-200 active:bg-gray-50"
-                          disabled
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-                            <BookOpen className="h-5 w-5 text-gray-600" strokeWidth={2} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                              Manuals
-                            </p>
-                            <p className="text-xs text-gray-600">User guides</p>
-                          </div>
-                        </button>
-                      </motion.div>
-                    )}
-
-                    {/* Quick Stats */}
-                    {primaryVehicle && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.1 }}
-                        className="grid grid-cols-2 gap-3"
-                      >
-                        <div className="rounded-2xl border border-gray-100 bg-white p-4 text-center">
-                          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                            Fuel Type
-                          </p>
-                          <p className="mt-2 text-lg font-bold text-gray-900 capitalize">
-                            {primaryVehicle.fuelType}
-                          </p>
-                        </div>
-                        <div className="rounded-2xl border border-gray-100 bg-white p-4 text-center">
-                          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                            Engine Size
-                          </p>
-                          <p className="mt-2 text-lg font-bold text-gray-900">
-                            {primaryVehicle.engineSize}
-                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              haptics.tap()
+                              setActiveTab('map')
+                            }}
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+                          >
+                            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-50">
+                              <HeartHandshake className="h-5 w-5 text-yellow-700" strokeWidth={2} />
+                            </span>
+                            <span className="flex-1">
+                              <span className="block text-sm font-semibold text-gray-900">Roadside help</span>
+                              <span className="block text-xs text-gray-500">Find nearby assistance fast</span>
+                            </span>
+                            <ChevronRight className="h-4 w-4 text-gray-300" />
+                          </button>
                         </div>
                       </motion.div>
-                    )}
+                    ) : null}
                     </div>
                   )
                 ) : null}

@@ -1,8 +1,8 @@
-import { Fragment, Suspense, lazy } from 'react'
+import { Fragment, Suspense, lazy, useCallback, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Phase4Shell } from '@/components/layout/Phase4Shell'
-import { SplashScreen } from '@/components/layout/SplashScreen'
+import { SplashScreen } from '@/components/ui/SplashScreen'
 
 const Auth = lazy(() => import('@/pages/Auth').then((m) => ({ default: m.Auth })))
 
@@ -17,9 +17,27 @@ function PageFallback() {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return !sessionStorage.getItem('mc_splash_shown')
+    } catch {
+      return false
+    }
+  })
+
+  const handleSplashComplete = useCallback(() => {
+    try {
+      sessionStorage.setItem('mc_splash_shown', '1')
+    } catch {
+      // sessionStorage unavailable
+    }
+
+    setShowSplash(false)
+  }, [])
+
   return (
     <Fragment>
-      <SplashScreen />
+      {showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : null}
       <BrowserRouter>
         <Routes>
           <Route

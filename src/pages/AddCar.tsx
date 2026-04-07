@@ -164,6 +164,8 @@ export function AddCar() {
       return
     }
 
+    haptics.medium()
+
     try {
       await addVehicle({
         ...formValues,
@@ -172,6 +174,7 @@ export function AddCar() {
         engineSize: sanitizeText(formValues.engineSize),
         color: sanitizeText(formValues.color),
       })
+      haptics.success()
       toast.success('Vehicle added successfully.')
       navigate('/')
     } catch (error) {

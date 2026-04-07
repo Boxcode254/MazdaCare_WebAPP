@@ -58,6 +58,35 @@
     --input:                #C4BABB;
   }
 
+  /* Dark mode Mazda palette overrides */
+  .dark body {
+    background: #111010;
+    color: #FDFBFB;
+  }
+
+  .dark {
+    --mz-black: #FDFBFB;
+    --mz-white: #1E1A1B;
+    --mz-bg: #111010;
+    --mz-gray-100: #1E1A1B;
+    --mz-border: rgba(255,255,255,0.08);
+    --mz-gray-700: rgba(255,255,255,0.85);
+    --mz-muted: rgba(255,255,255,0.45);
+    --mz-surface: #262020;
+
+    /* shadcn/ui tokens for dark mode */
+    --background: 5 5% 7%;
+    --foreground: 20 14% 98%;
+    --card: 5 5% 12%;
+    --card-foreground: 20 14% 98%;
+    --border: 0 0% 10%;
+    --input: 0 0% 10%;
+    --muted: 5 5% 14%;
+    --muted-foreground: 10 5% 55%;
+    --accent: 347 68% 15%;
+    --accent-foreground: 20 14% 98%;
+  }
+
   * {
     @apply border-border;
     box-sizing: border-box;
@@ -123,6 +152,22 @@
     opacity: 0;
     animation: enter-up 0.45s ease-out forwards;
     animation-delay: var(--stagger-delay, 0ms);
+  }
+
+  .service-log-stagger-enter {
+    opacity: 0;
+    animation: enter-up 200ms ease-out forwards;
+    animation-delay: var(--stagger-delay, 0ms);
+  }
+
+  .carcard-progress-fill {
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .carcard-progress-fill {
+      transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
   }
 
   @keyframes fadeSlideIn {
@@ -193,7 +238,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .animate-enter-up,
-    .stagger-enter {
+    .stagger-enter,
+    .service-log-stagger-enter {
       animation: none;
       opacity: 1;
       transform: none;

@@ -257,8 +257,9 @@ export function Dashboard() {
     }
 
     const targetMileage = activeVehicle.currentMileage
+    const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t))
 
-    if (hasAnimatedMileageRef.current || targetMileage >= 200000) {
+    if (hasAnimatedMileageRef.current || targetMileage >= 500000) {
       setAnimatedMileage(targetMileage)
       return
     }
@@ -267,12 +268,12 @@ export function Dashboard() {
     setAnimatedMileage(0)
 
     let animationFrameId = 0
-    const durationMs = 800
+    const durationMs = 900
     const startTime = performance.now()
 
     const tick = (now: number) => {
       const progress = Math.min((now - startTime) / durationMs, 1)
-      const easedProgress = 1 - Math.pow(1 - progress, 3)
+      const easedProgress = easeOutExpo(progress)
       setAnimatedMileage(Math.round(targetMileage * easedProgress))
 
       if (progress < 1) {
@@ -527,7 +528,7 @@ export function Dashboard() {
               className="stagger-enter flex cursor-pointer flex-col items-center gap-[5px] rounded-xl border border-[0.5px] border-black/6 bg-white px-1 pb-2 pt-2.5 transition-transform duration-100 active:scale-[0.96]"
               style={{ '--stagger-delay': `${80 + idx * 60}ms` } as CSSProperties}
               onClick={() => {
-                haptics.light()
+                haptics.tap()
                 navigate(to)
               }}
             >

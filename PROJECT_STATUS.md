@@ -1,12 +1,30 @@
+
 # MazdaCare Project Status
+## AI/IDE Agent Onboarding
+
+**Before coding, all agents (Cursor, Antigravity, Copilot, etc.) and new devs must:**
+- Read `CHAT.md` and this file fully
+- Never paste or commit secrets (API keys, tokens, etc.)
+- Keep `.env` present for local dev, but never leak its contents
+- Use existing hooks, UI primitives, and Mazda palette
+- Validate UI in both light and dark mode
+- All analytics/export is client-side only
+- For new features, prefer composition and reuse
+- Update this file and `CHAT.md` after major changes
+
+**.env policy:**
+- `.env` is required for local dev (Supabase keys, etc.)
+- Never paste or commit secrets into markdown or code
+- If you need a new env var, document the key (not value) in `.env.example`
+
 
 <!-- AUTO_STATUS_START -->
 ## Auto Snapshot
 
-- Last auto update: 2026-04-07T10:56:29.012Z
+- Last auto update: 2026-04-07T16:57:45.944Z
 - Branch: main
-- Latest commit: 2b4fa06
-- Git status: dirty (14 file(s) changed, main...origin/main)
+- Latest commit: 096ec32
+- Git status: dirty (32 file(s) changed, main...origin/main)
 - Production app URL: https://mazdacare-app.vercel.app
 - Vercel project: mazdacare-app
 - Supabase project ref: rmfkykcijcndwvsursmu
@@ -34,17 +52,17 @@
 
 ## Phase 4 — Logo, Refinements & Security
 
-- LOGO-1 MazdaCare SVG icon component - PENDING
-- LOGO-2 Apply logo to auth page - PENDING
-- LOGO-3 PWA icons and splash screen - PENDING
+- LOGO-1 MazdaCare SVG icon component - DONE
+- LOGO-2 Apply logo to auth page - DONE
+- LOGO-3 PWA icons and splash screen - DONE
 - LOGO-4 Dashboard and nav logo placement - DONE
-- SEC-1 CSP headers via vercel.json - PENDING
+- SEC-1 CSP headers via vercel.json - DONE
 - SEC-2 Input sanitization (DOMPurify) - DONE
-- SEC-3 API key and env variable audit - PENDING
+- SEC-3 API key and env variable audit - DONE
 - SEC-4 Supabase RLS edge case hardening - DONE (remote migration applied)
-- SEC-5 Auth guard and session hardening - PENDING
+- SEC-5 Auth guard and session hardening - DONE
 - SEC-6 Client-side form rate limiting - DONE
-- REFINE-1 Micro-interactions and haptics - PENDING
+- REFINE-1 Micro-interactions and haptics - DONE
 - REFINE-2 Onboarding empty state - DONE
 - REFINE-3 Offline indicator and network state - DONE
 

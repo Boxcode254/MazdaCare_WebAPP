@@ -17,6 +17,16 @@ import { sanitizeText } from '@/lib/sanitize'
 import { useAppStore } from '@/stores/appStore'
 import { toast } from 'sonner'
 
+const REMINDER_THRESHOLD_OPTIONS = [250, 500, 1000, 2000] as const
+const REMINDER_TIME_OPTIONS = [
+  { label: 'Morning (07:00)', value: '07:00' },
+  { label: 'Afternoon (12:00)', value: '12:00' },
+  { label: 'Evening (18:00)', value: '18:00' },
+] as const
+
+type ReminderThreshold = (typeof REMINDER_THRESHOLD_OPTIONS)[number]
+type ReminderTime = (typeof REMINDER_TIME_OPTIONS)[number]['value']
+
 export function Settings() {
   const navigate = useNavigate()
   const user = useAppStore((s) => s.user)
@@ -30,6 +40,8 @@ export function Settings() {
   const [displayNameInput, setDisplayNameInput] = useState('')
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [reminderThreshold, setReminderThreshold] = useState<ReminderThreshold>(500)
+  const [reminderTime, setReminderTime] = useState<ReminderTime>('07:00')
 
   const displayName: string =
     user?.user_metadata?.full_name ?? user?.email ?? 'Unknown user'
@@ -42,6 +54,18 @@ export function Settings() {
   useEffect(() => {
     setDisplayNameInput(displayName)
   }, [displayName])
+
+  useEffect(() => {
+    const storedThreshold = Number(localStorage.getItem('mc_reminder_km_threshold'))
+    if (REMINDER_THRESHOLD_OPTIONS.includes(storedThreshold as ReminderThreshold)) {
+      setReminderThreshold(storedThreshold as ReminderThreshold)
+    }
+
+    const storedTime = localStorage.getItem('mc_reminder_time')
+    if (REMINDER_TIME_OPTIONS.some((option) => option.value === storedTime)) {
+      setReminderTime(storedTime as ReminderTime)
+    }
+  }, [])
 
   const initials = displayName
     .split(' ')
@@ -103,6 +127,18 @@ export function Settings() {
     setDisplayNameInput(sanitizedName)
     setEditingProfile(false)
     toast.success('Display name updated for this session.')
+  }
+
+  function handleReminderThresholdChange(value: ReminderThreshold) {
+    setReminderThreshold(value)
+    localStorage.setItem('mc_reminder_km_threshold', String(value))
+    toast.success('Reminder distance updated.')
+  }
+
+  function handleReminderTimeChange(value: ReminderTime) {
+    setReminderTime(value)
+    localStorage.setItem('mc_reminder_time', value)
+    toast.success('Reminder time preference updated.')
   }
 
   return (
@@ -249,6 +285,59 @@ export function Settings() {
           <span className="flex-1 text-[15px] text-gray-800">Garage Display</span>
           <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
         </button>
+      </div>
+
+      <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-mz-red">Service reminders</h3>
+
+        <div className="mt-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Remind me</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {REMINDER_THRESHOLD_OPTIONS.map((option) => {
+              const active = reminderThreshold === option
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => handleReminderThresholdChange(option)}
+                  className={`rounded-lg border px-3 py-2 text-[12px] font-semibold transition ${
+                    active
+                      ? 'border-mz-red bg-mz-red-light text-mz-red'
+                      : 'border-transparent bg-mz-gray-100 text-mz-gray-700'
+                  }`}
+                >
+                  {option.toLocaleString()} km
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Reminder time</p>
+          <div className="mt-2 grid grid-cols-1 gap-2">
+            {REMINDER_TIME_OPTIONS.map((option) => {
+              const active = reminderTime === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleReminderTimeChange(option.value)}
+                  className={`rounded-lg border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                    active
+                      ? 'border-mz-red bg-mz-red-light text-mz-red'
+                      : 'border-transparent bg-mz-gray-100 text-mz-gray-700'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+          <p className="mt-2 text-[11px] text-mz-gray-500">
+            Reminder times are approximate and depend on your time zone.
+          </p>
+        </div>
       </div>
 
       {/* ── Group 3: Support ── */}

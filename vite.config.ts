@@ -9,9 +9,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
+      includeAssets: ['icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: 'Mazda Maintenance Kenya',
+        name: 'MazdaCare',
         short_name: 'MazdaCare',
         description: 'Track your Mazda service history',
         orientation: 'portrait',

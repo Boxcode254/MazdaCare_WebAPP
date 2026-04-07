@@ -2,11 +2,20 @@ import { useEffect, useState } from 'react'
 import { Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { haptics } from '@/lib/haptics'
 import type { Vehicle } from '@/types'
 
 interface CarCardProps {
   vehicle: Vehicle
   onEditMileage?: (vehicle: Vehicle) => void
+}
+
+function maskVin(vin: string): string {
+  if (vin.length <= 7) {
+    return vin
+  }
+
+  return `${vin.slice(0, 3)}...${vin.slice(-4)}`
 }
 
 export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
@@ -18,9 +27,15 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
     intervalUsed < 60 ? '#2E7D4F' : intervalUsed <= 90 ? '#C49A3C' : '#9B1B30'
   const fuelBadgeClass = vehicle.fuelType === 'diesel' ? 'bg-[#1A3A6B]' : 'bg-mz-red'
   const [animatedProgress, setAnimatedProgress] = useState(0)
+  const [showFullVin, setShowFullVin] = useState(false)
 
   useEffect(() => {
     setAnimatedProgress(0)
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setAnimatedProgress(intervalUsed)
+      return
+    }
 
     const timer = window.setTimeout(() => {
       setAnimatedProgress(intervalUsed)
@@ -32,7 +47,10 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
   return (
     <article
       className="cursor-pointer overflow-hidden rounded-[16px] border border-[0.5px] border-black/6 bg-mz-white"
-      onClick={() => navigate(`/service/${vehicle.id}`)}
+      onClick={() => {
+        haptics.tap()
+        navigate(`/service/${vehicle.id}`)
+      }}
     >
       <div className="relative min-h-[90px] bg-mz-black px-[14px] pb-[20px] pt-[14px]">
         <h3
@@ -76,10 +94,32 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
           </p>
         </div>
 
+        <div className="space-y-1.5 rounded-xl border border-mz-gray-100 bg-mz-gray-50 px-3 py-2">
+          <div className="flex items-center justify-between text-[11px]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            <span className="font-medium uppercase tracking-[0.04em] text-mz-gray-500">Registration</span>
+            <span className="font-semibold text-mz-black">{vehicle.registration}</span>
+          </div>
+          {vehicle.vin ? (
+            <div className="flex items-center justify-between text-[11px]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <span className="font-medium uppercase tracking-[0.04em] text-mz-gray-500">VIN</span>
+              <button
+                type="button"
+                className="font-semibold text-mz-black underline-offset-2 hover:underline"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setShowFullVin((current) => !current)
+                }}
+              >
+                {showFullVin ? `VIN: ${vehicle.vin}` : `VIN: ${maskVin(vehicle.vin)}`}
+              </button>
+            </div>
+          ) : null}
+        </div>
+
         <div className="h-[5px] overflow-hidden rounded-[4px] bg-mz-gray-100">
           <div
-            className="h-full rounded-[4px]"
-            style={{ width: `${animatedProgress}%`, backgroundColor: progressColor, transition: 'width 600ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+            className="carcard-progress-fill h-full rounded-[4px]"
+            style={{ width: `${animatedProgress}%`, backgroundColor: progressColor }}
           />
         </div>
 

@@ -66,6 +66,7 @@ interface AppState {
   serviceLogs: ServiceLog[]
   alerts: ServiceAlert[]
   activeVehicleId: string | null
+  setActiveVehicleId: (vehicleId: string | null) => void
   setAuthState: (user: User | null, session: Session | null) => void
   setLoading: (loading: boolean) => void
   setDisplayName: (displayName: string) => void
@@ -81,6 +82,7 @@ export const useAppStore = create<AppState>((set) => ({
   serviceLogs: [],
   alerts: [],
   activeVehicleId: null,
+  setActiveVehicleId: (activeVehicleId) => set({ activeVehicleId }),
   setAuthState: (user, session) =>
     set({
       user: applyDisplayNameOverride(user),

@@ -1,21 +1,29 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { Building2, CarFront, Fuel, Home, Loader2, MapPin, Search, Star } from 'lucide-react'
+import { Building2, CarFront, ChevronDown, Fuel, Home, Loader2, MapPin, Search, Star } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { useRateLimit } from '@/hooks/useRateLimit'
 import { haptics } from '@/lib/haptics'
 import { KENYA_MAZDA_OILS, getRecommendedOils } from '@/lib/oils'
 import { sanitizeCost, sanitizeMileage, sanitizeNote, sanitizeText } from '@/lib/sanitize'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
 import { useVehicles } from '@/hooks/useVehicles'
+
+interface LogServiceProps {
+  vehicleIdOverride?: string
+  initialMileage?: number
+  embedded?: boolean
+  onSuccess?: () => void
+}
 
 const serviceSchema = z.object({
   serviceDate: z.string().min(1),
@@ -45,8 +53,11 @@ const serviceDescriptions: Record<ServiceFormValues['serviceType'], string> = {
   other: 'Any other maintenance action.',
 }
 
-export function LogService() {
-  const { vehicleId } = useParams<{ vehicleId: string }>()
+export function LogService({ vehicleIdOverride, initialMileage, embedded = false, onSuccess }: LogServiceProps = {}) {
+  const { vehicleId: routeVehicleId } = useParams<{ vehicleId: string }>()
+  const [selectedVehicleId, setSelectedVehicleId] = useState(vehicleIdOverride ?? routeVehicleId ?? '')
+  const [isVehicleSheetOpen, setIsVehicleSheetOpen] = useState(false)
+  const vehicleId = selectedVehicleId || undefined
   const navigate = useNavigate()
   const logLimit = useRateLimit({ key: 'log_service', maxAttempts: 20, windowMs: 3600000 })
   const { vehicles, fetchVehicles } = useVehicles()
@@ -93,6 +104,14 @@ export function LogService() {
     'h-auto rounded-lg border border-transparent bg-mz-gray-100 px-3 py-[9px] text-[13px] text-mz-black shadow-none placeholder:text-[#9B6163] focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(155,27,48,0.1)]'
 
   useEffect(() => {
+    const resolvedVehicleId = vehicleIdOverride ?? routeVehicleId ?? ''
+
+    if (resolvedVehicleId) {
+      setSelectedVehicleId(resolvedVehicleId)
+    }
+  }, [routeVehicleId, vehicleIdOverride])
+
+  useEffect(() => {
     void fetchVehicles()
   }, [fetchVehicles])
 
@@ -101,9 +120,10 @@ export function LogService() {
       return
     }
 
-    setValue('mileageAtService', selectedVehicle.currentMileage)
-    setValue('nextServiceMileage', selectedVehicle.currentMileage + selectedVehicle.mileageInterval)
-  }, [selectedVehicle, setValue])
+    const startingMileage = typeof initialMileage === 'number' ? initialMileage : selectedVehicle.currentMileage
+    setValue('mileageAtService', startingMileage)
+    setValue('nextServiceMileage', startingMileage + selectedVehicle.mileageInterval)
+  }, [initialMileage, selectedVehicle, setValue])
 
   useEffect(() => {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
@@ -165,6 +185,8 @@ export function LogService() {
       return
     }
 
+    haptics.medium()
+
     const chosenOil = KENYA_MAZDA_OILS.find((oil) => `${oil.brand}|${oil.grade}` === formValues.oilChoice)
 
     const finalGarageName =
@@ -190,7 +212,11 @@ export function LogService() {
 
       haptics.success()
       toast.success('Service log saved successfully.')
-      navigate(`/service/${vehicleId}`)
+      if (embedded) {
+        onSuccess?.()
+      } else {
+        navigate(`/service/${vehicleId}`)
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to save service log.'
       toast.error(message)
@@ -208,18 +234,44 @@ export function LogService() {
 
   return (
     <section className="space-y-4 bg-mz-gray-100 pb-4 animate-enter-up">
-      <PageHeader
-        title="Log Service"
-        subtitle={
-          selectedVehicle
-            ? `${selectedVehicle.model} ${selectedVehicle.year} - ${selectedVehicle.registration}`
-            : 'Loading vehicle details...'
-        }
-        backTo={vehicleId ? `/service/${vehicleId}` : '/'}
-        action={<CarFront className="h-5 w-5 text-white/60" />}
-      />
+      {!embedded ? (
+        <PageHeader
+          title="Log Service"
+          subtitle={
+            selectedVehicle
+              ? `${selectedVehicle.model} ${selectedVehicle.year} - ${selectedVehicle.registration}`
+              : 'Loading vehicle details...'
+          }
+          backTo={vehicleId ? `/service/${vehicleId}` : '/'}
+          action={<CarFront className="h-5 w-5 text-white/60" />}
+        />
+      ) : null}
 
       <form className="space-y-0" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
+        <div className={sectionCardClass}>
+          <div className="flex items-center justify-between gap-3">
+            <Label className={fieldLabelClass}>Vehicle</Label>
+            <button
+              type="button"
+              onClick={() => setIsVehicleSheetOpen(true)}
+              disabled={vehicles.length <= 1}
+              className="inline-flex max-w-[78%] items-center gap-2 rounded-full bg-mz-gray-100 px-3 py-2 text-left text-[12px] font-semibold text-mz-black disabled:cursor-default"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              <CarFront className="h-4 w-4 shrink-0 text-mz-red" />
+              <span className="truncate">
+                {selectedVehicle ? `${selectedVehicle.model} · ${selectedVehicle.registration}` : 'Select vehicle'}
+              </span>
+              {vehicles.length > 1 ? <ChevronDown className="h-4 w-4 shrink-0 text-mz-gray-500" /> : null}
+            </button>
+          </div>
+          {vehicles.length > 1 ? (
+            <p className="mt-2 text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Tap the chip to switch vehicles quickly.
+            </p>
+          ) : null}
+        </div>
+
         <div className={sectionCardClass}>
           <h3 className={sectionTitleClass} style={{ fontFamily: 'Outfit, sans-serif' }}>
             Service Details
@@ -458,7 +510,7 @@ export function LogService() {
                     key={star}
                     type="button"
                     onClick={() => {
-                      haptics.light()
+                      haptics.tap()
                       setValue('rating', star, { shouldValidate: true })
                     }}
                     className="leading-none"
@@ -524,6 +576,47 @@ export function LogService() {
           {loading ? 'Saving log...' : 'Save service log'}
         </Button>
       </form>
+
+      <Sheet open={isVehicleSheetOpen} onOpenChange={setIsVehicleSheetOpen}>
+        <SheetContent
+          side="bottom"
+          showCloseButton={false}
+          className="max-h-[60vh] rounded-t-[24px] border-0 bg-white px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-4"
+        >
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-gray-200" />
+          <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-mz-red" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            Choose Vehicle
+          </h3>
+          <div className="mt-3 space-y-2 overflow-y-auto">
+            {vehicles.map((vehicle) => {
+              const isActive = vehicle.id === selectedVehicle?.id
+              return (
+                <button
+                  key={vehicle.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedVehicleId(vehicle.id)
+                    setIsVehicleSheetOpen(false)
+                  }}
+                  className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left transition ${
+                    isActive ? 'border-mz-red bg-mz-red-light' : 'border-transparent bg-mz-gray-100'
+                  }`}
+                >
+                  <div>
+                    <p className="text-[13px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      {vehicle.model} {vehicle.year}
+                    </p>
+                    <p className="text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      {vehicle.registration}
+                    </p>
+                  </div>
+                  {isActive ? <span className="h-2 w-2 rounded-full bg-mz-red" /> : null}
+                </button>
+              )
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
     </section>
   )
 }

@@ -88,7 +88,7 @@ export function AlertBanner({ vehicle, dismissible = false }: AlertBannerProps) 
           aria-label="Dismiss alert"
           className="absolute right-[10px] top-1/2 -translate-y-1/2 text-white/40"
           onClick={() => {
-            haptics.light()
+            haptics.tap()
             void dismissAlert(alert.id)
           }}
         >

@@ -86,8 +86,8 @@ export function ServiceLog() {
         {filteredLogs.map((log, idx) => (
           <div
             key={log.id}
-            className="stagger-enter"
-            style={{ '--stagger-delay': `${60 + idx * 45}ms` } as CSSProperties}
+            className="service-log-stagger-enter"
+            style={{ '--stagger-delay': `${idx * 50}ms` } as CSSProperties}
           >
             <ServiceLogCard log={log} />
           </div>

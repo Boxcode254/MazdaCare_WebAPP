@@ -1,101 +1,51 @@
-import { useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { useAppStore } from '@/stores/appStore'
-
-const WARNING_TIMEOUT_MS = 30 * 60 * 1000
-const SIGN_OUT_TIMEOUT_MS = 60 * 60 * 1000
 const WARNING_TOAST_ID = 'idle-session-warning'
 
-function isStandaloneDisplayMode() {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  return window.matchMedia('(display-mode: standalone)').matches
-}
-
-export function useIdleTimer() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const clearAll = useAppStore((state) => state.clearAll)
-  const user = useAppStore((state) => state.user)
-
-  const warningTimeoutRef = useRef<number | null>(null)
-  const signOutTimeoutRef = useRef<number | null>(null)
-
+export function useIdleTimer(onIdle: () => void, warningMs = 25 * 60 * 1000, idleMs = 30 * 60 * 1000) {
   useEffect(() => {
-    if (!user || typeof window === 'undefined' || typeof document === 'undefined' || !isStandaloneDisplayMode()) {
+    if (typeof window === 'undefined') {
       return
     }
 
-    const clearTimers = () => {
-      if (warningTimeoutRef.current !== null) {
-        window.clearTimeout(warningTimeoutRef.current)
-        warningTimeoutRef.current = null
-      }
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
 
-      if (signOutTimeoutRef.current !== null) {
-        window.clearTimeout(signOutTimeoutRef.current)
-        signOutTimeoutRef.current = null
-      }
+    if (!isStandalone) {
+      return
     }
 
-    const scheduleTimers = () => {
-      clearTimers()
+    let warnTimer: ReturnType<typeof setTimeout>
+    let idleTimer: ReturnType<typeof setTimeout>
 
-      if (document.hidden) {
-        return
-      }
-
-      warningTimeoutRef.current = window.setTimeout(() => {
-        toast.warning('Session will expire soon — tap to continue', {
-          id: WARNING_TOAST_ID,
-          duration: SIGN_OUT_TIMEOUT_MS - WARNING_TIMEOUT_MS,
-        })
-      }, WARNING_TIMEOUT_MS)
-
-      signOutTimeoutRef.current = window.setTimeout(async () => {
-        toast.dismiss(WARNING_TOAST_ID)
-        await supabase.auth.signOut()
-        clearAll()
-
-        if (location.pathname !== '/auth') {
-          navigate('/auth', { replace: true })
-        }
-      }, SIGN_OUT_TIMEOUT_MS)
-    }
-
-    const handleInteraction = () => {
+    const reset = () => {
+      clearTimeout(warnTimer)
+      clearTimeout(idleTimer)
       toast.dismiss(WARNING_TOAST_ID)
-      scheduleTimers()
-    }
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        clearTimers()
+      warnTimer = setTimeout(() => {
+        toast('Session expiring soon', {
+          id: WARNING_TOAST_ID,
+          description: 'Tap to stay signed in',
+          action: { label: 'Stay signed in', onClick: reset },
+          duration: 5 * 60 * 1000,
+        })
+      }, warningMs)
+
+      idleTimer = setTimeout(() => {
         toast.dismiss(WARNING_TOAST_ID)
-        return
-      }
-
-      scheduleTimers()
+        onIdle()
+      }, idleMs)
     }
 
-    scheduleTimers()
-
-    window.addEventListener('pointerdown', handleInteraction, { passive: true })
-    window.addEventListener('touchstart', handleInteraction, { passive: true })
-    window.addEventListener('keydown', handleInteraction)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+    const events: Array<keyof WindowEventMap> = ['touchstart', 'click', 'keydown', 'scroll']
+    events.forEach((eventName) => window.addEventListener(eventName, reset, { passive: true }))
+    reset()
 
     return () => {
-      clearTimers()
+      clearTimeout(warnTimer)
+      clearTimeout(idleTimer)
       toast.dismiss(WARNING_TOAST_ID)
-      window.removeEventListener('pointerdown', handleInteraction)
-      window.removeEventListener('touchstart', handleInteraction)
-      window.removeEventListener('keydown', handleInteraction)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      events.forEach((eventName) => window.removeEventListener(eventName, reset))
     }
-  }, [clearAll, location.pathname, navigate, user])
+  }, [idleMs, onIdle, warningMs])
 }

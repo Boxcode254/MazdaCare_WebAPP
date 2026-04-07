@@ -7,12 +7,14 @@ import {
   Wrench,
   CalendarDays,
   CarFront,
+  ExternalLink,
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useVehicles } from '@/hooks/useVehicles'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
-import { calculateNextService } from '@/hooks/useAlerts'
+import { calculateNextService, useAlerts } from '@/hooks/useAlerts'
+import { useAppStore } from '@/stores/appStore'
 import { toast } from 'sonner'
 import type { ServiceLog } from '@/types'
 
@@ -45,9 +47,11 @@ function getNextType(lastType: ServiceLog['serviceType']): 'minor' | 'major' {
 export function Schedule() {
   const { vehicleId } = useParams<{ vehicleId: string }>()
   const navigate = useNavigate()
+  const user = useAppStore((state) => state.user)
 
   const { vehicles, fetchVehicles, loading: vLoading } = useVehicles()
   const { logs, fetchLogs, loading: lLoading } = useServiceLogs()
+  const { alerts, fetchAlerts } = useAlerts()
   const [notifState, setNotifState] = useState<NotifState>('idle')
 
   const vehicle = vehicles.find((v) => v.id === vehicleId)
@@ -67,6 +71,14 @@ export function Schedule() {
       else if (Notification.permission === 'denied') setNotifState('denied')
     }
   }, [vehicleId, fetchVehicles, fetchLogs])
+
+  useEffect(() => {
+    if (!user?.id) {
+      return
+    }
+
+    void fetchAlerts(user.id)
+  }, [fetchAlerts, user?.id])
 
   async function requestReminder() {
     if (!('Notification' in window)) {
@@ -147,10 +159,52 @@ export function Schedule() {
   const nextSvc = calculateNextService(vehicle, lastLog)
   const { dueDate, kmRemaining, fractionUsed } = nextSvc
   const nextType = getNextType(lastLog.serviceType)
+  const nextTypeLabel = nextType === 'major' ? 'Major Service' : 'Minor Service'
+  const vehicleRegistration = vehicle.registration
+  const vehicleAlert = alerts.find((alert) => alert.vehicleId === vehicle.id)
+  const calendarDate = vehicleAlert?.dueDate ? parseISO(vehicleAlert.dueDate) : dueDate
+  const calendarDateKey = format(calendarDate, 'yyyyMMdd')
+  const calendarTargetKm = lastLog.nextServiceMileage ?? nextSvc.dueMileage
   const checklist = nextType === 'major' ? MAJOR_CHECKLIST : MINOR_CHECKLIST
   const progressFill = fractionUsed > 0.8 ? '#9B1B30' : fractionUsed >= 0.5 ? '#C49A3C' : '#2E7D4F'
   const serviceBadgeClass =
     nextType === 'major' ? 'bg-mz-black text-white' : 'bg-mz-red-light text-mz-red'
+
+  function handleAddGoogleCalendar() {
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: `Mazda Service Due — ${vehicleRegistration}`,
+      details: `Service type: ${nextTypeLabel}\nMileage target: ${calendarTargetKm} km\nTracked via MazdaCare`,
+      dates: `${calendarDateKey}T080000/${calendarDateKey}T090000`,
+    })
+
+    const url = `https://calendar.google.com/calendar/render?${params.toString()}`
+    window.open(url, '_blank')
+  }
+
+  function handleAddAppleCalendar() {
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      `DTSTART:${calendarDateKey}T080000`,
+      `DTEND:${calendarDateKey}T090000`,
+      `SUMMARY:Mazda Service Due — ${vehicleRegistration}`,
+      `DESCRIPTION:Next service at ${calendarTargetKm} km`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\n')
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'mazdacare-service-reminder.ics'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="space-y-5 bg-mz-gray-100 pb-4 animate-enter-up">
@@ -205,6 +259,26 @@ export function Schedule() {
         <Bell className="h-4 w-4 text-mz-red" />
         Set service reminder
       </Button>
+
+      <button
+        type="button"
+        className="mx-[-2px] flex w-[calc(100%+4px)] items-center justify-center gap-2 rounded-xl border border-mz-gray-300 bg-white py-3 text-[13px] font-semibold text-mz-gray-700 hover:bg-mz-gray-100"
+        style={{ fontFamily: 'Outfit, sans-serif' }}
+        onClick={handleAddGoogleCalendar}
+      >
+        <ExternalLink className="h-4 w-4" />
+        Add to Google Calendar →
+      </button>
+
+      <button
+        type="button"
+        className="mx-[-2px] flex w-[calc(100%+4px)] items-center justify-center gap-2 rounded-xl border border-mz-gray-300 bg-white py-3 text-[13px] font-semibold text-mz-gray-700 hover:bg-mz-gray-100"
+        style={{ fontFamily: 'Outfit, sans-serif' }}
+        onClick={handleAddAppleCalendar}
+      >
+        <CalendarDays className="h-4 w-4" />
+        Add to Apple Calendar
+      </button>
 
       {/* ── Service checklist ── */}
       <section className="mx-[-2px] rounded-2xl bg-white p-[14px]">

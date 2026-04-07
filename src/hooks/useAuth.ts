@@ -43,13 +43,19 @@ export function useAuth() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (event === 'SIGNED_OUT' || nextSession === null) {
-        clearAll()
+      const authEvent = event as string
+
+      if (authEvent === 'SIGNED_OUT' || authEvent === 'USER_DELETED') {
+        useAppStore.getState().clearAll()
 
         if (location.pathname !== '/auth') {
           navigate('/auth', { replace: true })
         }
 
+        return
+      }
+
+      if (event === 'TOKEN_REFRESHED') {
         return
       }
 

@@ -38,6 +38,20 @@ interface ServiceLogRow {
   created_at: string
 }
 
+const REMINDER_THRESHOLD_OPTIONS = [250, 500, 1000, 2000] as const
+const DEFAULT_REMINDER_THRESHOLD = 500
+
+function readReminderThreshold(): number {
+  if (typeof window === 'undefined') {
+    return DEFAULT_REMINDER_THRESHOLD
+  }
+
+  const rawValue = Number(window.localStorage.getItem('mc_reminder_km_threshold'))
+  return REMINDER_THRESHOLD_OPTIONS.includes(rawValue as (typeof REMINDER_THRESHOLD_OPTIONS)[number])
+    ? rawValue
+    : DEFAULT_REMINDER_THRESHOLD
+}
+
 function toServiceLog(row: ServiceLogRow): ServiceLog {
   return {
     id: row.id,
@@ -160,12 +174,14 @@ export function useServiceLogs() {
 
         const dueDate = new Date(payload.serviceDate)
         dueDate.setMonth(dueDate.getMonth() + (payload.serviceType === 'major' ? 6 : 3))
+        const reminderThreshold = readReminderThreshold()
+        const dueMileage = Math.max(payload.nextServiceMileage - reminderThreshold, 0)
 
         const { error: alertError } = await supabase.from('service_alerts').insert({
           vehicle_id: payload.vehicleId,
           user_id: userId,
           alert_type: 'mileage',
-          due_mileage: payload.nextServiceMileage,
+          due_mileage: dueMileage,
           due_date: dueDate.toISOString().slice(0, 10),
           service_type: payload.serviceType,
           is_dismissed: false,
