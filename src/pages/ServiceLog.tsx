@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ClipboardList, Plus } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { ServiceEmptyState } from '@/components/layout/EmptyState'
 import { ServiceLogCard } from '@/components/service/ServiceLogCard'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
@@ -68,14 +69,15 @@ export function ServiceLog() {
         </div>
       ) : null}
 
-      {!loading && filteredLogs.length === 0 ? (
-        <div className="flex flex-col items-center px-6 py-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mz-red-light">
-            <ClipboardList className="h-6 w-6 text-mz-red" />
-          </div>
-          <h2 className="mt-4 text-[16px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>No service logs yet</h2>
-          <p className="mt-[6px] max-w-[240px] text-center text-[13px] text-mz-gray-500">
-            Tap the + button below to log your first service.
+      {!loading && logs.length === 0 ? (
+        <ServiceEmptyState vehicleId={vehicleId} />
+      ) : null}
+
+      {!loading && logs.length > 0 && filteredLogs.length === 0 ? (
+        <div className="flex flex-col items-center px-6 py-8 text-center">
+          <ClipboardList className="h-7 w-7 text-mz-gray-400" />
+          <p className="mt-2 text-[13px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            No {filter === 'all' ? '' : filter} records found.
           </p>
         </div>
       ) : null}

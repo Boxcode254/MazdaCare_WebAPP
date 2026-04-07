@@ -113,7 +113,15 @@ export const useAppStore = create<AppState>((set) => ({
       loading: false,
     }),
   clearAll: () => {
-    clearDisplayNameOverrides()
+    // Wipe the entire sessionStorage for this tab — removes display name
+    // overrides (PII), rate-limit counters, splash flag, and any future keys.
+    // Supabase's own signOut() handles clearing localStorage auth tokens.
+    try {
+      window.sessionStorage.clear()
+    } catch {
+      // Private-browsing or storage-disabled — proceed anyway.
+      clearDisplayNameOverrides()
+    }
 
     set({
       user: null,

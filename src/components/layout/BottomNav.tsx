@@ -1,4 +1,4 @@
-import { Calendar, FileText, LayoutGrid, Navigation } from 'lucide-react'
+import { Car, Home, MapPin, User } from 'lucide-react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 
 export function BottomNav() {
@@ -9,47 +9,48 @@ export function BottomNav() {
   const vid = vehicleId ?? ''
 
   const navItems = [
-    { label: 'Dashboard', to: '/', icon: LayoutGrid, path: '/' },
-    { label: 'Services', to: vid ? `/service/${vid}` : '/', icon: FileText, path: '/service' },
-    { label: 'Map', to: '/map', icon: Navigation, path: '/map' },
-    { label: 'Schedule', to: vid ? `/schedule/${vid}` : '/', icon: Calendar, path: '/schedule' },
+    { label: 'Home', to: '/', icon: Home, matches: ['/'] },
+    {
+      label: 'My Garage',
+      to: vid ? `/service/${vid}` : '/add-car',
+      icon: Car,
+      matches: ['/service', '/add-car', '/schedule', '/log-service'],
+    },
+    { label: 'Services', to: '/map', icon: MapPin, matches: ['/map'] },
+    { label: 'Profile', to: '/settings', icon: User, matches: ['/settings'] },
   ]
 
-  const isRouteActive = (path: string) => {
-    if (path === '/') {
+  const isRouteActive = (matches: string[]) => {
+    if (matches.includes('/')) {
       return location.pathname === '/'
     }
 
-    return location.pathname.startsWith(path)
+    return matches.some((path) => location.pathname.startsWith(path))
   }
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-40 flex w-full max-w-md -translate-x-1/2 justify-around border-t border-[0.5px] border-t-mz-gray-300 bg-mz-white px-0 pt-[10px] pb-[calc(env(safe-area-inset-bottom,14px))]">
+    <nav className="fixed bottom-0 left-1/2 z-40 flex w-full max-w-md -translate-x-1/2 justify-around border-t border-black/5 bg-white/98 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom,14px)+6px)] backdrop-blur supports-[backdrop-filter]:bg-white/94">
       <div className="flex w-full items-start justify-around">
-        {navItems.map(({ icon: Icon, label, to, path }) => {
-          const active = isRouteActive(path)
+        {navItems.map(({ icon: Icon, label, to, matches }) => {
+          const active = isRouteActive(matches)
 
           return (
             <NavLink
               key={label}
               to={to}
-              className="flex min-w-[60px] flex-col items-center gap-[3px] transition-transform duration-100 active:scale-[0.97]"
+              className="flex min-w-[68px] flex-col items-center gap-1 rounded-2xl px-2 py-1.5 transition-transform duration-100 active:scale-[0.97]"
             >
               <Icon
-                className={`h-5 w-5 ${active ? 'text-mz-red' : 'text-mz-gray-300'}`}
-                strokeWidth={2.5}
+                className={`${active ? 'text-[#A31526]' : 'text-mz-gray-300'} h-5 w-5`}
+                strokeWidth={2.25}
               />
               <span
-                className={`font-body text-[9px] font-semibold uppercase tracking-[0.08em] ${
-                  active ? 'text-mz-red' : 'text-mz-gray-300'
+                className={`font-body text-xs font-medium leading-none ${
+                  active ? 'text-[#A31526]' : 'text-mz-gray-500'
                 }`}
               >
                 {label}
               </span>
-              <span
-                aria-hidden="true"
-                className={`h-1 w-1 rounded-full bg-mz-red ${active ? 'visible' : 'invisible'}`}
-              />
             </NavLink>
           )
         })}

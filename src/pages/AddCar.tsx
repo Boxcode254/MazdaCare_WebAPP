@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Loader2 } from 'lucide-react'
+import { Car, Info, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,35 @@ import { sanitizeMileage, sanitizePlate, sanitizeText } from '@/lib/sanitize'
 import { useVehicles } from '@/hooks/useVehicles'
 
 const colorOptions = ['White', 'Silver', 'Gray', 'Black', 'Blue', 'Red', 'Green', 'Brown']
+const kenyaPlatePattern = /^K[A-Z]{2}\s\d{3}[A-Z]$/
+const vinPattern = /^[A-HJ-NPR-Z0-9]{17}$/i
+
+const modelCards = [
+  {
+    label: 'CX-5',
+    value: 'CX-5',
+    accent: 'Grey',
+    imageUrl: 'https://images.unsplash.com/photo-1743114713503-b698b8433f03?w=1080',
+  },
+  {
+    label: 'Demio / 2',
+    value: 'Demio',
+    accent: 'White',
+    imageUrl: 'https://images.unsplash.com/photo-1756664825749-d481c5a94a57?w=1080',
+  },
+  {
+    label: 'Mazda 3',
+    value: 'Axela',
+    accent: 'Blue',
+    imageUrl: 'https://images.unsplash.com/photo-1754908132913-559fbdf12a36?w=1080',
+  },
+  {
+    label: 'MX-5',
+    value: 'MX-5',
+    accent: 'Red',
+    imageUrl: 'https://images.unsplash.com/photo-1633118013371-4aed8e7fbae9?w=1080',
+  },
+] as const
 
 const addCarSchema = z.object({
   model: z.enum(MAZDA_MODELS),
@@ -24,7 +53,7 @@ const addCarSchema = z.object({
   registration: z
     .string()
     .transform((value) => value.toUpperCase().trim())
-    .refine((value) => /^K[A-Z]{2}\s\d{3}[A-Z]$/.test(value), 'Use Kenya format: KXX 123A'),
+      .refine((value) => kenyaPlatePattern.test(value), 'Use Kenya format: KXX 123A'),
   currentMileage: z.number().int().min(0),
   mileageInterval: z.union([z.literal(5000), z.literal(10000)]),
   color: z.string().min(2),
@@ -40,6 +69,7 @@ const MODEL_YEAR_RANGES: Partial<Record<AddCarFormValues['model'], string>> = {
   'CX-5': '2012-2024',
   'CX-9': '2016-2023',
   'BT-50': '2011-2024',
+  'MX-5': '2016-2024',
 }
 
 export function AddCar() {
@@ -48,6 +78,7 @@ export function AddCar() {
   const addCarLimit = useRateLimit({ key: 'add_vehicle', maxAttempts: 10, windowMs: 3600000 })
   const [step, setStep] = useState(1)
   const [stepVisible, setStepVisible] = useState(false)
+  const [vinInput, setVinInput] = useState('')
 
   const {
     register,
@@ -71,6 +102,30 @@ export function AddCar() {
   })
 
   const values = watch()
+  const stepMeta = {
+    1: {
+      eyebrow: 'Step 1 of 2',
+      title: 'Choose your Mazda',
+      subtitle: 'Pick the model that matches your car to start your garage profile.',
+      cta: 'Next: Vehicle details',
+      helper: 'Choose the card that looks closest to your Mazda.',
+    },
+    2: {
+      eyebrow: 'Step 2 of 2',
+      title: 'A few final details',
+      subtitle: 'Add the essentials below, then save your vehicle to MazdaCare.',
+      cta: 'Save Vehicle',
+      helper: 'These fields are kept simple and touch-friendly.',
+    },
+  } as const
+
+  const stepLabels = ['Model', 'Details'] as const
+  const progressPercent = (step / stepLabels.length) * 100
+  const isVinValid = vinPattern.test(vinInput.trim())
+  const isStepReady =
+    step === 1
+      ? Boolean(values.model)
+      : Boolean(values.year >= 1990 && values.color.trim().length >= 2 && isVinValid)
 
   useEffect(() => {
     setStepVisible(false)
@@ -80,16 +135,16 @@ export function AddCar() {
 
   const stepValidations = useMemo(
     () => ({
-      1: ['model', 'year', 'fuelType', 'engineSize'] as const,
-      2: ['registration', 'currentMileage', 'mileageInterval', 'color'] as const,
+      1: ['model'] as const,
+      2: ['year', 'color'] as const,
     }),
     []
   )
 
   const nextStep = async () => {
-    if (step < 3) {
+    if (step < 2) {
       const valid = await trigger(stepValidations[step as 1 | 2])
-      if (!valid) {
+      if (!valid || (step === 1 ? false : !isVinValid)) {
         haptics.error()
         toast.error('Please fix the highlighted fields before continuing.')
         return
@@ -131,65 +186,97 @@ export function AddCar() {
   }
 
   return (
-    <section className="-mx-4 -mt-6 min-h-[100dvh] bg-mz-gray-100">
-      <div className="bg-mz-black px-4 pb-7 pt-[calc(env(safe-area-inset-top,0px)+20px)]">
-        <p
-          className="text-[14px] italic text-white/45"
-          style={{ fontFamily: 'Cormorant Garamond, serif', letterSpacing: '0.1em' }}
-        >
-          MazdaCare
-        </p>
-        <h1
-          className="mt-1 text-[28px] font-light italic leading-[1.1] text-white"
-          style={{ fontFamily: 'Cormorant Garamond, serif' }}
-        >
-          Add your Mazda
-        </h1>
+    <section className="-mx-4 -mt-6 min-h-[100dvh] bg-mz-gray-100 px-4 pb-8 pt-[calc(env(safe-area-inset-top,0px)+16px)]">
+      <div className="mx-auto max-w-md overflow-hidden rounded-[28px] bg-mz-black shadow-shell">
+        <div className="px-5 pb-7 pt-5">
+          <p
+            className="text-[14px] italic text-white/45"
+            style={{ fontFamily: 'Cormorant Garamond, serif', letterSpacing: '0.1em' }}
+          >
+            MazdaCare
+          </p>
+          <h1
+            className="mt-1 text-[28px] font-light italic leading-[1.1] text-white"
+            style={{ fontFamily: 'Cormorant Garamond, serif' }}
+          >
+            Add your Mazda
+          </h1>
 
-        <div className="mt-4 flex items-center justify-center gap-1.5">
-          {[1, 2, 3].map((n) => (
-            <span
-              key={n}
-              className={step === n ? 'h-1.5 w-5 rounded-full bg-mz-red' : 'h-1.5 w-1.5 rounded-full bg-white/20'}
+          <p className="mt-2 max-w-[320px] text-[13px] text-white/50" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            {stepMeta[step as 1 | 2].eyebrow} · {stepMeta[step as 1 | 2].helper}
+          </p>
+
+          <div className="mt-4 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-2 rounded-full bg-mz-red transition-[width] duration-300 ease-out"
+              style={{ width: `${progressPercent}%` }}
             />
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div className="-mt-4 min-h-[calc(100dvh-140px)] rounded-t-[24px] bg-white px-4 pb-8 pt-6">
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-white/45" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            {stepLabels.map((label, index) => (
+              <span key={label} className={step === index + 1 ? 'text-white' : ''}>
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="-mt-1 min-h-[calc(100dvh-180px)] rounded-t-[28px] bg-white px-5 pb-8 pt-6">
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-mz-red" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              {stepMeta[step as 1 | 2].eyebrow}
+            </p>
+            <h2 className="mt-1 text-[26px] font-light italic leading-[1.05] text-mz-black" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+              {stepMeta[step as 1 | 2].title}
+            </h2>
+            <p className="mt-2 text-[13px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              {stepMeta[step as 1 | 2].subtitle}
+            </p>
+          </div>
+
           <div
             key={step}
             className={`transition-all duration-200 ease-out ${stepVisible ? 'translate-x-0 opacity-100' : 'translate-x-6 opacity-0'}`}
           >
             {step === 1 ? (
-              <>
-                <div className="space-y-2">
-                  <Label className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">
-                    Model
-                  </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {MAZDA_MODELS.map((model) => (
-                      <button
-                        key={model}
-                        type="button"
-                        onClick={() => setValue('model', model as AddCarFormValues['model'], { shouldValidate: true })}
-                        className={`flex flex-col items-center gap-1.5 rounded-xl border-[1.5px] p-3 text-center transition ${
-                          values.model === model ? 'border-mz-red bg-mz-red-light' : 'border-transparent bg-mz-gray-100'
-                        }`}
-                      >
-                        <span className="text-[13px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                          {model}
-                        </span>
-                        <span className="text-[10px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                          {MODEL_YEAR_RANGES[model as AddCarFormValues['model']] ?? '2008-2024'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  {errors.model ? <p className="text-xs text-red-600">{errors.model.message}</p> : null}
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {modelCards.map((card) => (
+                    <button
+                      key={card.label}
+                      type="button"
+                      onClick={() => setValue('model', card.value as AddCarFormValues['model'], { shouldValidate: true })}
+                      className={`overflow-hidden rounded-2xl border bg-white text-left transition active:scale-[0.98] ${
+                        values.model === card.value ? 'border-[#A31526] shadow-button' : 'border-black/8'
+                      }`}
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden bg-mz-gray-100">
+                        <img src={card.imageUrl} alt={card.label} className="h-full w-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
+                        <div className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/92 shadow-sm">
+                          <Car className="h-4 w-4 text-[#A31526]" />
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                          <p className="text-[17px] font-light italic leading-none" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                            {card.label}
+                          </p>
+                          <div className="mt-1 flex items-center justify-between text-[10px] text-white/75" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                            <span>{card.accent}</span>
+                            <span>{MODEL_YEAR_RANGES[card.value as AddCarFormValues['model']] ?? '2016-2024'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
+                {errors.model ? <p className="text-xs text-red-600">{errors.model.message}</p> : null}
+              </div>
+            ) : null}
 
+            {step === 2 ? (
+              <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="year" className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Year</Label>
                   <Input
@@ -197,208 +284,69 @@ export function AddCar() {
                     type="number"
                     min={1990}
                     max={new Date().getFullYear() + 1}
-                    className="h-auto rounded-lg border border-transparent bg-mz-gray-100 px-3 py-[9px] text-[13px] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(155,27,48,0.1)]"
+                    className="h-auto rounded-xl border border-transparent bg-mz-gray-100 px-4 py-3.5 text-[15px] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(163,21,38,0.12)]"
                     {...register('year', { valueAsNumber: true })}
                   />
                   {errors.year ? <p className="text-xs text-red-600">{errors.year.message}</p> : null}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Fuel Type</Label>
-                  <div className="flex rounded-[10px] bg-mz-gray-100 p-[3px]">
-                    {(['petrol', 'diesel'] as const).map((fuel) => (
-                      <button
-                        key={fuel}
-                        type="button"
-                        onClick={() => setValue('fuelType', fuel, { shouldValidate: true })}
-                        className={`flex-1 rounded-lg px-3 py-[9px] text-center text-[13px] font-semibold transition ${
-                          values.fuelType === fuel
-                            ? fuel === 'petrol'
-                              ? 'bg-mz-red text-white'
-                              : 'bg-[#1A3A6B] text-white'
-                            : 'bg-transparent text-mz-gray-500'
-                        }`}
-                        style={{ fontFamily: 'Outfit, sans-serif' }}
-                      >
-                        {fuel === 'petrol' ? 'Petrol' : 'Diesel'}
-                      </button>
-                    ))}
-                  </div>
-                  {errors.fuelType ? <p className="text-xs text-red-600">{errors.fuelType.message}</p> : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="engineSize" className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Engine Size</Label>
+                  <Label htmlFor="color" className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Color</Label>
                   <Input
-                    id="engineSize"
-                    className="h-auto rounded-lg border border-transparent bg-mz-gray-100 px-3 py-[9px] text-[13px] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(155,27,48,0.1)]"
-                    placeholder="e.g. 1.5L"
-                    {...register('engineSize')}
+                    id="color"
+                    className="h-auto rounded-xl border border-transparent bg-mz-gray-100 px-4 py-3.5 text-[15px] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(163,21,38,0.12)]"
+                    placeholder="e.g. Machine Grey"
+                    list="mazda-color-options"
+                    {...register('color')}
                   />
-                  {errors.engineSize ? <p className="text-xs text-red-600">{errors.engineSize.message}</p> : null}
-                </div>
-              </>
-            ) : null}
-
-            {step === 2 ? (
-              <>
-                <div className="space-y-1.5">
-                  <Label htmlFor="registration" className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Registration Plate</Label>
-                  <Input
-                    id="registration"
-                    className="h-auto rounded-lg border border-transparent bg-mz-gray-100 px-3 py-[9px] text-[13px] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(155,27,48,0.1)]"
-                    placeholder="KXX 123A"
-                    {...register('registration')}
-                  />
-                  {errors.registration ? <p className="text-xs text-red-600">{errors.registration.message}</p> : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="currentMileage" className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Current Mileage (km)</Label>
-                  <Input
-                    id="currentMileage"
-                    className="h-auto rounded-lg border border-transparent bg-mz-gray-100 px-3 py-[9px] text-[13px] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(155,27,48,0.1)]"
-                    type="number"
-                    min={0}
-                    {...register('currentMileage', { valueAsNumber: true })}
-                  />
-                  {errors.currentMileage ? <p className="text-xs text-red-600">{errors.currentMileage.message}</p> : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Mileage Interval</Label>
-                  <div className="flex rounded-[10px] bg-mz-gray-100 p-[3px]">
-                    {[5000, 10000].map((interval) => (
-                      <button
-                        key={interval}
-                        type="button"
-                        onClick={() => setValue('mileageInterval', interval as 5000 | 10000, { shouldValidate: true })}
-                        className={`flex-1 rounded-lg px-3 py-[9px] text-center text-[13px] font-semibold transition ${
-                          values.mileageInterval === interval
-                            ? 'bg-mz-red text-white'
-                            : 'bg-transparent text-mz-gray-500'
-                        }`}
-                        style={{ fontFamily: 'Outfit, sans-serif' }}
-                      >
-                        {interval.toLocaleString()} km
-                      </button>
-                    ))}
-                  </div>
-                  {errors.mileageInterval ? <p className="text-xs text-red-600">{errors.mileageInterval.message}</p> : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">Car Color</Label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <datalist id="mazda-color-options">
                     {colorOptions.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setValue('color', color, { shouldValidate: true })}
-                        className={`min-h-11 rounded-lg border px-2 py-2 text-xs font-medium transition ${
-                          values.color === color ? 'border-mz-red bg-mz-red-light text-mz-red' : 'border-transparent bg-mz-gray-100 text-mz-gray-700'
-                        }`}
-                        style={{ fontFamily: 'Outfit, sans-serif' }}
-                      >
-                        {color}
-                      </button>
+                      <option key={color} value={color} />
                     ))}
-                  </div>
+                  </datalist>
                   {errors.color ? <p className="text-xs text-red-600">{errors.color.message}</p> : null}
                 </div>
-              </>
-            ) : null}
 
-            {step === 3 ? (
-              <div className="space-y-4">
-                <div className="overflow-hidden rounded-[16px] border border-[0.5px] border-black/6 bg-mz-white">
-                  <div className="relative min-h-[90px] bg-mz-black px-[14px] pb-[20px] pt-[14px]">
-                    <h3
-                      className="text-white"
-                      style={{
-                        fontFamily: 'Cormorant Garamond, serif',
-                        fontSize: '24px',
-                        fontWeight: 300,
-                        fontStyle: 'italic',
-                        letterSpacing: '-0.01em',
-                      }}
-                    >
-                      Mazda {values.model}
-                    </h3>
-                    <p className="mt-[2px] text-xs text-white/45" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                      {values.year} • {values.engineSize}
-                    </p>
-                    <span
-                      className="absolute right-[14px] top-[14px] rounded-[4px] bg-white/10 px-[9px] py-[3px] text-[11px] font-semibold text-white"
-                      style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}
-                    >
-                      {values.registration?.toUpperCase()}
-                    </span>
-                    <span
-                      className={`absolute bottom-[14px] right-[14px] rounded-[20px] px-[9px] py-[3px] text-[10px] font-semibold uppercase text-white ${
-                        values.fuelType === 'diesel' ? 'bg-[#1A3A6B]' : 'bg-mz-red'
-                      }`}
-                      style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}
-                    >
-                      {values.fuelType}
-                    </span>
-                  </div>
-                  <div className="bg-mz-white px-[14px] py-[12px]">
-                    <p className="text-[18px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                      {Number(values.currentMileage || 0).toLocaleString()} km
+                <div className="space-y-1.5">
+                  <Label htmlFor="vin" className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">VIN</Label>
+                  <Input
+                    id="vin"
+                    value={vinInput}
+                    onChange={(event) => setVinInput(event.target.value.toUpperCase().replace(/\s+/g, ''))}
+                    className="h-auto rounded-xl border border-transparent bg-mz-gray-100 px-4 py-3.5 text-[15px] uppercase tracking-[0.08em] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(163,21,38,0.12)]"
+                    placeholder="17-character VIN"
+                    maxLength={17}
+                  />
+                  <div className="mt-2 flex items-start gap-2 rounded-xl bg-[#EEF5FF] px-3 py-3 text-[12px] text-[#1A3A6B]">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                    <p>
+                      Tip: You can usually find your 17-digit VIN on the driver's side dashboard where it meets the windshield, or on your registration card.
                     </p>
                   </div>
-                </div>
-
-                <div className="rounded-xl border border-mz-gray-100 bg-mz-gray-100/40 p-3">
-                  <div className="grid grid-cols-2 gap-y-2">
-                    {[
-                      ['Model', values.model],
-                      ['Year', values.year],
-                      ['Fuel', values.fuelType],
-                      ['Engine', values.engineSize],
-                      ['Registration', values.registration?.toUpperCase()],
-                      ['Mileage', `${Number(values.currentMileage || 0).toLocaleString()} km`],
-                      ['Interval', `${Number(values.mileageInterval || 0).toLocaleString()} km`],
-                      ['Color', values.color],
-                    ].map(([k, v]) => (
-                      <>
-                        <p
-                          key={`${k}-k`}
-                          className="text-[11px] uppercase text-mz-gray-500"
-                          style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.06em' }}
-                        >
-                          {k}
-                        </p>
-                        <p key={`${k}-v`} className="text-[13px] font-semibold text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                          {v}
-                        </p>
-                      </>
-                    ))}
-                  </div>
+                  {!isVinValid && vinInput.length > 0 ? <p className="text-xs text-red-600">VIN must be 17 characters.</p> : null}
                 </div>
               </div>
             ) : null}
           </div>
 
-          {step < 3 ? (
+          {step < 2 ? (
             <Button
               type="button"
               className="mt-6 w-full rounded-xl bg-mz-red py-3.5 text-[14px] font-semibold text-white transition-transform duration-100 hover:bg-mz-red-mid active:scale-[0.97]"
               style={{ fontFamily: 'Outfit, sans-serif' }}
               onClick={nextStep}
             >
-              Continue →
+              {stepMeta[step as 1 | 2].cta}
             </Button>
           ) : (
             <Button
               type="submit"
-              className="mt-6 w-full rounded-xl bg-mz-red py-3.5 text-[14px] font-semibold text-white transition-transform duration-100 hover:bg-mz-red-mid active:scale-[0.97]"
+              className={`mt-6 w-full rounded-xl bg-mz-red py-3.5 text-[14px] font-semibold text-white transition-transform duration-100 hover:bg-mz-red-mid active:scale-[0.97] ${isStepReady && !loading ? 'animate-pulse shadow-button' : ''}`}
               style={{ fontFamily: 'Outfit, sans-serif' }}
               disabled={loading}
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              {loading ? 'Saving...' : 'Save vehicle'}
+              {loading ? 'Saving...' : stepMeta[step as 1 | 2].cta}
             </Button>
           )}
 
@@ -411,7 +359,8 @@ export function AddCar() {
           >
             Back
           </button>
-        </form>
+          </form>
+        </div>
       </div>
     </section>
   )

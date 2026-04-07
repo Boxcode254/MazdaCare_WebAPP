@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'rea
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { SplashScreen } from '@/components/layout/SplashScreen'
+import MazdaLogo from '@/components/ui/MazdaLogo'
 import { NetworkBanner } from '@/components/ui/NetworkBanner'
 import { useIdleTimer } from '@/hooks/useIdleTimer'
 
@@ -29,15 +30,17 @@ function ProtectedAppLayout() {
   useIdleTimer()
   const location = useLocation()
   const showBottomNav = location.pathname !== '/auth'
-  const networkBannerOffsetClass =
-    location.pathname === '/'
-      ? 'top-[calc(env(safe-area-inset-top,0px)+104px)]'
-      : 'top-[calc(env(safe-area-inset-top,0px)+88px)]'
+  const networkBannerOffsetClass = 'top-[calc(env(safe-area-inset-top,0px)+68px)]'
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-white/30 bg-white/80 shadow-[0_20px_80px_rgba(15,23,42,0.16)] backdrop-blur">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-white/50 bg-white/92 shadow-shell backdrop-blur supports-[backdrop-filter]:bg-white/82 lg:my-4 lg:min-h-[calc(100vh-2rem)] lg:overflow-hidden lg:rounded-[28px]">
+      <header className="sticky top-0 z-30 border-b border-black/5 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90">
+        <div className="flex h-[68px] items-center justify-center px-4 pt-[env(safe-area-inset-top,0px)]">
+          <MazdaLogo variant="full" theme="light" size="sm" />
+        </div>
+      </header>
       <NetworkBanner className={`absolute inset-x-0 z-40 ${networkBannerOffsetClass}`} />
-      <main className="flex flex-col flex-1 px-4 pb-24 pt-6">
+      <main className="flex flex-col flex-1 px-4 pb-24 pt-4">
         <Suspense fallback={<PageFallback />}>
           <div key={location.pathname} className="page-enter flex flex-col flex-1">
             <Outlet />

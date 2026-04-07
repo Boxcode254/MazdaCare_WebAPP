@@ -7,6 +7,7 @@ import { CarCard } from '@/components/car/CarCard'
 import { InstallAppBanner } from '@/components/layout/InstallAppBanner'
 import { AlertBanner } from '@/components/schedule/AlertBanner'
 import MazdaLogo from '@/components/ui/MazdaLogo'
+import { GarageEmptyState } from '@/components/layout/EmptyState'
 import { useVehicles } from '@/hooks/useVehicles'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
 import { calculateNextService } from '@/hooks/useAlerts'
@@ -101,7 +102,7 @@ function OnboardingEmptyState({ onAddMazda }: { onAddMazda: () => void }) {
           Welcome to MazdaCare
         </h2>
         <p className="mt-[6px] text-[14px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          Add your Mazda to get started
+          Your garage is ready. Let’s add your first Mazda and set up reminders together.
         </p>
 
         <div className="mt-6 flex-1">
@@ -145,37 +146,14 @@ function OnboardingEmptyState({ onAddMazda }: { onAddMazda: () => void }) {
           style={{ fontFamily: 'Outfit, sans-serif' }}
           onClick={onAddMazda}
         >
-          Add my Mazda →
+          Add your first Mazda →
         </button>
       </div>
     </div>
   )
 }
 
-function ReturningEmptyState({ onAddVehicle }: { onAddVehicle: () => void }) {
-  return (
-    <div className="flex min-h-[calc(100dvh-11rem)] flex-col items-center justify-center px-6 text-center">
-      <CarSilhouette width={220} opacity={0.16} />
-      <h2
-        className="mt-6 text-[28px] font-light italic leading-none text-mz-black"
-        style={{ fontFamily: 'Cormorant Garamond, serif' }}
-      >
-        Your garage is empty
-      </h2>
-      <p className="mt-[6px] max-w-[260px] text-[14px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
-        Add a vehicle to bring back service history, reminders, and garage tools.
-      </p>
-      <button
-        type="button"
-        className="mt-6 rounded-xl bg-mz-red px-5 py-[14px] text-[14px] font-semibold text-white"
-        style={{ fontFamily: 'Outfit, sans-serif' }}
-        onClick={onAddVehicle}
-      >
-        Add a vehicle
-      </button>
-    </div>
-  )
-}
+
 
 // ─── Pull-to-refresh hook ──────────────────────────────────────────────────
 function usePullToRefresh(onRefresh: () => Promise<void>) {
@@ -333,7 +311,7 @@ export function Dashboard() {
       return <OnboardingEmptyState onAddMazda={handleAddVehicle} />
     }
 
-    return <ReturningEmptyState onAddVehicle={handleAddVehicle} />
+    return <GarageEmptyState onAddVehicle={handleAddVehicle} />
   }
 
   return (

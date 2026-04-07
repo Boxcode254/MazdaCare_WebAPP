@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
 import type { MazdaModel } from '@/lib/mazda-models'
+import { sanitizeInput, sanitizeMileage, sanitizePlate, sanitizeText } from '@/lib/sanitize'
 import type { Vehicle } from '@/types'
 
 interface VehiclePayload {
@@ -106,19 +107,25 @@ export function useVehicles() {
 
       try {
         const userId = await resolveUserId()
+        const sanitizedModel = sanitizeInput(payload.model)
+        const sanitizedRegistration = sanitizePlate(payload.registration)
+        const sanitizedEngineSize = sanitizeText(payload.engineSize)
+        const sanitizedColor = payload.color ? sanitizeText(payload.color) : null
+        const sanitizedMileage = sanitizeMileage(payload.currentMileage)
+
         const { data, error: insertError } = await supabase
           .from('vehicles')
           .insert({
             user_id: userId,
             make: 'Mazda',
-            model: payload.model,
+            model: (sanitizedModel || payload.model) as MazdaModel,
             year: payload.year,
             fuel_type: payload.fuelType,
-            engine_size: payload.engineSize,
-            registration: payload.registration,
-            current_mileage: payload.currentMileage,
+            engine_size: sanitizedEngineSize,
+            registration: sanitizedRegistration,
+            current_mileage: sanitizedMileage,
             mileage_interval: payload.mileageInterval,
-            color: payload.color ?? null,
+            color: sanitizedColor,
           })
           .select('*')
           .single()

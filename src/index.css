@@ -10,18 +10,19 @@
     color-scheme: light;
 
     /* ── MZ Design Tokens ─────────────────────────────────── */
-    --mz-red:        #9B1B30;
-    --mz-red-mid:    #B82234;
-    --mz-red-dark:   #6B0D1C;
-    --mz-red-light:  #F5E8EA;
-    --mz-red-pale:   #FDF3F4;
+    --mz-red:        #A31526;
+    --mz-red-mid:    #BC2133;
+    --mz-red-dark:   #7F0F1D;
+    --mz-red-light:  #F8E7EA;
+    --mz-red-pale:   #FDF4F5;
     --mz-black:      #111010;
     --mz-gray-900:   #1E1A1B;
     --mz-gray-700:   #3D3536;
+    --mz-gray-600:   #6A625D;
     --mz-gray-500:   #6B6163;
     --mz-gray-300:   #C4BABB;
-    --mz-gray-100:   #F0ECEC;
-    --mz-white:      #FDFBFB;
+    --mz-gray-100:   #F6F1F0;
+    --mz-white:      #FFFCFB;
     --mz-gold:       #C49A3C;
     --mz-gold-light: #F5EDD6;
 
@@ -35,23 +36,23 @@
     --radius-2xl: 24px;
 
     /* ── shadcn/ui tokens — mapped to MZ palette ──────────── */
-    --primary:              #9B1B30;
+    --primary:              #A31526;
     --primary-foreground:   #FAFAFA;
-    --ring:                 #9B1B30;
+    --ring:                 #A31526;
     --radius:               0.5rem;
-    --background:           #F0ECEC;
-    --foreground:           #3D3536;
-    --card:                 #FDFBFB;
-    --card-foreground:      #3D3536;
-    --popover:              #FDFBFB;
-    --popover-foreground:   #3D3536;
-    --secondary:            #F0ECEC;
-    --secondary-foreground: #3D3536;
-    --muted:                #F0ECEC;
-    --muted-foreground:     #6B6163;
-    --accent:               #F5E8EA;
-    --accent-foreground:    #9B1B30;
-    --destructive:          #9B1B30;
+    --background:           #F6F1F0;
+    --foreground:           #6A625D;
+    --card:                 #FFFCFB;
+    --card-foreground:      #6A625D;
+    --popover:              #FFFCFB;
+    --popover-foreground:   #6A625D;
+    --secondary:            #F6F1F0;
+    --secondary-foreground: #6A625D;
+    --muted:                #F6F1F0;
+    --muted-foreground:     #6A625D;
+    --accent:               #F8E7EA;
+    --accent-foreground:    #A31526;
+    --destructive:          #A31526;
     --destructive-foreground: #FAFAFA;
     --border:               #C4BABB;
     --input:                #C4BABB;
@@ -64,10 +65,21 @@
 
   body {
     font-family: var(--font-body);
-    background: var(--mz-gray-100);
-    color: var(--mz-gray-700);
+    background:
+      radial-gradient(circle at top, rgba(163, 21, 38, 0.08), transparent 36%),
+      linear-gradient(180deg, #fbf7f6 0%, #f6f1f0 100%);
+    color: var(--mz-gray-600);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #111827;
+    font-weight: 700;
+  }
+
+  p, li, span, label {
+    color: var(--mz-gray-600);
   }
 
   /* Prevent zoom on input focus on iOS */
@@ -122,6 +134,35 @@
     animation: fadeSlideIn 180ms ease-out;
   }
 
+  @keyframes wizard-ready-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(155, 27, 48, 0.18);
+      transform: scale(1);
+    }
+
+    50% {
+      box-shadow: 0 0 0 10px rgba(155, 27, 48, 0);
+      transform: scale(1.01);
+    }
+  }
+
+  .wizard-primary-ready {
+    animation: wizard-ready-pulse 1.8s ease-in-out infinite;
+  }
+
+  .bg-mazda-red {
+    background-color: var(--mz-red);
+  }
+
+  .text-mazda-red {
+    color: var(--mz-red);
+  }
+
+  .border-mazda-red {
+    border-color: var(--mz-red);
+  }
+
   @keyframes network-slide-down {
     from { transform: translateY(-36px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
@@ -167,6 +208,9 @@
       animation: none;
       opacity: 1;
       transform: none;
+    }
+    .wizard-primary-ready {
+      animation: none;
     }
     .skeleton {
       animation: none;

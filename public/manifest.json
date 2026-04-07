@@ -1,11 +1,11 @@
 {
-  "name": "Mazda Maintenance Kenya",
+  "name": "MazdaCare",
   "short_name": "MazdaCare",
   "description": "Track your Mazda service history",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#9B1B30",
+  "background_color": "#F5F5F5",
+  "theme_color": "#A31526",
   "orientation": "portrait",
   "icons": [
     {

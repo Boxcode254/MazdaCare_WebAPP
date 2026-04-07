@@ -1,17 +1,20 @@
 import DOMPurify from 'dompurify'
 
+export function sanitizeInput(value: string): string {
+  if (!value) return ''
+
+  return DOMPurify.sanitize(value, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+  }).trim()
+}
+
 export function sanitizeText(input: string): string {
-  if (!input) return ''
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
-    .trim()
-    .slice(0, 500)
+  return sanitizeInput(input).slice(0, 500)
 }
 
 export function sanitizeNote(input: string): string {
-  if (!input) return ''
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
-    .trim()
-    .slice(0, 2000)
+  return sanitizeInput(input).slice(0, 2000)
 }
 
 export function sanitizePlate(input: string): string {

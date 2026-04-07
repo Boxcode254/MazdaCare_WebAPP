@@ -1,6 +1,7 @@
 export const MAZDA_MODELS = [
   'Demio',
   'Axela',
+  'MX-5',
   'CX-3',
   'CX-5',
   'CX-7',
