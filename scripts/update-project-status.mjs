@@ -1,9 +1,11 @@
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const root = process.cwd()
-const statusFilePath = path.join(root, 'PROJECT_STATUS.md')
+const scriptDir = path.dirname(fileURLToPath(import.meta.url))
+const root = path.join(scriptDir, '..')
+const statusFilePath = path.join(root, 'docs', 'project-status.md')
 const envFilePath = path.join(root, '.env.local')
 
 function run(command) {

@@ -1,6 +1,8 @@
 # React + TypeScript + Vite
 # MazdaCare PWA
 
+**Documentation:** [`docs/README.md`](docs/README.md) (onboarding, project status, implementation plan).
+
 ## PWA Icons
 
 The source icon is `src/assets/mazdacare-icon.svg` (512×512, dark background, wing mark).

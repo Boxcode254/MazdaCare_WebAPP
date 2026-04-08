@@ -3,28 +3,98 @@
 ## AI/IDE Agent Onboarding
 
 **Before coding, all agents (Cursor, Antigravity, Copilot, etc.) and new devs must:**
-- Read `CHAT.md` and this file fully
+- Read [Onboarding](./onboarding.md) and this file fully
 - Never paste or commit secrets (API keys, tokens, etc.)
-- Keep `.env` present for local dev, but never leak its contents
+- Keep `.env` present for local dev at the repo root, but never leak its contents
 - Use existing hooks, UI primitives, and Mazda palette
 - Validate UI in both light and dark mode
 - All analytics/export is client-side only
 - For new features, prefer composition and reuse
-- Update this file and `CHAT.md` after major changes
+- Update [Onboarding](./onboarding.md) and this file after major changes
+
 
 **.env policy:**
 - `.env` is required for local dev (Supabase keys, etc.)
 - Never paste or commit secrets into markdown or code
 - If you need a new env var, document the key (not value) in `.env.example`
 
+---
+
+## Architecture Recommendations (2026-04-07)
+
+- Add a high-level architecture diagram (C4 or similar) to documentation for onboarding and audits.
+- Document the flow for critical features (e.g., service logging, push notifications).
+- Regularly review RLS and edge function logic as the schema evolves.
+
+#### [Placeholder: Insert C4 Context/Container Diagram Here]
+
+---
+
+## Refactoring Plan
+---
+
+## Manual QA Walkthrough: End-to-End User Flow (2026-04-07)
+
+Follow this checklist to simulate a real user journey and catch UI/UX bugs:
+
+### 1. Account Creation
+- Open the app in a private/incognito browser window.
+- Click “Sign Up” or “Continue with Google.”
+- Complete the registration process (use a test email or Google account).
+- Confirm onboarding screens and initial dashboard load.
+
+### 2. Add Multiple Cars
+- Navigate to “Garage” or “Add Car.”
+- Add a first vehicle (fill all required fields, test VIN decoder if available).
+- Add a second and third vehicle (use different models/years).
+- Switch between vehicles and verify context updates (dashboard, service logs, etc.).
+
+### 3. Set Garages Visited
+- Go to the “Garage Finder” or “Map.”
+- Search for and select a garage.
+- Mark it as visited or add to your garage history.
+- Repeat for multiple garages.
+- Check that the visited list/history updates and persists after reload.
+
+### 4. Service Logging
+- For each car, log a new service (oil change, tire rotation, etc.).
+- Enter realistic and edge-case data (e.g., high mileage, missing optional fields).
+- Verify logs appear in the service history and analytics update.
+
+### 5. Alerts & Scheduler
+- Set a maintenance alert/reminder for a car.
+- Confirm alert appears in dashboard/schedule.
+- Simulate time passing (if possible) and check alert banners.
+
+### 6. PWA & Offline
+- Install the app to your device home screen (PWA prompt).
+- Reload and use the app offline; verify offline banners and limited functionality.
+
+### 7. Settings & Auth
+- Update profile details, toggle push notifications, test password reset.
+- Log out and log back in; confirm state is preserved.
+
+### 8. General UI/UX
+- Test in both light and dark mode.
+- Try on mobile and desktop browsers.
+- Look for layout glitches, broken buttons, or missing feedback.
+
+---
+
+Log any bugs, unexpected behaviors, or UX issues found during this walkthrough for triage and fixing.
+
+- Domain-based folder refactoring (e.g., hooks/components by vehicles, service_logs, maps) is deferred until the next major feature push. Current structure is maintainable; refactor will be planned alongside new features for minimal disruption.
+
+---
+
 
 <!-- AUTO_STATUS_START -->
 ## Auto Snapshot
 
-- Last auto update: 2026-04-07T18:34:42.474Z
+- Last auto update: 2026-04-08T23:12:56.385Z
 - Branch: main
-- Latest commit: 8240e25
-- Git status: dirty (15 file(s) changed, main...origin/main [ahead 1])
+- Latest commit: 27f5ea0
+- Git status: dirty (25 file(s) changed, main...origin/main [ahead 2])
 - Production app URL: https://mazdacare-app.vercel.app
 - Vercel project: mazdacare-app
 - Supabase project ref: rmfkykcijcndwvsursmu
@@ -42,6 +112,7 @@
 - Prompt 6: Scheduler and alerts - DONE
 - Prompt 7: Dashboard and polish - DONE
 - Prompt 8: PWA and deployment - DONE
+
 
 ## UI/UX Progress
 
@@ -72,6 +143,16 @@
 - REFINE-1 Micro-interactions and haptics - DONE
 - REFINE-2 Onboarding empty state - DONE
 - REFINE-3 Offline indicator and network state - DONE
+
+## Phase 5 — Adaptive Desktop & Table View (2026-04-08)
+
+- Multi-column grid layout with sidebar (Phase4Shell) - DONE
+- Interactive element scaling for desktop (buttons/cards) - DONE
+- Global keyboard shortcuts (N, V, S, H) - DONE
+- Desktop hover states and right-click context menus (ServiceLogCard, Table rows) - DONE
+- ResponsiveModal: Dialog on desktop, Drawer on mobile - DONE
+- Desktop Table View: Toggle between Card/Table in History, high-density data, context menu actions - DONE
+- Documentation updated: [Onboarding](./onboarding.md) and this file reflect desktop enhancements - DONE
 
 ## Deployment and Infra Status
 
@@ -118,17 +199,20 @@
 ## Remaining Blockers
 
 1. Google Maps API key — set VITE_GOOGLE_MAPS_API_KEY in:
-   - local `.env.local`
+   - local `.env.local` at repo root
    - Vercel env (production, preview, development)
    After adding: verify map loads, then add HTTP referrer restrictions
    in Google Cloud Console for https://mazdacare-app.vercel.app/*
 
 ## Useful Resume Commands
 
-From project root (mazda-app):
+From repository root:
+
   Build:                pnpm build
   Dev server (LAN):     pnpm dev --host 0.0.0.0
   List Supabase fns:    npx supabase functions list
   Check cron:           npx supabase db query --linked -o table "select jobname, schedule, active from cron.job where jobname='check-alerts-daily';"
   Check Vercel env:     npx vercel env ls production --format json --non-interactive
   Check RLS policies:   npx supabase db query --linked "select tablename, policyname, cmd from pg_policies where schemaname='public' order by tablename;"
+
+Update the **Auto Snapshot** block in this file: `pnpm status:update` (from repository root)

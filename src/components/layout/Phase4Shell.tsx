@@ -1,3 +1,4 @@
+// Removed duplicate implementation and export of Phase4Shell. The main implementation and export are below.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertCircle,
@@ -1843,7 +1844,40 @@ export function Phase4Shell() {
 
   return (
     <div className="brand-shell flex min-h-screen w-full justify-center overflow-hidden font-sans">
-      <div className="relative flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-[rgba(255,251,250,0.9)] shadow-[0_24px_80px_rgba(90,12,24,0.16)] backdrop-blur-sm">
+      {/* Desktop grid: sidebar + main, mobile: single column */}
+      <div className="relative flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-[rgba(255,251,250,0.9)] shadow-[0_24px_80px_rgba(90,12,24,0.16)] backdrop-blur-sm lg:max-w-full lg:grid lg:grid-cols-[320px_1fr] lg:gap-0">
+        {/* Sidebar for desktop */}
+        <aside className="hidden lg:flex lg:flex-col lg:items-stretch lg:justify-between lg:bg-white/80 lg:border-r lg:border-gray-100 lg:shadow-md">
+          {/* Mazda Logo and Nav */}
+          <div className="flex flex-col items-center gap-8 pt-10 pb-6">
+            <MazdaLogo variant="icon" theme="dark" size="md" />
+            <nav className="flex flex-col gap-2 w-full px-4">
+              <NavButton icon={<Home className="h-6 w-6" />} label="Home" isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
+              <NavButton icon={<Car className="h-6 w-6" />} label="Garage" isActive={activeTab === 'garage'} onClick={() => setActiveTab('garage')} />
+              <NavButton icon={<MapPin className="h-6 w-6" />} label="Map" isActive={activeTab === 'map'} onClick={() => setActiveTab('map')} />
+              <NavButton icon={<Settings className="h-6 w-6" />} label="Settings" isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+            </nav>
+          </div>
+          {/* Vehicle Rail/Quick Stats (desktop only) */}
+          <div className="flex flex-col gap-4 px-4 pb-8">
+            {shouldUseVehicleRail && vehicles.length > 0 ? (
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">My Mazdas</h3>
+                {vehicles.map((vehicle) => (
+                  <div key={vehicle.id} className={`mb-2 ${activeVehicleId === vehicle.id ? 'ring-2 ring-[#A31526]' : ''} rounded-xl overflow-hidden`}>
+                    <CarCard vehicle={vehicle} onEditMileage={() => { setActiveVehicleId(vehicle.id); setIsMileageSheetOpen(true); }} />
+                  </div>
+                ))}
+                {canAddVehicle && (
+                  <button className="w-full rounded-xl border-2 border-dashed border-[#9B1B30] bg-[#F5E8EA] py-3 text-[#9B1B30] font-bold mt-2" onClick={() => setIsAddingCar(true)}>
+                    <Plus className="inline-block mr-1" /> Add Mazda
+                  </button>
+                )}
+              </div>
+            ) : null}
+            {/* Quick Stats/Alerts can be added here */}
+          </div>
+        </aside>
         <AnimatePresence>
           {showPWAPrompt && !pwaDismissed && !isAddingCar && activeTab === 'garage' ? (
             <motion.div
@@ -1879,6 +1913,8 @@ export function Phase4Shell() {
           ) : null}
         </AnimatePresence>
 
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col">
         <div className="sticky top-0 z-30 flex items-center justify-between border-b border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.86)] px-5 pb-4 pt-12 backdrop-blur-xl">
           <div className="flex items-center gap-3">
             {isAddingCar || isLoggingService ? (
@@ -1910,7 +1946,7 @@ export function Phase4Shell() {
           </div>
         </div>
 
-        <div className="relative flex-1 overflow-y-auto bg-transparent pb-24">
+        <div className="relative flex-1 overflow-y-auto bg-transparent pb-24 lg:pb-0">
           <AnimatePresence mode="wait">
             {isAddingCar ? (
               <motion.div key="add-car" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="h-full">
@@ -2276,8 +2312,9 @@ export function Phase4Shell() {
           </AnimatePresence>
         </div>
 
+        {/* Mobile nav bar (hidden on desktop) */}
         {!isAddingCar ? (
-          <div className="absolute bottom-0 z-40 w-full max-w-md border-t border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.94)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] shadow-[0_-10px_40px_rgba(90,12,24,0.08)] backdrop-blur-xl">
+          <div className="absolute bottom-0 z-40 w-full max-w-md border-t border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.94)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] shadow-[0_-10px_40px_rgba(90,12,24,0.08)] backdrop-blur-xl lg:hidden">
             <div className="flex items-center justify-around px-2 py-2.5">
               <NavButton icon={<Home className="h-6 w-6" />} label="Home" isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
               <NavButton icon={<Car className="h-6 w-6" />} label="Garage" isActive={activeTab === 'garage'} onClick={() => setActiveTab('garage')} />
@@ -2286,6 +2323,7 @@ export function Phase4Shell() {
             </div>
           </div>
         ) : null}
+        </div>
       </div>
     </div>
   )
