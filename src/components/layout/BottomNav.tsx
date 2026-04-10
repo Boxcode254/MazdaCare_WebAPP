@@ -11,13 +11,24 @@ export function BottomNav() {
   const navItems = [
     { label: 'Home', to: '/', icon: Home, matches: ['/'] },
     {
-      label: 'My Garage',
-      to: vid ? `/service/${vid}` : '/add-car',
+      label: 'Vehicles',
+      to: '/vehicles',
       icon: Car,
-      matches: ['/service', '/add-car', '/schedule', '/log-service'],
+      matches: ['/vehicles'],
     },
-    { label: 'Services', to: '/map', icon: MapPin, matches: ['/map'] },
-    { label: 'Profile', to: '/settings', icon: User, matches: ['/settings'] },
+    {
+      label: 'Events',
+      to: '/events',
+      icon: CheckCircle2,
+      matches: ['/events'],
+    },
+    {
+      label: 'Notifications',
+      to: '/notifications',
+      icon: Bell,
+      matches: ['/notifications'],
+    },
+    { label: 'Settings', to: '/settings', icon: User, matches: ['/settings'] },
   ]
 
   const isRouteActive = (matches: string[]) => {

@@ -3,8 +3,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Phase4Shell } from '@/components/layout/Phase4Shell'
 import { SplashScreen } from '@/components/ui/SplashScreen'
+import VehicleDetailPage from '@/pages/VehicleDetail'
 
 const Auth = lazy(() => import('@/pages/Auth').then((m) => ({ default: m.Auth })))
+const VehiclesPage = lazy(() => import('@/pages/Vehicles'))
 
 function PageFallback() {
   return (
@@ -54,6 +56,26 @@ function App() {
             element={
               <ProtectedRoute>
                 <Phase4Shell />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vehicles"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageFallback />}>
+                  <VehiclesPage />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vehicles/:id"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageFallback />}>
+                  <VehicleDetailPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />

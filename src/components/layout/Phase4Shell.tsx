@@ -12,17 +12,12 @@ import {
   Download,
   ExternalLink,
   Gauge,
-  HeartHandshake,
   Home,
   Info,
   LogOut,
-  MapPin,
   MessageSquare,
-  Navigation,
   Pencil,
-  Phone,
   Plus,
-  Search,
   Settings,
   Shield,
   User,
@@ -46,6 +41,12 @@ import { sanitizeMileage, sanitizeText } from '@/lib/sanitize'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
 import { decodeVIN, formatVIN, type VINInfo } from '@/lib/vinDecoder'
+import { KeyboardShortcutLegend } from '@/components/layout/KeyboardShortcutLegend'
+import { ShortcutsHelpDialog } from '@/components/layout/ShortcutsHelpDialog'
+import useKeyboardShortcuts, {
+  registerKeyboardShortcut,
+  unregisterKeyboardShortcut,
+} from '@/hooks/useKeyboardShortcuts'
 
 const VEHICLES = [
   {
@@ -86,15 +87,6 @@ const VEHICLES = [
   },
 ]
 
-const DEALERSHIPS = [
-  {
-    id: 1,
-    name: 'Mazda Downtown Service Center',
-    distance: '2.4 miles away',
-    rating: 4.9,
-  },
-]
-
 // Helper function to get vehicle image by model
 function getVehicleImage(model: string): string {
   const vehicle = VEHICLES.find((v) => v.model === model)
@@ -109,7 +101,7 @@ function maskVin(vin: string): string {
   return `${vin.slice(0, 3)}...${vin.slice(-4)}`
 }
 
-type TabId = 'home' | 'garage' | 'map' | 'profile'
+type TabId = 'home' | 'vehicles' | 'settings'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -679,121 +671,7 @@ function EmptyGarageState({ onAdd }: { onAdd: () => void }) {
   )
 }
 
-function ServicesLog({
-  serviceLogs,
-}: {
-  serviceLogs: import('@/types').ServiceLog[]
-}) {
-  const formatServiceType = (value: import('@/types').ServiceLog['serviceType']) => {
-    if (value === 'oil_change') return 'Oil change'
-    if (value === 'tyre_rotation') return 'Tyre rotation'
-    if (value === 'brake_service') return 'Brake service'
-    return value.charAt(0).toUpperCase() + value.slice(1)
-  }
 
-  const garageSummaries = useMemo(() => {
-    const groupedByGarage = new Map<
-      string,
-      {
-        garageName: string
-        totalCost: number
-        lastVisited: number
-        services: import('@/types').ServiceLog[]
-      }
-    >()
-
-    const orderedLogs = [...serviceLogs].sort(
-      (a, b) => new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime()
-    )
-
-    for (const log of orderedLogs) {
-      const garageName = log.garageName?.trim() || 'Garage not specified'
-      const existing = groupedByGarage.get(garageName)
-      const numericCost = Math.max(0, Number(log.serviceCost ?? 0))
-      const serviceDate = new Date(log.serviceDate).getTime()
-
-      if (!existing) {
-        groupedByGarage.set(garageName, {
-          garageName,
-          totalCost: numericCost,
-          lastVisited: serviceDate,
-          services: [log],
-        })
-        continue
-      }
-
-      existing.totalCost += numericCost
-      existing.lastVisited = Math.max(existing.lastVisited, serviceDate)
-      existing.services.push(log)
-    }
-
-    return Array.from(groupedByGarage.values()).sort(
-      (a, b) => b.lastVisited - a.lastVisited
-    )
-  }, [serviceLogs])
-
-  return (
-    <div className="space-y-5 p-6 pb-28">
-      <div className="rounded-2xl border border-[#E8D9DC] bg-[#F8EEF0] p-4 shadow-sm">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B1B30]">
-          Garage Visits
-        </p>
-        <h2 className="mt-1 text-xl font-bold text-[#111010]">Visited garages and service costs</h2>
-        <p className="mt-1 text-[13px] text-[#6B6163]">
-          A clean summary of where your car was serviced and what each visit cost.
-        </p>
-      </div>
-
-      {garageSummaries.length === 0 ? (
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm">
-          <p className="text-[13px] text-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            No garages visited yet. Log a service to start your history.
-          </p>
-        </div>
-      ) : (
-        garageSummaries.map((garage) => (
-          <section key={garage.garageName} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
-              <div>
-                <h3 className="text-[16px] font-semibold text-[#111010]">
-                  {garage.garageName}
-                </h3>
-                <p className="mt-0.5 text-[12px] text-gray-500">
-                  {garage.services.length} service{garage.services.length === 1 ? '' : 's'}
-                </p>
-              </div>
-              <div className="rounded-full bg-[#F5E8EA] px-3 py-1 text-[11px] font-semibold text-[#9B1B30]">
-                Total KES {Math.round(garage.totalCost).toLocaleString('en-KE')}
-              </div>
-            </div>
-
-            <div className="mt-3 space-y-2.5">
-              {garage.services.map((service) => (
-                <div key={service.id} className="rounded-xl border border-gray-100 bg-[#FCFAFA] px-3.5 py-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-[13px] font-semibold text-[#111010]">
-                      {formatServiceType(service.serviceType)}
-                    </p>
-                    <p className="text-[13px] font-semibold text-[#9B1B30]">
-                      KES {Math.round(service.serviceCost ?? 0).toLocaleString('en-KE')}
-                    </p>
-                  </div>
-                  <p className="mt-1 text-[12px] text-gray-500">
-                    {new Date(service.serviceDate).toLocaleDateString('en-KE', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))
-      )}
-    </div>
-  )
-}
 
 function AddCarWizard({
   onComplete,
@@ -1061,65 +939,7 @@ function AddCarWizard({
   )
 }
 
-function MapFinder() {
-  return (
-    <div className="relative flex h-full flex-col">
-      <div className="absolute inset-0 z-0 bg-gray-200">
-        <img
-          src="https://images.unsplash.com/photo-1543365095-3892d8135a3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnb29nbGUlMjBtYXBzJTIwc3RyZWV0JTIwdmlldyUyMG1hcCUyMGludGVyZmFjZXxlbnwxfHx8fDE3NzU1NDg3MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
-          alt="Map"
-          className="h-full w-full object-cover opacity-60 mix-blend-multiply"
-        />
-        <div className="absolute left-1/2 top-[40%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center animate-bounce">
-          <div className="rounded-full border-2 border-white bg-[#A31526] p-2.5 text-white shadow-lg">
-            <Wrench className="h-5 w-5" />
-          </div>
-          <div className="mt-1 h-2 w-2 rounded-full bg-black/30 blur-[2px]" />
-        </div>
-      </div>
 
-      <div className="relative z-10 p-4">
-        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-3 shadow-lg">
-          <Search className="ml-1 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search service centers..."
-            className="flex-1 bg-transparent text-[15px] outline-none"
-            readOnly
-          />
-          <div className="h-6 w-px bg-gray-200" />
-          <MapPin className="mr-1 h-5 w-5 text-[#A31526]" />
-        </div>
-      </div>
-
-      <div className="absolute bottom-4 z-20 w-full px-4">
-        {DEALERSHIPS.map((dealership) => (
-          <div key={dealership.id} className="rounded-3xl border border-gray-100 bg-white p-5 shadow-2xl">
-            <div className="mb-2 flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-bold leading-tight text-gray-900">{dealership.name}</h2>
-                <p className="mt-1 text-sm font-semibold text-[#A31526]">{dealership.distance}</p>
-              </div>
-              <div className="flex items-center gap-1 rounded-lg bg-green-50 px-2 py-1 text-xs font-bold text-green-700">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                {dealership.rating}
-              </div>
-            </div>
-            <div className="mt-6 flex gap-3">
-              <button className="flex flex-1 justify-center gap-2 rounded-xl bg-[#A31526] py-3.5 text-[15px] font-bold text-white shadow-lg hover:bg-[#8B1220]">
-                <Navigation className="h-4 w-4" />
-                Directions
-              </button>
-              <button className="flex w-14 items-center justify-center rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200">
-                <Phone className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function SettingsView({
   user,
@@ -1544,7 +1364,10 @@ export function Phase4Shell() {
   const [activeRailIndex, setActiveRailIndex] = useState(0)
   const [prefilledServiceMileage, setPrefilledServiceMileage] = useState<number | undefined>(undefined)
   const [serviceReturnTab, setServiceReturnTab] = useState<TabId>('home')
+  const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false)
   const railSlotRefs = useRef<Array<HTMLDivElement | null>>([])
+  const activeTabRef = useRef<TabId>(activeTab)
+  activeTabRef.current = activeTab
 
   useEffect(() => {
     void fetchVehicles().catch(() => undefined)
@@ -1605,6 +1428,31 @@ export function Phase4Shell() {
     () => (primaryVehicle ? lookupMazdaManuals(primaryVehicle.model, primaryVehicle.year) : null),
     [primaryVehicle],
   )
+
+  useKeyboardShortcuts()
+
+  useEffect(() => {
+    function onHelpKey(e: KeyboardEvent) {
+      if (!(e.metaKey || e.ctrlKey) || e.key !== '/') return
+      const el = e.target as HTMLElement
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable) return
+      e.preventDefault()
+      setShortcutsHelpOpen(true)
+    }
+    window.addEventListener('keydown', onHelpKey)
+    return () => window.removeEventListener('keydown', onHelpKey)
+  }, [])
+
+  useEffect(() => {
+    registerKeyboardShortcut('h', () => setActiveTab('home'))
+    registerKeyboardShortcut('v', () => setActiveTab('vehicles'))
+    registerKeyboardShortcut('s', () => setActiveTab('settings'))
+    return () => {
+      unregisterKeyboardShortcut('h')
+      unregisterKeyboardShortcut('v')
+      unregisterKeyboardShortcut('s')
+    }
+  }, [activeVehicleId, isAddingCar, isLoggingService, vehicles])
 
   useEffect(() => {
     if (!vehicles.length) {
@@ -1694,12 +1542,10 @@ export function Phase4Shell() {
     if (isAddingCar) return 'Add Your Mazda'
     if (isLoggingService) return 'Log Service'
     switch (activeTab) {
-      case 'garage':
-        return hasCars ? 'My Garage' : 'Welcome'
-      case 'map':
-        return 'Find Service'
-      case 'profile':
-        return 'Settings & Profile'
+      case 'vehicles':
+        return hasCars ? 'My Vehicles' : 'Welcome'
+      case 'settings':
+        return 'Settings'
       case 'home':
       default:
         return 'MazdaCare'
@@ -1853,9 +1699,8 @@ export function Phase4Shell() {
             <MazdaLogo variant="icon" theme="dark" size="md" />
             <nav className="flex flex-col gap-2 w-full px-4">
               <NavButton icon={<Home className="h-6 w-6" />} label="Home" isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
-              <NavButton icon={<Car className="h-6 w-6" />} label="Garage" isActive={activeTab === 'garage'} onClick={() => setActiveTab('garage')} />
-              <NavButton icon={<MapPin className="h-6 w-6" />} label="Map" isActive={activeTab === 'map'} onClick={() => setActiveTab('map')} />
-              <NavButton icon={<Settings className="h-6 w-6" />} label="Settings" isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+              <NavButton icon={<Car className="h-6 w-6" />} label="Vehicles" isActive={activeTab === 'vehicles'} onClick={() => setActiveTab('vehicles')} />
+              <NavButton icon={<Settings className="h-6 w-6" />} label="Settings" isActive={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
             </nav>
           </div>
           {/* Vehicle Rail/Quick Stats (desktop only) */}
@@ -1879,7 +1724,7 @@ export function Phase4Shell() {
           </div>
         </aside>
         <AnimatePresence>
-          {showPWAPrompt && !pwaDismissed && !isAddingCar && activeTab === 'garage' ? (
+          {showPWAPrompt && !pwaDismissed && !isAddingCar && activeTab === 'vehicles' ? (
             <motion.div
               initial={{ y: -100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -1915,7 +1760,10 @@ export function Phase4Shell() {
 
         {/* Main content area */}
         <div className="flex-1 flex flex-col">
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.86)] px-5 pb-4 pt-12 backdrop-blur-xl">
+        <ShortcutsHelpDialog open={shortcutsHelpOpen} onOpenChange={setShortcutsHelpOpen} />
+        {/* Hide header on home tab — greeting replaces it */}
+        {(activeTab !== 'home' || isAddingCar || isLoggingService) ? (
+        <div className="app-top-bar sticky top-0 z-30 flex items-center justify-between px-5 pb-4 pt-12">
           <div className="flex items-center gap-3">
             {isAddingCar || isLoggingService ? (
               <button
@@ -1935,16 +1783,13 @@ export function Phase4Shell() {
               </button>
             ) : null}
             <h1 className="text-[24px] font-semibold tracking-tight text-gray-900">
-              {!isAddingCar && activeTab === 'garage' && !hasCars ? (
-                <>
-                  Mazda<span className="text-[#A31526]">Care</span>
-                </>
-              ) : (
-                getHeaderTitle()
-              )}
+              {getHeaderTitle()}
             </h1>
           </div>
         </div>
+        ) : null}
+
+        <KeyboardShortcutLegend />
 
         <div className="relative flex-1 overflow-y-auto bg-transparent pb-24 lg:pb-0">
           <AnimatePresence mode="wait">
@@ -1968,9 +1813,8 @@ export function Phase4Shell() {
               </motion.div>
             ) : (
               <motion.div key="main-tabs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                {activeTab === 'garage' && (!hasCars ? <EmptyGarageState onAdd={() => setIsAddingCar(true)} /> : <ServicesLog serviceLogs={logs} />)}
-                {activeTab === 'map' ? <MapFinder /> : null}
-                {activeTab === 'profile' ? <SettingsView user={{ fullName: profileName, email: profileEmail, phone: profilePhone }} primaryVehicle={primaryVehicle ? { id: primaryVehicle.id, model: primaryVehicle.model, year: primaryVehicle.year, registration: primaryVehicle.registration } : null} serviceLogs={logs} onLogout={handleLogout} isLoggingOut={isLoggingOut} /> : null}
+                {activeTab === 'vehicles' && (!hasCars ? <EmptyGarageState onAdd={() => setIsAddingCar(true)} /> : <div className="p-8 text-center text-gray-500">Your vehicles will appear here.</div>)}
+                {activeTab === 'settings' ? <SettingsView user={{ fullName: profileName, email: profileEmail, phone: profilePhone }} primaryVehicle={primaryVehicle ? { id: primaryVehicle.id, model: primaryVehicle.model, year: primaryVehicle.year, registration: primaryVehicle.registration } : null} serviceLogs={logs} onLogout={handleLogout} isLoggingOut={isLoggingOut} /> : null}
                 {activeTab === 'home' ? (
                   !hasCars ? (
                     needsProfileSetup ? (
@@ -1985,9 +1829,9 @@ export function Phase4Shell() {
                       <EmptyHomeState userName={profileName?.split(' ')[0] || 'Driver'} onAdd={() => setIsAddingCar(true)} />
                     )
                   ) : (
-                    <div className="flex h-full flex-col justify-start space-y-6 p-6">
+                    <div className="flex h-full flex-col justify-start space-y-6 p-6 pt-[env(safe-area-inset-top,48px)]">
                       {/* Personalized Greeting */}
-                      <div className="pt-4">
+                      <div className="pt-2">
                         <div className="flex items-start gap-3">
                           <MazdaLogo variant="icon" theme="dark" size="sm" className="mt-1 shrink-0" />
                           <div>
@@ -2284,23 +2128,7 @@ export function Phase4Shell() {
                             <ChevronRight className="h-4 w-4 text-gray-300" />
                           </button>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              haptics.tap()
-                              setActiveTab('map')
-                            }}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
-                          >
-                            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-50">
-                              <HeartHandshake className="h-5 w-5 text-yellow-700" strokeWidth={2} />
-                            </span>
-                            <span className="flex-1">
-                              <span className="block text-sm font-semibold text-gray-900">Roadside help</span>
-                              <span className="block text-xs text-gray-500">Find nearby assistance fast</span>
-                            </span>
-                            <ChevronRight className="h-4 w-4 text-gray-300" />
-                          </button>
+
                         </div>
                       </motion.div>
                     ) : null}
@@ -2314,12 +2142,13 @@ export function Phase4Shell() {
 
         {/* Mobile nav bar (hidden on desktop) */}
         {!isAddingCar ? (
-          <div className="absolute bottom-0 z-40 w-full max-w-md border-t border-[rgba(153,23,40,0.08)] bg-[rgba(255,249,248,0.94)] pb-[calc(env(safe-area-inset-bottom,0px)+8px)] shadow-[0_-10px_40px_rgba(90,12,24,0.08)] backdrop-blur-xl lg:hidden">
-            <div className="flex items-center justify-around px-2 py-2.5">
-              <NavButton icon={<Home className="h-6 w-6" />} label="Home" isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
-              <NavButton icon={<Car className="h-6 w-6" />} label="Garage" isActive={activeTab === 'garage'} onClick={() => setActiveTab('garage')} />
-              <NavButton icon={<MapPin className="h-6 w-6" />} label="Map" isActive={activeTab === 'map'} onClick={() => setActiveTab('map')} />
-              <NavButton icon={<Settings className="h-6 w-6" />} label="Settings" isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+          <div className="absolute bottom-0 z-40 w-full max-w-md px-5 pb-[calc(env(safe-area-inset-bottom,0px)+20px)] lg:hidden">
+            <div className="rounded-[32px] border border-[#A31526]/10 bg-[rgba(255,249,248,0.85)] px-2 py-2 shadow-[0_16px_32px_rgba(163,21,38,0.12)] backdrop-blur-2xl">
+              <div className="flex items-center justify-between">
+                <NavButton icon={<Home className="h-6 w-6" />} label="Home" isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
+                <NavButton icon={<Car className="h-6 w-6" />} label="Vehicles" isActive={activeTab === 'vehicles'} onClick={() => setActiveTab('vehicles')} />
+                <NavButton icon={<Settings className="h-6 w-6" />} label="Settings" isActive={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+              </div>
             </div>
           </div>
         ) : null}

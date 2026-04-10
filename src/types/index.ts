@@ -12,6 +12,7 @@ export interface Vehicle {
   mileageInterval: 5000 | 7000 | 9000 | 10000
   color?: string
   nextServiceMileage?: number
+  imageUrl?: string
 }
 
 export interface ServiceLog {

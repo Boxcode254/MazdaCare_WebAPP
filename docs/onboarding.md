@@ -46,7 +46,7 @@ This document is for AI coding agents (Cursor, Antigravity, Copilot, etc.) and n
 ## Critical UI/UX rule — top page layout
 
 - **Do not** add or change the top of any page to a black/dark background bar or full-width dark strip.
-- The top of app pages must stay **light**, as implemented in `Phase4Shell` and existing headers.
+- The main shell header uses **`app-top-bar`** (light cream) in **both** themes — see [Design system](./design-system.md).
 - Applies to all new pages and agent-generated UI.
 
 ## `.env` policy

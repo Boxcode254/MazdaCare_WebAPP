@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Car, Info, Loader2 } from 'lucide-react'
+import { Car, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,6 @@ import { useVehicles } from '@/hooks/useVehicles'
 
 const colorOptions = ['White', 'Silver', 'Gray', 'Black', 'Blue', 'Red', 'Green', 'Brown']
 const kenyaPlatePattern = /^K[A-Z]{2}\s\d{3}[A-Z]$/
-const vinPattern = /^[A-HJ-NPR-Z0-9]{17}$/i
 
 const modelCards = [
   {
@@ -55,7 +54,7 @@ const addCarSchema = z.object({
     .transform((value) => value.toUpperCase().trim())
       .refine((value) => kenyaPlatePattern.test(value), 'Use Kenya format: KXX 123A'),
   currentMileage: z.number().int().min(0),
-  mileageInterval: z.union([z.literal(5000), z.literal(10000)]),
+  mileageInterval: z.union([z.literal(5000), z.literal(7000), z.literal(9000), z.literal(10000)]),
   color: z.string().min(2),
 })
 
@@ -78,7 +77,6 @@ export function AddCar() {
   const addCarLimit = useRateLimit({ key: 'add_vehicle', maxAttempts: 10, windowMs: 3600000 })
   const [step, setStep] = useState(1)
   const [stepVisible, setStepVisible] = useState(false)
-  const [vinInput, setVinInput] = useState('')
 
   const {
     register,
@@ -121,11 +119,10 @@ export function AddCar() {
 
   const stepLabels = ['Model', 'Details'] as const
   const progressPercent = (step / stepLabels.length) * 100
-  const isVinValid = vinPattern.test(vinInput.trim())
   const isStepReady =
     step === 1
       ? Boolean(values.model)
-      : Boolean(values.year >= 1990 && values.color.trim().length >= 2 && isVinValid)
+      : Boolean(values.year >= 1990 && values.color.trim().length >= 2)
 
   useEffect(() => {
     setStepVisible(false)
@@ -144,7 +141,7 @@ export function AddCar() {
   const nextStep = async () => {
     if (step < 2) {
       const valid = await trigger(stepValidations[step as 1 | 2])
-      if (!valid || (step === 1 ? false : !isVinValid)) {
+      if (!valid) {
         haptics.error()
         toast.error('Please fix the highlighted fields before continuing.')
         return
@@ -173,6 +170,7 @@ export function AddCar() {
         currentMileage: sanitizeMileage(formValues.currentMileage),
         engineSize: sanitizeText(formValues.engineSize),
         color: sanitizeText(formValues.color),
+        mileageInterval: formValues.mileageInterval,
       })
       haptics.success()
       toast.success('Vehicle added successfully.')
@@ -308,25 +306,6 @@ export function AddCar() {
                     ))}
                   </datalist>
                   {errors.color ? <p className="text-xs text-red-600">{errors.color.message}</p> : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="vin" className="mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-mz-gray-500">VIN</Label>
-                  <Input
-                    id="vin"
-                    value={vinInput}
-                    onChange={(event) => setVinInput(event.target.value.toUpperCase().replace(/\s+/g, ''))}
-                    className="h-auto rounded-xl border border-transparent bg-mz-gray-100 px-4 py-3.5 text-[15px] uppercase tracking-[0.08em] text-mz-black shadow-none focus-visible:border-mz-red focus-visible:bg-white focus-visible:ring-[3px] focus-visible:ring-[rgba(163,21,38,0.12)]"
-                    placeholder="17-character VIN"
-                    maxLength={17}
-                  />
-                  <div className="mt-2 flex items-start gap-2 rounded-xl bg-[#EEF5FF] px-3 py-3 text-[12px] text-[#1A3A6B]">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                    <p>
-                      Tip: You can usually find your 17-digit VIN on the driver's side dashboard where it meets the windshield, or on your registration card.
-                    </p>
-                  </div>
-                  {!isVinValid && vinInput.length > 0 ? <p className="text-xs text-red-600">VIN must be 17 characters.</p> : null}
                 </div>
               </div>
             ) : null}

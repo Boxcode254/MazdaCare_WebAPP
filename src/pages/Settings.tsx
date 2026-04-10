@@ -380,7 +380,7 @@ export function Settings() {
       <button
         type="button"
         onClick={() => setLogoutConfirmOpen(true)}
-        className="mb-6 flex h-12 w-full items-center justify-center rounded-xl border-2 border-mazda-red bg-transparent text-[15px] font-semibold text-mazda-red"
+        className="mb-6 flex h-12 w-full items-center justify-center rounded-xl border-2 border-mz-red bg-transparent text-[15px] font-semibold text-mz-red"
       >
         Log Out
       </button>

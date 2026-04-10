@@ -29,8 +29,9 @@
     --mz-surface:    rgba(255, 249, 248, 0.92);
     --mz-panel:      rgba(255, 255, 255, 0.74);
 
-    --font-body:     'Space Grotesk', sans-serif;
-    --font-display:  'Fraunces', serif;
+    /* Match tailwind.config.js (Outfit + Cormorant Garamond) */
+    --font-body:     'Outfit', ui-sans-serif, system-ui, sans-serif;
+    --font-display:  'Cormorant Garamond', ui-serif, Georgia, serif;
 
     --radius-sm:  6px;
     --radius-md:  8px;
@@ -73,21 +74,32 @@
     --mz-bg: #111010;
     --mz-gray-100: #1E1A1B;
     --mz-border: rgba(255,255,255,0.08);
-    --mz-gray-700: rgba(255,255,255,0.85);
-    --mz-muted: rgba(255,255,255,0.45);
+    --mz-gray-700: rgba(255,255,255,0.88);
+    --mz-gray-600: rgba(255,255,255,0.78);
+    --mz-muted: rgba(255,255,255,0.55);
     --mz-surface: #262020;
+    --mz-red-light: rgba(248, 220, 226, 0.12);
 
-    /* shadcn/ui tokens for dark mode */
+    /* shadcn/ui — Soul Red primary, higher contrast muted text (~WCAG-friendly on dark cards) */
     --background: 5 5% 7%;
-    --foreground: 20 14% 98%;
+    --foreground: 20 14% 96%;
     --card: 5 5% 12%;
-    --card-foreground: 20 14% 98%;
-    --border: 0 0% 10%;
-    --input: 0 0% 10%;
-    --muted: 5 5% 14%;
-    --muted-foreground: 10 5% 55%;
-    --accent: 347 68% 15%;
-    --accent-foreground: 20 14% 98%;
+    --card-foreground: 20 14% 96%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --muted: 5 5% 16%;
+    --muted-foreground: 20 10% 72%;
+    --accent: 347 45% 22%;
+    --accent-foreground: 347 85% 92%;
+    --primary: 350 75% 52%;
+    --primary-foreground: 0 0% 99%;
+    --ring: 350 75% 58%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 99%;
+    --secondary: 5 5% 18%;
+    --secondary-foreground: 20 14% 92%;
+    --popover: 5 5% 10%;
+    --popover-foreground: 20 14% 96%;
   }
 
   * {
@@ -240,16 +252,24 @@
     animation: wizard-ready-pulse 1.8s ease-in-out infinite;
   }
 
-  .bg-mazda-red {
-    background-color: var(--mz-red);
+  /**
+   * Light-top rule: main shell header strip stays light (cream) in both themes.
+   * Do not replace with dark fills — see docs/design-system.md
+   */
+  .app-top-bar {
+    border-bottom: 1px solid rgba(153, 23, 40, 0.08);
+    background: rgba(255, 249, 248, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
-  .text-mazda-red {
-    color: var(--mz-red);
+  .dark .app-top-bar {
+    background: rgba(255, 249, 248, 0.94);
+    color: #151112;
   }
 
-  .border-mazda-red {
-    border-color: var(--mz-red);
+  .dark .app-top-bar h1 {
+    color: #111827;
   }
 
   @keyframes network-slide-down {

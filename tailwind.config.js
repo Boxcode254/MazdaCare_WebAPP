@@ -40,6 +40,7 @@ export default {
           DEFAULT: 'var(--card)',
           foreground: 'var(--card-foreground)',
         },
+        /* Canonical brand scale — use mz-* only (no duplicate mazda-* prefix). */
         mz: {
           red:          '#A31526',
           'red-mid':    '#BC2133',
@@ -56,11 +57,6 @@ export default {
           white:        '#FFFCFB',
           gold:         '#C49A3C',
           'gold-light': '#F5EDD6',
-        },
-        mazda: {
-          red: '#A31526',
-          'red-dark': '#7F0F1D',
-          'red-light': '#F8E7EA',
         },
       },
       fontFamily: {
