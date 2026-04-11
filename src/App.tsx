@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Phase4Shell } from '@/components/layout/Phase4Shell'
 import { SplashScreen } from '@/components/ui/SplashScreen'
-import VehicleDetailPage from '@/pages/VehicleDetail'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 const Auth = lazy(() => import('@/pages/Auth').then((m) => ({ default: m.Auth })))
 const VehiclesPage = lazy(() => import('@/pages/Vehicles'))
@@ -33,57 +33,46 @@ function App() {
     } catch {
       // sessionStorage unavailable
     }
-
     setShowSplash(false)
   }, [])
 
   return (
-    <Fragment>
-      {showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : null}
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/auth"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <Auth />
-              </Suspense>
-            }
-          />
-
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Phase4Shell />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/vehicles"
-            element={
-              <ProtectedRoute>
+    <ErrorBoundary>
+      <Fragment>
+        {showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : null}
+        <BrowserRouter>
+          <Routes>
+            <Route
+              path="/auth"
+              element={
                 <Suspense fallback={<PageFallback />}>
-                  <VehiclesPage />
+                  <Auth />
                 </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/vehicles/:id"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageFallback />}>
-                  <VehicleDetailPage />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </Fragment>
+              }
+            />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Phase4Shell />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vehicles"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageFallback />}>
+                    <VehiclesPage />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </Fragment>
+    </ErrorBoundary>
   )
 }
 

@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { useVehicles } from '@/hooks/useVehicles'
-import { CarCard } from '@/components/car/CarCard'
 import { Plus } from 'lucide-react'
 
 export default function VehiclesPage() {

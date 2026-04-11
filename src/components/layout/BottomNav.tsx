@@ -1,12 +1,8 @@
-import { Car, Home, MapPin, User } from 'lucide-react'
-import { NavLink, useLocation, useParams } from 'react-router-dom'
+import { Car, Home, User, CheckCircle2, Bell } from 'lucide-react'
+import { NavLink, useLocation } from 'react-router-dom'
 
 export function BottomNav() {
   const location = useLocation()
-
-  // Grab any :vehicleId already present in the current URL so nav links stay contextual
-  const { vehicleId } = useParams<{ vehicleId?: string }>()
-  const vid = vehicleId ?? ''
 
   const navItems = [
     { label: 'Home', to: '/', icon: Home, matches: ['/'] },
