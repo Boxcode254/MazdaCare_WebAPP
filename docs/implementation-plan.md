@@ -1,6 +1,6 @@
 # Mazda Maintenance Monitoring App — Full Implementation Plan
 
-> **Last updated:** 2026-04-07  
+> **Last updated:** 2026-04-12  
 > **Platform decision:** Progressive Web App (PWA) — works on any Android/iOS browser in Nairobi,  
 > installs to home screen, no Play Store needed, offline-capable, one codebase.  
 > **Production URL:** https://mazdacare-app.vercel.app  
@@ -22,30 +22,21 @@
 | Prompt 7: Dashboard & polish | ✅ DONE |
 | Prompt 8: PWA & deployment | ✅ DONE |
 | UI/UX redesign (Phases 1–3) | ✅ DONE (Soul Red theme, performance, QA) |
-| Phase 4: Logo, refinements, security | 🔧 IN PROGRESS |
+| Phase 4: Logo, refinements, security | ✅ DONE |
+| Phase 5: Adaptive desktop & table view | ✅ DONE |
+| Phase 6: Vehicle workspace + service-state consistency | ✅ DONE |
 
-### Phase 4 Remaining Items
+### Latest Completed Delivery (2026-04-12)
 
-| ID | Task | Status |
-|---|---|---|
-| LOGO-1 | MazdaCare SVG icon component | PENDING |
-| LOGO-2 | Apply logo to auth page | PENDING |
-| LOGO-3 | PWA icons and splash screen | PENDING |
-| LOGO-4 | Dashboard and nav logo placement | ✅ DONE |
-| SEC-1 | CSP headers via vercel.json | PENDING |
-| SEC-2 | Input sanitization (DOMPurify) | ✅ DONE |
-| SEC-3 | API key and env variable audit | PENDING |
-| SEC-4 | Supabase RLS edge case hardening | ✅ DONE |
-| SEC-5 | Auth guard and session hardening | PENDING |
-| SEC-6 | Client-side form rate limiting | ✅ DONE |
-| REFINE-1 | Micro-interactions and haptics | PENDING |
-| REFINE-2 | Onboarding empty state | ✅ DONE |
-| REFINE-3 | Offline indicator and network state | ✅ DONE |
+- Shared `serviceState` utility introduced so next-service/due-state logic comes from latest logs first and alerts second.
+- `Phase4Shell` now supports a true desktop master-detail Vehicles workspace while preserving mobile list/detail behavior.
+- Dashboard cards, vehicle list cards, notifications, and mileage update flows now use the same service snapshot model.
+- Dedicated `/vehicles/:id` route and reusable `VehicleDetailView` added for direct detail-page navigation.
+- Typography and token refresh completed with Plus Jakarta Sans, Instrument Serif, and a tighter premium palette.
 
 ### Remaining Blockers
 
 1. **Google Maps API key** — set `VITE_GOOGLE_MAPS_API_KEY` in local `.env.local` and Vercel env vars. After adding: verify map loads, then add HTTP referrer restrictions in Google Cloud Console for `https://mazdacare-app.vercel.app/*`
-2. **PWA icon PNG files** — after LOGO-3, export SVG to 192×192 and 512×512 PNG, commit to `public/icons/`
 
 ---
 
@@ -93,14 +84,16 @@
 │   │   ├── ui/                # shadcn components (button, card, input, select, dialog, sheet, badge, toast, tabs, form, label, slider, avatar, progress, sonner)
 │   │   ├── layout/            # Phase4Shell (unified app shell), BottomNav, InstallAppBanner
 │   │   ├── auth/              # ProtectedRoute
-│   │   ├── car/               # CarCard
+│   │   ├── car/               # CarCard, VehicleListCard, VehicleDetailView
 │   │   ├── service/           # ServiceLogCard
 │   │   ├── map/               # GarageCard
 │   │   └── schedule/          # AlertBanner
 │   ├── pages/
-│   │   ├── Dashboard.tsx      # (Legacy — Phase4Shell now handles home)
-│   │   ├── AddCar.tsx         # (Legacy — wizard embedded in Phase4Shell)
+│   │   ├── Dashboard.tsx      # Dashboard overview cards and quick actions
+│   │   ├── AddCar.tsx         # Add vehicle route / embedded wizard fallback
 │   │   ├── Auth.tsx           # Sign-in / sign-up (Google OAuth + email)
+│   │   ├── Vehicles.tsx       # Vehicle list route
+│   │   ├── VehicleDetail.tsx  # Dedicated vehicle detail route (/vehicles/:id)
 │   │   ├── ServiceLog.tsx     # Service history list
 │   │   ├── LogService.tsx     # Log a new service form
 │   │   ├── GarageMap.tsx      # Google Maps + garage search
@@ -109,20 +102,22 @@
 │   ├── hooks/
 │   │   ├── useAuth.ts         # Auth state + session listener
 │   │   ├── useVehicles.ts     # Vehicle CRUD with sanitization
-│   │   ├── useServiceLogs.ts  # Service log queries + mutations
-│   │   └── useAlerts.ts       # Alert fetching + next-service calc
+│   │   ├── useServiceLogs.ts  # Service log queries + latest-log map for cross-screen status
+│   │   └── useAlerts.ts       # Alert fetching + next-service helpers
 │   ├── lib/
 │   │   ├── supabase.ts        # Supabase client
 │   │   ├── oils.ts            # Kenya oil data (9 brands/grades)
 │   │   ├── mazda-models.ts    # Mazda model list (12 models)
 │   │   ├── maps.ts            # Google Maps helpers
+│   │   ├── serviceState.ts    # Shared vehicle service-status derivation
 │   │   ├── sanitize.ts        # DOMPurify sanitization helpers
+│   │   ├── vehicleDisplay.ts  # Vehicle catalog + image lookup helpers
 │   │   └── utils.ts           # cn() and general utils
 │   ├── stores/
 │   │   └── appStore.ts        # Zustand global store
 │   ├── types/
 │   │   └── index.ts           # Vehicle, ServiceLog, Garage, ServiceAlert interfaces
-│   └── App.tsx                # Routes: /auth → Auth, / → ProtectedRoute → Phase4Shell
+│   └── App.tsx                # Routes: /auth, /, /vehicles/:id
 ├── supabase/
 │   ├── config.toml
 │   ├── migrations/
@@ -140,7 +135,7 @@
 
 ### Architecture Note
 
-The app uses **Phase4Shell** (`src/components/layout/Phase4Shell.tsx`) as a unified single-page shell with tab-based navigation (`home` | `garage` | `map` | `profile`), replacing the original multi-page React Router approach. The shell manages all primary views, the vehicle add wizard, settings, and service logging inline. The only separate route is `/auth`.
+The app uses **Phase4Shell** (`src/components/layout/Phase4Shell.tsx`) as the unified authenticated shell with tab-based navigation (`vehicles` | `events` | `notifications` | `settings`). Vehicles now behaves as a responsive workspace: mobile uses list/detail transitions, desktop uses a persistent master-detail layout. Shared vehicle service state is derived centrally in `src/lib/serviceState.ts` and reused across dashboard, shell, notifications, and detail surfaces. Separate routes are `/auth`, `/`, and `/vehicles/:id`.
 
 ---
 
@@ -866,7 +861,9 @@ Finalize PWA and deploy:
 | Dashboard + polish | 3-4 hours | ✅ Complete |
 | PWA + deploy | 1-2 hours | ✅ Complete |
 | UI/UX redesign (3 phases) | — | ✅ Complete |
-| Phase 4 (logo, security, refinement) | — | 🔧 In progress |
+| Phase 4 (logo, security, refinement) | — | ✅ Complete |
+| Phase 5 (adaptive desktop & table view) | — | ✅ Complete |
+| Phase 6 (vehicle workspace & service-state consistency) | — | ✅ Complete |
 
 ---
 

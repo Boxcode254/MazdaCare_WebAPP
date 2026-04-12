@@ -10,28 +10,29 @@
     color-scheme: light;
 
     /* ── MZ Design Tokens ─────────────────────────────────── */
-    --mz-red:        #991728;
-    --mz-red-mid:    #C2263D;
-    --mz-red-dark:   #5A0C18;
-    --mz-red-light:  #F8DCE2;
-    --mz-red-pale:   #FFF5F7;
-    --mz-rose:       #E46B80;
-    --mz-black:      #151112;
-    --mz-gray-900:   #231C1E;
-    --mz-gray-700:   #43393B;
-    --mz-gray-600:   #615658;
-    --mz-gray-500:   #75686A;
-    --mz-gray-300:   #D3C5C8;
-    --mz-gray-100:   #F6EEEE;
-    --mz-white:      #FFF9F8;
-    --mz-gold:       #C49A3C;
-    --mz-gold-light: #F8EFD9;
-    --mz-surface:    rgba(255, 249, 248, 0.92);
-    --mz-panel:      rgba(255, 255, 255, 0.74);
+    --mz-red:        #8F1326;
+    --mz-red-mid:    #B31F35;
+    --mz-red-dark:   #5F0A18;
+    --mz-red-light:  #F5DDE2;
+    --mz-red-pale:   #FEF6F8;
+    --mz-rose:       #D8707D;
+    --mz-black:      #151214;
+    --mz-gray-900:   #211A1D;
+    --mz-gray-700:   #403438;
+    --mz-gray-600:   #5E5256;
+    --mz-gray-500:   #7B7073;
+    --mz-gray-300:   #D8CDD0;
+    --mz-gray-100:   #F4EEEF;
+    --mz-white:      #FFFDFC;
+    --mz-gold:       #B88A37;
+    --mz-gold-light: #F7EEDB;
+    --mz-surface:    rgba(255, 252, 251, 0.94);
+    --mz-panel:      rgba(255, 255, 255, 0.78);
+    --mz-navy:       #253650;
+    --mz-green:      #2C6A4A;
 
-    /* Match tailwind.config.js (Outfit + Cormorant Garamond) */
-    --font-body:     'Outfit', ui-sans-serif, system-ui, sans-serif;
-    --font-display:  'Cormorant Garamond', ui-serif, Georgia, serif;
+    --font-body:     'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display:  'Instrument Serif', ui-serif, Georgia, serif;
 
     --radius-sm:  6px;
     --radius-md:  8px;
@@ -40,26 +41,26 @@
     --radius-2xl: 24px;
 
     /* ── shadcn/ui tokens — mapped to MZ palette ──────────── */
-    --primary:              #A31526;
-    --primary-foreground:   #FAFAFA;
-    --ring:                 #A31526;
+    --primary:              #8F1326;
+    --primary-foreground:   #FFFCFB;
+    --ring:                 #8F1326;
     --radius:               0.5rem;
-    --background:           #F7EEEE;
-    --foreground:           #6A625D;
-    --card:                 #FFF9F8;
-    --card-foreground:      #6A625D;
-    --popover:              #FFF9F8;
-    --popover-foreground:   #6A625D;
-    --secondary:            #F6EEEE;
-    --secondary-foreground: #6A625D;
-    --muted:                #F8F1F2;
-    --muted-foreground:     #6A625D;
-    --accent:               #F8DCE2;
-    --accent-foreground:    #A31526;
-    --destructive:          #A31526;
-    --destructive-foreground: #FAFAFA;
-    --border:               #D9CBCE;
-    --input:                #D9CBCE;
+    --background:           #F7F1F2;
+    --foreground:           #5E5256;
+    --card:                 #FFFDFC;
+    --card-foreground:      #211A1D;
+    --popover:              #FFFDFC;
+    --popover-foreground:   #211A1D;
+    --secondary:            #F3EBEC;
+    --secondary-foreground: #403438;
+    --muted:                #F4EEEF;
+    --muted-foreground:     #7B7073;
+    --accent:               #F5DDE2;
+    --accent-foreground:    #8F1326;
+    --destructive:          #8F1326;
+    --destructive-foreground: #FFFCFB;
+    --border:               #DED2D5;
+    --input:                #DED2D5;
   }
 
   /* Dark mode Mazda palette overrides */
@@ -110,10 +111,10 @@
   body {
     font-family: var(--font-body);
     background:
-      radial-gradient(circle at top left, rgba(153, 23, 40, 0.16), transparent 34%),
-      radial-gradient(circle at top right, rgba(228, 107, 128, 0.12), transparent 28%),
-      linear-gradient(180deg, #fff8f7 0%, #f8eeee 52%, #f4e8e9 100%);
-    color: var(--mz-gray-600);
+      radial-gradient(circle at top left, rgba(143, 19, 38, 0.14), transparent 34%),
+      radial-gradient(circle at top right, rgba(37, 54, 80, 0.08), transparent 28%),
+      linear-gradient(180deg, #fffdfc 0%, #f7f1f2 48%, #f2eaec 100%);
+    color: var(--mz-gray-700);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
@@ -122,13 +123,12 @@
   h1, h2, h3, h4, h5, h6 {
     color: var(--mz-gray-900);
     font-family: var(--font-display);
-    font-weight: 600;
-    font-variation-settings: "SOFT" 60, "WONK" 0;
-    letter-spacing: -0.03em;
+    font-weight: 400;
+    letter-spacing: -0.02em;
   }
 
   p, li, span, label {
-    color: var(--mz-gray-600);
+    color: var(--mz-gray-700);
   }
 
   [style*="Outfit, sans-serif"] {
@@ -138,8 +138,11 @@
   [style*="Cormorant Garamond, serif"] {
     font-family: var(--font-display) !important;
     font-style: normal !important;
-    font-variation-settings: "SOFT" 60, "WONK" 0;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
+  }
+
+  [style*="Instrument Serif, serif"] {
+    font-family: var(--font-display) !important;
   }
 
   /* Prevent zoom on input focus on iOS */
@@ -172,26 +175,26 @@
 @layer utilities {
   .brand-shell {
     background:
-      radial-gradient(circle at top left, rgba(153, 23, 40, 0.22), transparent 28%),
-      radial-gradient(circle at 100% 0, rgba(228, 107, 128, 0.12), transparent 26%),
-      linear-gradient(180deg, #fff7f6 0%, #f7eded 100%);
+      radial-gradient(circle at top left, rgba(143, 19, 38, 0.18), transparent 28%),
+      radial-gradient(circle at 100% 0, rgba(37, 54, 80, 0.1), transparent 24%),
+      linear-gradient(180deg, #fffdfc 0%, #f5eff0 100%);
   }
 
   .brand-panel {
-    background: linear-gradient(180deg, rgba(255, 249, 248, 0.96) 0%, rgba(255, 244, 244, 0.9) 100%);
-    border: 1px solid rgba(153, 23, 40, 0.08);
-    box-shadow: 0 20px 60px rgba(90, 12, 24, 0.08);
+    background: linear-gradient(180deg, rgba(255, 252, 251, 0.97) 0%, rgba(250, 244, 245, 0.92) 100%);
+    border: 1px solid rgba(143, 19, 38, 0.08);
+    box-shadow: 0 20px 60px rgba(95, 10, 24, 0.09);
     backdrop-filter: blur(18px);
   }
 
   .brand-panel-strong {
     background:
-      linear-gradient(135deg, rgba(90, 12, 24, 0.96) 0%, rgba(153, 23, 40, 0.94) 58%, rgba(194, 38, 61, 0.88) 100%);
-    box-shadow: 0 24px 60px rgba(90, 12, 24, 0.26);
+      linear-gradient(135deg, rgba(95, 10, 24, 0.96) 0%, rgba(143, 19, 38, 0.94) 58%, rgba(179, 31, 53, 0.88) 100%);
+    box-shadow: 0 24px 60px rgba(95, 10, 24, 0.28);
   }
 
   .brand-outline {
-    border: 1px solid rgba(153, 23, 40, 0.12);
+    border: 1px solid rgba(143, 19, 38, 0.12);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   }
 

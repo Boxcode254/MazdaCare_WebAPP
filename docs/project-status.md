@@ -91,10 +91,10 @@ Log any bugs, unexpected behaviors, or UX issues found during this walkthrough f
 <!-- AUTO_STATUS_START -->
 ## Auto Snapshot
 
-- Last auto update: 2026-04-11T07:32:26.934Z
+- Last auto update: 2026-04-12T06:42:43.381Z
 - Branch: main
-- Latest commit: 83b28b9
-- Git status: dirty (8 file(s) changed, main...origin/main)
+- Latest commit: 17533e3
+- Git status: dirty (17 file(s) changed, main...origin/main)
 - Production app URL: https://mazdacare-app.vercel.app
 - Vercel project: mazdacare-app
 - Supabase project ref: rmfkykcijcndwvsursmu
@@ -154,9 +154,28 @@ Log any bugs, unexpected behaviors, or UX issues found during this walkthrough f
 - Desktop Table View: Toggle between Card/Table in History, high-density data, context menu actions - DONE
 - Documentation updated: [Onboarding](./onboarding.md) and this file reflect desktop enhancements - DONE
 
+## Phase 6 — Vehicle Workspace & Service-State Consistency (2026-04-12)
+
+- Shared vehicle service snapshot utility (`src/lib/serviceState.ts`) derived from latest service logs first, alerts second - DONE
+- Latest-log map support in `useServiceLogs` for cross-screen service-state reuse - DONE
+- Vehicles list cards and notifications now show exact due state instead of interval approximation - DONE
+- Mileage update sheet now uses the same service target source as list/detail views - DONE
+- Desktop Vehicles upgraded to a true master-detail workspace with persistent list + detail pane - DONE
+- Reusable `VehicleListCard`, `VehicleDetailView`, and dedicated `/vehicles/:id` route added - DONE
+- Dashboard cards now read the same shared service snapshot as Vehicles - DONE
+- Premium token refresh applied: Plus Jakarta Sans + Instrument Serif, refined warm neutral/red/gold palette - DONE
+
 ## Deployment and Infra Status
 
 ### Recent Code/Data Updates
+
+- **Vehicle workspace and service-state consistency pass (2026-04-12):**
+  - Added `src/lib/serviceState.ts` as the single source of truth for due mileage/date, overdue state, due-soon state, and progress
+  - Added `src/lib/vehicleDisplay.ts` to centralize vehicle image/catalog lookup
+  - Added `src/components/car/VehicleListCard.tsx` and `src/components/car/VehicleDetailView.tsx`
+  - Added `src/pages/VehicleDetail.tsx` and routed `/vehicles/:id` through `src/App.tsx`
+  - Updated `Dashboard.tsx`, `CarCard.tsx`, `Phase4Shell.tsx`, and `Vehicles.tsx` so service status is consistent across dashboard, list, detail, and notifications
+  - Refined global typography/color tokens in `src/index.css` and `tailwind.config.js`
 
 - **Mazda Manual Catalog Integration (2026-04-07):**
   - Added `src/data/mazdaManualCatalog.json` (official Mazda Canada manual links, 2000+ lines, all models/years)

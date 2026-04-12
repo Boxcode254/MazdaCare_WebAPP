@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { buildLatestServiceLogMap } from '@/lib/serviceState'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
 import type { ServiceLog } from '@/types'
@@ -74,6 +75,7 @@ function toServiceLog(row: ServiceLogRow): ServiceLog {
 export function useServiceLogs() {
   const user = useAppStore((state) => state.user)
   const [logs, setLogs] = useState<ServiceLog[]>([])
+  const [latestLogsByVehicle, setLatestLogsByVehicle] = useState<Record<string, ServiceLog>>({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -118,6 +120,50 @@ export function useServiceLogs() {
         return mapped
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unable to load service logs.'
+        setError(message)
+        throw err
+      } finally {
+        setLoading(false)
+      }
+    },
+    [resolveUserId]
+  )
+
+  const fetchLatestLogs = useCallback(
+    async (vehicleIds?: string[]) => {
+      if (vehicleIds && vehicleIds.length === 0) {
+        setLatestLogsByVehicle({})
+        return {}
+      }
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const userId = await resolveUserId()
+        let query = supabase
+          .from('service_logs')
+          .select('*')
+          .eq('user_id', userId)
+          .order('service_date', { ascending: false })
+          .order('created_at', { ascending: false })
+
+        if (vehicleIds?.length) {
+          query = query.in('vehicle_id', vehicleIds)
+        }
+
+        const { data, error: fetchError } = await query
+
+        if (fetchError) {
+          throw fetchError
+        }
+
+        const mapped = ((data ?? []) as ServiceLogRow[]).map(toServiceLog)
+        const latestMap = buildLatestServiceLogMap(mapped)
+        setLatestLogsByVehicle(latestMap)
+        return latestMap
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unable to load latest service logs.'
         setError(message)
         throw err
       } finally {
@@ -192,6 +238,17 @@ export function useServiceLogs() {
         }
 
         setLogs((current) => [created, ...current])
+        setLatestLogsByVehicle((current) => {
+          const existing = current[created.vehicleId]
+          if (existing && new Date(existing.serviceDate).getTime() > new Date(created.serviceDate).getTime()) {
+            return current
+          }
+
+          return {
+            ...current,
+            [created.vehicleId]: created,
+          }
+        })
         return created
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unable to save service log.'
@@ -208,6 +265,7 @@ export function useServiceLogs() {
     async (id: string) => {
       setLoading(true)
       setError(null)
+      const deletedLog = logs.find((log) => log.id === id) ?? null
 
       try {
         const userId = await resolveUserId()
@@ -218,6 +276,27 @@ export function useServiceLogs() {
         }
 
         setLogs((current) => current.filter((log) => log.id !== id))
+        if (deletedLog) {
+          setLatestLogsByVehicle((current) => {
+            if (current[deletedLog.vehicleId]?.id !== id) {
+              return current
+            }
+
+            const nextLatest = logs
+              .filter((log) => log.vehicleId === deletedLog.vehicleId && log.id !== id)
+              .sort((left, right) => new Date(right.serviceDate).getTime() - new Date(left.serviceDate).getTime())[0]
+
+            if (!nextLatest) {
+              const { [deletedLog.vehicleId]: _removed, ...rest } = current
+              return rest
+            }
+
+            return {
+              ...current,
+              [deletedLog.vehicleId]: nextLatest,
+            }
+          })
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unable to delete service log.'
         setError(message)
@@ -231,9 +310,11 @@ export function useServiceLogs() {
 
   return {
     logs,
+    latestLogsByVehicle,
     loading,
     error,
     fetchLogs,
+    fetchLatestLogs,
     addLog,
     deleteLog,
   }

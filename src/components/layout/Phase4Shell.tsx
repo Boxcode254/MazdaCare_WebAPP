@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Bell,
   Calendar,
@@ -21,22 +21,27 @@ import {
   Droplets,
   CircleDot,
   AlertCircle,
+  Menu,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { toast } from 'sonner'
-import { CarCard } from '@/components/car/CarCard'
+import { VehicleListCard } from '@/components/car/VehicleListCard'
+import { VehicleDetailView } from '@/components/car/VehicleDetailView'
 import MazdaLogo from '@/components/ui/MazdaLogo'
 import { CostAnalytics } from '@/components/service/CostAnalytics'
 import { LogService } from '@/pages/LogService'
 import { Sheet, SheetClose, SheetContent } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
+import { useAlerts } from '@/hooks/useAlerts'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
 import { useVehicles } from '@/hooks/useVehicles'
 import { useAuth } from '@/hooks/useAuth'
 import { haptics } from '@/lib/haptics'
 import { lookupMazdaManuals, type MazdaManualLookupResult } from '@/lib/mazdaManuals'
+import { resolveVehicleServiceSnapshot, type VehicleServiceSnapshot } from '@/lib/serviceState'
 import { sanitizeMileage, sanitizeText } from '@/lib/sanitize'
 import { supabase } from '@/lib/supabase'
+import { MAZDA_VEHICLE_CATALOG } from '@/lib/vehicleDisplay'
 import { useAppStore } from '@/stores/appStore'
 import { decodeVIN, formatVIN, type VINInfo } from '@/lib/vinDecoder'
 import { KeyboardShortcutLegend } from '@/components/layout/KeyboardShortcutLegend'
@@ -49,57 +54,7 @@ import type { Vehicle, ServiceLog } from '@/types'
 
 // ─── Static vehicle catalogue ──────────────────────────────────────────────
 
-const VEHICLES = [
-  {
-    id: 'cx5',
-    model: 'CX-5' as const,
-    name: 'Mazda CX-5',
-    type: 'SUV',
-    color: 'Grey',
-    image:
-      'https://images.unsplash.com/photo-1743114713503-b698b8433f03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYXpkYSUyMGN4NSUyMGdyZXklMjBzdXZ8ZW58MXx8fHwxNzc1NTQ3MDIzfDA&ixlib=rb-4.1.0&q=80&w=1080',
-  },
-  {
-    id: 'demio',
-    model: 'Demio' as const,
-    name: 'Mazda Demio / 2',
-    type: 'City Car',
-    color: 'White',
-    image:
-      'https://images.unsplash.com/photo-1756664825749-d481c5a94a57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYXpkYSUyMDIlMjBzbWFsbCUyMHdoaXRlJTIwY2FyfGVufDF8fHx8MTc3NTU0NzAyNnww&ixlib=rb-4.1.0&q=80&w=1080',
-  },
-  {
-    id: 'mazda3',
-    model: 'Axela' as const,
-    name: 'Mazda 3',
-    type: 'Hatchback',
-    color: 'Blue',
-    image:
-      'https://images.unsplash.com/photo-1754908132913-559fbdf12a36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYXpkYSUyMDMlMjBibHVlJTIwaGF0Y2hiYWNrfGVufDF8fHx8MTc3NTU0NzAyM3ww&ixlib=rb-4.1.0&q=80&w=1080',
-  },
-  {
-    id: 'mx5',
-    model: 'MX-5' as const,
-    name: 'Mazda MX-5',
-    type: 'Convertible',
-    color: 'Red',
-    image:
-      'https://images.unsplash.com/photo-1633118013371-4aed8e7fbae9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYXpkYSUyMG14NSUyMHJlZCUyMGNvbnZlcnRpYmxlfGVufDF8fHx8MTc3NTU0NzAyM3ww&ixlib=rb-4.1.0&q=80&w=1080',
-  },
-]
-
-function getVehicleImage(model: string): string {
-  const vehicle = VEHICLES.find((v) => v.model === model)
-  return (
-    vehicle?.image ||
-    'https://images.unsplash.com/photo-1743114713503-b698b8433f03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
-  )
-}
-
-function maskVin(vin: string): string {
-  if (vin.length <= 7) return vin
-  return `${vin.slice(0, 3)}...${vin.slice(-4)}` 
-}
+const VEHICLES = MAZDA_VEHICLE_CATALOG
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -769,9 +724,13 @@ function SettingsView({
 
 // ─── Events tab (Service History) ────────────────────────────────────────────
 
-function EventsTabContent() {
-  const { logs } = useServiceLogs()
-  const activeVehicleId = useAppStore((s) => s.activeVehicleId)
+function EventsTabContent({
+  logs,
+  activeVehicleId,
+}: {
+  logs: ServiceLog[]
+  activeVehicleId: string | null
+}) {
 
   const vehicleLogs = useMemo(
     () => (activeVehicleId ? logs.filter((l) => l.vehicleId === activeVehicleId) : logs),
@@ -815,7 +774,7 @@ function EventsTabContent() {
               </div>
               <p className="mt-0.5 truncate text-[11px] text-gray-500">{log.garageName || 'Garage not recorded'}</p>
               {log.rating ? (
-                <p className="mt-0.5 text-[10px] text-[#C49A3C">{'★'.repeat(log.rating)}{'☆'.repeat(5 - log.rating)}</p>
+                <p className="mt-0.5 text-[10px] text-[#C49A3C]">{'★'.repeat(log.rating)}{'☆'.repeat(5 - log.rating)}</p>
               ) : null}
             </div>
             <div className="shrink-0 text-right">
@@ -833,12 +792,23 @@ function EventsTabContent() {
 
 // ─── Notifications tab ────────────────────────────────────────────────────────
 
-function NotificationsTabContent() {
-  const vehicles = useAppStore((s) => s.vehicles)
+function NotificationsTabContent({
+  vehicles,
+  serviceSnapshots,
+}: {
+  vehicles: Vehicle[]
+  serviceSnapshots: Record<string, VehicleServiceSnapshot>
+}) {
+  const dueVehicles = vehicles
+    .map((vehicle) => ({
+      vehicle,
+      snapshot: serviceSnapshots[vehicle.id] ?? resolveVehicleServiceSnapshot(vehicle),
+    }))
+    .filter(({ snapshot }) => snapshot.status === 'overdue' || snapshot.status === 'due-soon')
 
   return (
     <div className="space-y-3 p-4 pb-28">
-      {vehicles.length === 0 ? (
+      {dueVehicles.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-10 text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F5F1F1]">
             <Bell className="h-6 w-6 text-[#C9C0C1]" />
@@ -847,23 +817,33 @@ function NotificationsTabContent() {
           <p className="mt-1 text-[13px] text-gray-400">We'll notify you when a service is due</p>
         </div>
       ) : (
-        vehicles.map((vehicle) => {
-          const nextService = vehicle.nextServiceMileage ?? vehicle.currentMileage + vehicle.mileageInterval
-          const kmRemaining = nextService - vehicle.currentMileage
-          const isOverdue = kmRemaining <= 0
-          const isDueSoon = kmRemaining <= 500
-          if (!isOverdue && !isDueSoon) return null
+        dueVehicles.map(({ vehicle, snapshot }) => {
+          const accent = snapshot.status === 'overdue' ? '#8F1326' : '#B88A37'
+          const title = snapshot.status === 'overdue'
+            ? 'Service overdue'
+            : snapshot.kmRemaining != null
+              ? `Service due soon — ${Math.max(snapshot.kmRemaining, 0).toLocaleString()} km`
+              : 'Service due soon'
+          const detail = snapshot.dueMileage != null
+            ? `Next at ${snapshot.dueMileage.toLocaleString()} km`
+            : snapshot.dueDate
+              ? `Due by ${snapshot.dueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`
+              : 'Reminder active'
+
           return (
-            <div key={vehicle.id} className={`flex items-start gap-3 rounded-2xl border bg-white p-4 shadow-sm ${isOverdue ? 'border-l-4 border-l-[#A31526] border-gray-100' : 'border-gray-100'}`}>
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isOverdue ? 'bg-[#F9EAEC]' : 'bg-[#FFF8EC]'}`}>
-                <AlertCircle className={`h-5 w-5 ${isOverdue ? 'text-[#A31526]' : 'text-[#C49A3C]'}`} />
+            <div key={vehicle.id} className={`flex items-start gap-3 rounded-2xl border bg-white p-4 shadow-sm ${snapshot.status === 'overdue' ? 'border-l-4 border-l-[#8F1326] border-gray-100' : 'border-gray-100'}`}>
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                style={{ backgroundColor: `${accent}14` }}
+              >
+                <AlertCircle className="h-5 w-5" style={{ color: accent }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-bold text-gray-900">
-                  {isOverdue ? 'Service overdue' : `Service due soon — ${kmRemaining} km`}
+                  {title}
                 </p>
                 <p className="mt-0.5 text-[11px] text-gray-500">{vehicle.make} {vehicle.model} · {vehicle.registration}</p>
-                <p className="mt-0.5 text-[10px] text-gray-400">Next at {nextService.toLocaleString()} km</p>
+                <p className="mt-0.5 text-[10px] text-gray-400">{detail}</p>
               </div>
             </div>
           )
@@ -877,6 +857,7 @@ function NotificationsTabContent() {
 
 function MileageUpdateSheet({
   vehicle,
+  serviceSnapshot,
   isOpen,
   onOpenChange,
   onSave,
@@ -884,6 +865,7 @@ function MileageUpdateSheet({
   onOpenLogService,
 }: {
   vehicle: Vehicle | null
+  serviceSnapshot: VehicleServiceSnapshot | null
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   onSave: (value: number) => Promise<void>
@@ -901,10 +883,22 @@ function MileageUpdateSheet({
   const parsed = parseInt(draftMileage.replace(/,/g, ''), 10)
   const isValid = !isNaN(parsed) && parsed > vehicle.currentMileage && parsed <= vehicle.currentMileage + 200000
   const delta = !isNaN(parsed) ? parsed - vehicle.currentMileage : 0
-  const nextService = vehicle.nextServiceMileage ?? vehicle.currentMileage + vehicle.mileageInterval
-  const kmLeft = nextService - (isValid ? parsed : vehicle.currentMileage)
-  const pct = Math.min(100, Math.max(0, Math.round(((isValid ? parsed : vehicle.currentMileage) / nextService) * 100)))
-  const barColor = pct >= 90 ? '#A31526' : pct >= 60 ? '#C49A3C' : '#2E7D4F'
+  const nextService = serviceSnapshot?.dueMileage ?? null
+  const comparisonMileage = isValid ? parsed : vehicle.currentMileage
+  const intervalStartMileage = serviceSnapshot?.latestLog?.mileageAtService ?? vehicle.currentMileage
+  const kmLeft = nextService == null ? null : nextService - comparisonMileage
+  const pct = nextService == null
+    ? 0
+    : Math.min(
+        100,
+        Math.max(
+          0,
+          Math.round(
+            ((comparisonMileage - intervalStartMileage) / Math.max(nextService - intervalStartMileage, 1)) * 100,
+          ),
+        ),
+      )
+  const barColor = kmLeft != null && kmLeft <= 0 ? '#8F1326' : pct >= 90 ? '#8F1326' : pct >= 60 ? '#B88A37' : '#2C6A4A'
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -944,17 +938,28 @@ function MileageUpdateSheet({
             </div>
           </div>
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-[12px] text-gray-600">Next service at</p>
-              <p className="text-[14px] font-bold text-[#A31526]">{nextService.toLocaleString()} km</p>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-[#F5F1F1]">
-              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: barColor }} />
-            </div>
-            <div className="mt-1.5 flex justify-between">
-              <p className="text-[10px] text-gray-400">{pct}% used</p>
-              <p className="text-[10px] font-semibold" style={{ color: barColor }}>{Math.max(0, kmLeft).toLocaleString()} km left</p>
-            </div>
+            {nextService != null ? (
+              <>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[12px] text-gray-600">Next service at</p>
+                  <p className="text-[14px] font-bold text-[#8F1326]">{nextService.toLocaleString()} km</p>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-[#F5F1F1]">
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: barColor }} />
+                </div>
+                <div className="mt-1.5 flex justify-between">
+                  <p className="text-[10px] text-gray-400">{pct}% used</p>
+                  <p className="text-[10px] font-semibold" style={{ color: barColor }}>{Math.max(0, kmLeft ?? 0).toLocaleString()} km left</p>
+                </div>
+              </>
+            ) : (
+              <div>
+                <p className="text-[12px] font-semibold text-[#211A1D]">Exact next-service target unavailable</p>
+                <p className="mt-1 text-[11px] text-gray-500">
+                  Log a service to track the next due mileage from actual service history instead of a default interval estimate.
+                </p>
+              </div>
+            )}
           </div>
           <div className="flex gap-3">
             <SheetClose asChild>
@@ -979,9 +984,13 @@ function MileageUpdateSheet({
 
 function Phase4Shell() {
   const { user, session, signOut } = useAuth()
-  const { activeVehicleId, setActiveVehicleId, setAuthState, setDisplayName } = useAppStore()
+  const activeVehicleId = useAppStore((state) => state.activeVehicleId)
+  const setActiveVehicleId = useAppStore((state) => state.setActiveVehicleId)
+  const setAuthState = useAppStore((state) => state.setAuthState)
+  const setDisplayName = useAppStore((state) => state.setDisplayName)
+  const { alerts, fetchAlerts } = useAlerts()
   const { vehicles, fetchVehicles, addVehicle, updateVehicle, loading } = useVehicles()
-  const { logs, fetchLogs } = useServiceLogs()
+  const { logs, fetchLogs, latestLogsByVehicle, fetchLatestLogs } = useServiceLogs()
 
   const [activeTab, setActiveTab] = useState<TabId>('vehicles')
   const [isAddingCar, setIsAddingCar] = useState(false)
@@ -994,17 +1003,14 @@ function Phase4Shell() {
   const [isManualSheetOpen, setIsManualSheetOpen] = useState(false)
   const [isSavingMileage, setIsSavingMileage] = useState(false)
   const [isSavingProfile, setIsSavingProfile] = useState(false)
-  const [showFullVin, setShowFullVin] = useState(false)
-  const [activeRailIndex, setActiveRailIndex] = useState(0)
+  const [vehicleScreenMode, setVehicleScreenMode] = useState<'list' | 'detail'>('list')
   const [prefilledServiceMileage, setPrefilledServiceMileage] = useState<number | undefined>(undefined)
   const [serviceReturnTab, setServiceReturnTab] = useState<TabId>('vehicles')
   const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false)
 
-  const railSlotRefs = useRef<Array<HTMLDivElement | null>>([])
-  const activeTabRef = useRef<TabId>(activeTab)
-  activeTabRef.current = activeTab
-
   useEffect(() => { void fetchVehicles().catch(() => undefined) }, [fetchVehicles])
+
+  useEffect(() => { void fetchAlerts().catch(() => undefined) }, [fetchAlerts])
 
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
@@ -1019,20 +1025,49 @@ function Phase4Shell() {
   }, [])
 
   const hasCars = vehicles.length > 0
-  const shouldUseVehicleRail = vehicles.length >= 2
   const canAddVehicle = vehicles.length < 10
-  const railSlotCount = vehicles.length + (canAddVehicle ? 1 : 0)
   const profileFullName = user?.user_metadata?.full_name?.trim() ?? ''
   const profilePhone = (user?.user_metadata?.phone_number as string | undefined)?.trim() || user?.phone || ''
   const isProfileComplete = profileFullName.length > 0 && profilePhone.length > 0
   const needsProfileSetup = Boolean(user) && !isProfileComplete
   const primaryVehicle = vehicles.find((v) => v.id === activeVehicleId) ?? vehicles[0] ?? null
-  const latestPrimaryLog = logs[0]
   const profileName = useMemo(() => profileFullName || user?.email || 'MazdaCare Driver', [profileFullName, user?.email])
   const profileEmail = user?.email ?? 'No email available'
-  const nextServiceMileage = primaryVehicle?.nextServiceMileage ?? null
-  const kmToNextService = primaryVehicle && nextServiceMileage ? Math.max(nextServiceMileage - primaryVehicle.currentMileage, 0) : null
   const manualLookup = useMemo(() => (primaryVehicle ? lookupMazdaManuals(primaryVehicle.model, primaryVehicle.year) : null), [primaryVehicle])
+  const alertByVehicleId = useMemo(
+    () => new Map(alerts.map((alert) => [alert.vehicleId, alert])),
+    [alerts],
+  )
+  const vehicleServiceSnapshots = useMemo(() => {
+    return vehicles.reduce<Record<string, VehicleServiceSnapshot>>((map, vehicle) => {
+      map[vehicle.id] = resolveVehicleServiceSnapshot(
+        vehicle,
+        latestLogsByVehicle[vehicle.id],
+        alertByVehicleId.get(vehicle.id),
+      )
+      return map
+    }, {})
+  }, [alertByVehicleId, latestLogsByVehicle, vehicles])
+  const primaryVehicleServiceSnapshot = useMemo(() => {
+    if (!primaryVehicle) {
+      return null
+    }
+
+    return vehicleServiceSnapshots[primaryVehicle.id] ?? resolveVehicleServiceSnapshot(
+      primaryVehicle,
+      logs[0] ?? null,
+      alertByVehicleId.get(primaryVehicle.id),
+    )
+  }, [alertByVehicleId, logs, primaryVehicle, vehicleServiceSnapshots])
+  const profileInitials = useMemo(() => {
+    const initials = profileName
+      .split(' ')
+      .map((segment: string) => segment[0] ?? '')
+      .join('')
+      .slice(0, 2)
+
+    return initials.toUpperCase() || 'MC'
+  }, [profileName])
 
   useKeyboardShortcuts()
 
@@ -1053,7 +1088,7 @@ function Phase4Shell() {
     registerKeyboardShortcut('v', () => setActiveTab('vehicles'))
     registerKeyboardShortcut('s', () => setActiveTab('settings'))
     return () => { unregisterKeyboardShortcut('h'); unregisterKeyboardShortcut('v'); unregisterKeyboardShortcut('s') }
-  }, [activeVehicleId, isAddingCar, isLoggingService, vehicles])
+  }, [])
 
   useEffect(() => {
     if (!vehicles.length) { if (activeVehicleId !== null) setActiveVehicleId(null); return }
@@ -1062,31 +1097,14 @@ function Phase4Shell() {
   }, [activeVehicleId, setActiveVehicleId, vehicles])
 
   useEffect(() => {
-    if (!shouldUseVehicleRail) { setActiveRailIndex(0); return }
-    const selectedIndex = vehicles.findIndex((v) => v.id === primaryVehicle?.id)
-    setActiveRailIndex(selectedIndex >= 0 ? selectedIndex : 0)
-  }, [primaryVehicle?.id, shouldUseVehicleRail, vehicles])
+    if (!vehicles.length) {
+      setVehicleScreenMode('list')
+    }
+  }, [vehicles.length])
 
   useEffect(() => {
-    if (!shouldUseVehicleRail) return
-    const slotNodes = railSlotRefs.current.filter((node): node is HTMLDivElement => Boolean(node))
-    if (!slotNodes.length) return
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting || entry.intersectionRatio < 0.6) continue
-        const slot = entry.target as HTMLDivElement
-        const slotIndex = Number(slot.dataset.slotIndex ?? '-1')
-        const slotType = slot.dataset.slotType
-        const vehicleId = slot.dataset.vehicleId ?? null
-        if (slotIndex >= 0) setActiveRailIndex(slotIndex)
-        if (slotType === 'vehicle' && vehicleId) useAppStore.getState().setActiveVehicleId(vehicleId)
-      }
-    }, { threshold: [0.6] })
-    for (const node of slotNodes) observer.observe(node)
-    return () => observer.disconnect()
-  }, [railSlotCount, shouldUseVehicleRail, vehicles])
-
-  useEffect(() => { setShowFullVin(false) }, [primaryVehicle?.id])
+    void fetchLatestLogs(vehicles.map((vehicle) => vehicle.id)).catch(() => undefined)
+  }, [fetchLatestLogs, vehicles])
 
   useEffect(() => {
     if (!primaryVehicle?.id) return
@@ -1168,7 +1186,7 @@ function Phase4Shell() {
       await updateVehicle(primaryVehicle.id, { currentMileage: sanitizedValue })
       haptics.success()
       toast.success(`Mileage updated to ${sanitizedValue.toLocaleString()} km`)
-      if ((primaryVehicle.nextServiceMileage ?? primaryVehicle.currentMileage + primaryVehicle.mileageInterval) <= sanitizedValue) {
+      if (primaryVehicleServiceSnapshot?.dueMileage != null && primaryVehicleServiceSnapshot.dueMileage <= sanitizedValue) {
         toast('Service overdue — log your service or adjust your schedule', { style: { background: '#FFF7ED', color: '#B45309', border: '1px solid #FCD34D' } })
       }
       setIsMileageSheetOpen(false)
@@ -1184,6 +1202,173 @@ function Phase4Shell() {
     setServiceReturnTab(activeTab)
     setIsMileageSheetOpen(false)
     setIsLoggingService(true)
+  }
+
+  function handleOpenVehicleDetail(vehicleId: string, openDetail = true) {
+    setActiveVehicleId(vehicleId)
+    if (openDetail) {
+      setVehicleScreenMode('detail')
+    }
+    void fetchLogs(vehicleId).catch(() => undefined)
+  }
+
+  function renderVehicleListPanel(isDesktop: boolean) {
+    if (isDesktop) {
+      return (
+        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-[#FDFAFA] shadow-[0_24px_48px_rgba(15,10,11,0.05)]">
+          <div className="border-b border-black/5 px-5 py-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7A6E70]">Garage</p>
+                <h1
+                  className="mt-3 text-[34px] leading-none text-[#0F0A0B]"
+                  style={{
+                    fontFamily: 'Cormorant Garamond, serif',
+                    fontStyle: 'italic',
+                    fontWeight: 600,
+                  }}
+                >
+                  My Vehicles
+                </h1>
+                <p className="mt-2 max-w-xs text-[13px] leading-relaxed text-[#7A6E70]">
+                  Select a Mazda to inspect precise next-service status and recent activity.
+                </p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#8F1326] text-[12px] font-semibold text-white">
+                {profileInitials}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 px-4 py-4">
+            {vehicles.map((vehicle) => (
+              <VehicleListCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                serviceSnapshot={vehicleServiceSnapshots[vehicle.id]}
+                isSelected={primaryVehicle?.id === vehicle.id}
+                onOpen={(selectedVehicle) => {
+                  handleOpenVehicleDetail(selectedVehicle.id, false)
+                }}
+              />
+            ))}
+
+            {canAddVehicle ? (
+              <button
+                type="button"
+                onClick={() => setIsAddingCar(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-[24px] border-[1.5px] border-dashed border-[#CDB7BC] bg-[#FEF7F8] px-4 py-4 text-[13px] font-semibold text-[#8F1326]"
+              >
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#8F1326] text-white">
+                  <Plus className="h-4 w-4" />
+                </span>
+                Add another Mazda
+              </button>
+            ) : null}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="min-h-full bg-[#F5F1F1]">
+        <div className="sticky top-0 z-10 flex h-14 items-center border-b border-black/5 bg-[#FDFAFA] px-4">
+          <div className="flex w-9 items-center justify-start text-[#3D3035]" aria-hidden="true">
+            <Menu className="h-5 w-5" />
+          </div>
+          <div className="flex-1 text-center">
+            <h1
+              className="text-[22px] text-[#0F0A0B]"
+              style={{
+                fontFamily: 'Cormorant Garamond, serif',
+                fontStyle: 'italic',
+                fontWeight: 600,
+              }}
+            >
+              My Vehicles
+            </h1>
+          </div>
+          <div className="flex w-9 items-center justify-end">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#8F1326] text-[12px] font-semibold text-white">
+              {profileInitials}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2.5 px-3 py-3 pb-28">
+          {vehicles.map((vehicle) => (
+            <VehicleListCard
+              key={vehicle.id}
+              vehicle={vehicle}
+              serviceSnapshot={vehicleServiceSnapshots[vehicle.id]}
+              onOpen={(selectedVehicle) => {
+                handleOpenVehicleDetail(selectedVehicle.id)
+              }}
+            />
+          ))}
+
+          {canAddVehicle ? (
+            <button
+              type="button"
+              onClick={() => setIsAddingCar(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-[#C9C0C1] bg-[#FEF7F8] px-4 py-4 text-[13px] font-semibold text-[#8F1326]"
+            >
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#8F1326] text-white">
+                <Plus className="h-4 w-4" />
+              </span>
+              Add another Mazda
+            </button>
+          ) : null}
+        </div>
+      </div>
+    )
+  }
+
+  function renderVehicleDetailPanel(isDesktop: boolean) {
+    if (!primaryVehicle) {
+      return isDesktop ? (
+        <div className="flex min-h-[640px] items-center justify-center rounded-[32px] border border-black/5 bg-[#FDFAFA] p-10 text-center shadow-[0_24px_48px_rgba(15,10,11,0.05)]">
+          <div>
+            <p className="text-[14px] font-semibold text-[#211A1D]">Select a Mazda</p>
+            <p className="mt-2 text-[12px] text-[#7A6E70]">Choose a vehicle from the list to inspect service readiness and recent activity.</p>
+          </div>
+        </div>
+      ) : null
+    }
+
+    const detailView = (
+      <VehicleDetailView
+        vehicle={primaryVehicle}
+        logs={logs}
+        serviceSnapshot={primaryVehicleServiceSnapshot ?? undefined}
+        isDesktopPane={isDesktop}
+        onBack={!isDesktop ? () => setVehicleScreenMode('list') : undefined}
+        onOpenMileageSheet={() => {
+          haptics.tap()
+          setIsMileageSheetOpen(true)
+        }}
+        onLogService={() => {
+          haptics.tap()
+          setServiceReturnTab(activeTab)
+          setIsLoggingService(true)
+        }}
+        onOpenManual={manualLookup ? () => {
+          haptics.tap()
+          setIsManualSheetOpen(true)
+        } : undefined}
+        onSeeAllHistory={() => setActiveTab('events')}
+      />
+    )
+
+    if (!isDesktop) {
+      return detailView
+    }
+
+    return (
+      <div className="overflow-hidden rounded-[32px] border border-black/5 bg-[#F7F1F2] shadow-[0_24px_48px_rgba(15,10,11,0.05)]">
+        {detailView}
+      </div>
+    )
   }
 
   return (
@@ -1202,20 +1387,23 @@ function Phase4Shell() {
             </nav>
           </div>
           <div className="flex flex-col gap-4 px-4 pb-8">
-            {shouldUseVehicleRail && vehicles.length > 0 ? (
-              <div className="space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">My Mazdas</h3>
-                {vehicles.map((vehicle) => (
-                  <div key={vehicle.id} className={`mb-2 ${activeVehicleId === vehicle.id ? 'ring-2 ring-[#A31526]' : ''} rounded-xl overflow-hidden`}>
-                    <CarCard vehicle={vehicle} onEditMileage={() => { setActiveVehicleId(vehicle.id); setIsMileageSheetOpen(true) }} />
-                  </div>
-                ))}
-                {canAddVehicle && (
-                  <button className="w-full rounded-xl border-2 border-dashed border-[#9B1B30] bg-[#F5E8EA] py-3 text-[#9B1B30] font-bold mt-2" onClick={() => setIsAddingCar(true)}>
-                    <Plus className="inline-block mr-1" /> Add Mazda
-                  </button>
-                )}
+            {activeTab === 'vehicles' && hasCars ? (
+              <div className="rounded-[24px] border border-[#F1E6E6] bg-[#FDFAFA] p-4 shadow-[0_12px_28px_rgba(15,10,11,0.04)]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6E70]">
+                  Garage Summary
+                </p>
+                <p className="mt-2 text-[18px] font-semibold text-[#0F0A0B]">
+                  {vehicles.length} Mazda{vehicles.length === 1 ? '' : 's'} tracked
+                </p>
+                <p className="mt-1 text-[12px] leading-relaxed text-[#7A6E70]">
+                  Browse the list in the main panel to inspect service status and recent activities.
+                </p>
               </div>
+            ) : null}
+            {canAddVehicle ? (
+              <button className="w-full rounded-xl border-2 border-dashed border-[#9B1B30] bg-[#F5E8EA] py-3 text-[#9B1B30] font-bold mt-2" onClick={() => setIsAddingCar(true)}>
+                <Plus className="inline-block mr-1" /> Add Mazda
+              </button>
             ) : null}
           </div>
         </aside>
@@ -1295,144 +1483,21 @@ function Phase4Shell() {
                         <EmptyHomeState userName={profileName?.split(' ')[0] || 'Driver'} onAdd={() => setIsAddingCar(true)} />
                       )
                     ) : (
-                      <div className="flex flex-col pb-4">
-                        {/* Greeting header */}
-                        <div className="brand-panel px-5 pb-6 pt-[calc(env(safe-area-inset-top,0px)+20px)]">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/45">
-                                {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}
-                              </p>
-                              <h1 className="mt-0.5 text-[22px] font-bold leading-tight text-white">{profileName.split(' ')[0]}</h1>
-                              <p className="mt-0.5 text-[12px] text-white/40">{vehicles.length} vehicle{vehicles.length !== 1 ? 's' : ''} tracked</p>
-                            </div>
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#A31526]">
-                              <span className="text-[13px] font-bold text-white">
-                                {profileName.slice(0, 2).toUpperCase()}
-                              </span>
-                            </div>
-                          </div>
+                      <div className="min-h-full bg-[#F5F1F1] lg:bg-transparent">
+                        <div className="lg:hidden">
+                          {vehicleScreenMode === 'list' ? renderVehicleListPanel(false) : renderVehicleDetailPanel(false)}
                         </div>
 
-                        {/* Vehicle rail */}
-                        <div className="mt-4 px-4">
-                          {shouldUseVehicleRail ? (
-                            <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                              {vehicles.map((vehicle, idx) => (
-                                <div key={vehicle.id} ref={(el) => { railSlotRefs.current[idx] = el }} data-slot-index={idx} data-slot-type="vehicle" data-vehicle-id={vehicle.id}
-                                  className="w-[calc(100%-32px)] shrink-0 snap-start overflow-hidden rounded-2xl">
-                                  <CarCard vehicle={vehicle} onEditMileage={(v) => { setActiveVehicleId(v.id); setIsMileageSheetOpen(true) }} />
-                                </div>
-                              ))}
-                              {canAddVehicle && (
-                                <div ref={(el) => { railSlotRefs.current[vehicles.length] = el }} data-slot-index={vehicles.length} data-slot-type="add"
-                                  className="flex w-[calc(100%-32px)] shrink-0 snap-start cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[#C9C0C1] bg-[#FEF7F8] p-8"
-                                  onClick={() => setIsAddingCar(true)}>
-                                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#A31526]">
-                                    <Plus className="h-6 w-6 text-white" />
-                                  </div>
-                                  <p className="text-[13px] font-bold text-[#A31526]">Add another Mazda</p>
-                                </div>
-                              )}
-                              {/* Rail dots */}
-                              <div className="flex w-full justify-center gap-1.5 pt-2 pb-1">
-                                {Array.from({ length: railSlotCount }).map((_, i) => (
-                                  <div key={i} className={`rounded-full transition-all ${i === activeRailIndex ? 'h-[5px] w-[18px] bg-[#A31526]' : 'h-[5px] w-[5px] bg-[#C9C0C1]'}`} />
-                                ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <CarCard vehicle={primaryVehicle!} onEditMileage={(v) => { setActiveVehicleId(v.id); setIsMileageSheetOpen(true) }} />
-                              {canAddVehicle && (
-                                <button onClick={() => setIsAddingCar(true)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#C9C0C1] bg-[#FEF7F8] py-4 text-[13px] font-bold text-[#A31526]">
-                                  <Plus className="h-4 w-4" /> Add another Mazda
-                                </button>
-                              )}
-                            </div>
-                          )}
+                        <div className="hidden lg:grid lg:min-h-full lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-6 lg:px-6 lg:py-6">
+                          {renderVehicleListPanel(true)}
+                          {renderVehicleDetailPanel(true)}
                         </div>
-
-                        {/* Vehicle detail */}
-                        {primaryVehicle && (
-                          <div className="mt-4 space-y-3 px-4">
-                            {/* Stats row */}
-                            <div className="grid grid-cols-2 gap-3">
-                              {[
-                                { label: 'Next service', value: kmToNextService != null ? `${kmToNextService.toLocaleString()} km` : '—', color: kmToNextService != null && kmToNextService < 500 ? '#A31526' : undefined },
-                                { label: 'Last service', value: latestPrimaryLog ? latestPrimaryLog.serviceDate : 'None yet' },
-                                { label: 'Total services', value: `${logs.length}` },
-                                { label: 'VIN', value: primaryVehicle.vin ? (showFullVin ? primaryVehicle.vin : maskVin(primaryVehicle.vin)) : 'Not set' },
-                              ].map((stat) => (
-                                <div key={stat.label} className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
-                                  <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-gray-400">{stat.label}</p>
-                                  <p className="mt-0.5 text-[15px] font-bold text-gray-900" style={stat.color ? { color: stat.color } : {}}>{stat.value}</p>
-                                </div>
-                              ))}
-                            </div>
-
-                            {/* Vehicle image */}
-                            <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-                              <div className="relative h-36 w-full">
-                                <img src={getVehicleImage(primaryVehicle.model)} alt={`Mazda ${primaryVehicle.model}`} className="h-full w-full object-cover" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                <div className="absolute bottom-3 left-4 text-white">
-                                  <p className="text-[11px] font-semibold uppercase tracking-wider opacity-70">{primaryVehicle.fuelType} · {primaryVehicle.engineSize}</p>
-                                  <p className="text-xl font-bold">Mazda {primaryVehicle.model}</p>
-                                </div>
-                              </div>
-                              <div className="flex gap-2 p-3">
-                                <button type="button" onClick={() => { haptics.tap(); setIsMileageSheetOpen(true) }}
-                                  className="flex-1 rounded-xl bg-[#A31526] py-2.5 text-[12px] font-bold text-white active:scale-[0.98]">
-                                  Update km
-                                </button>
-                                <button type="button" onClick={() => { haptics.tap(); setServiceReturnTab(activeTab); setIsLoggingService(true) }}
-                                  className="flex-1 rounded-xl border border-[#E3CDD1] bg-white py-2.5 text-[12px] font-semibold text-[#A31526] active:scale-[0.98]">
-                                  Log service
-                                </button>
-                                {manualLookup && (
-                                  <button type="button" onClick={() => { haptics.tap(); setIsManualSheetOpen(true) }}
-                                    className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-[12px] font-semibold text-gray-600 active:scale-[0.98]">
-                                    Manual
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Recent services preview */}
-                            {logs.length > 0 && (
-                              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                                <div className="mb-3 flex items-center justify-between">
-                                  <p className="text-[13px] font-bold text-gray-900">Recent services</p>
-                                  <button type="button" onClick={() => setActiveTab('events')} className="text-[11px] font-semibold text-[#A31526]">See all →</button>
-                                </div>
-                                <div className="space-y-2">
-                                  {logs.slice(0, 3).map((log) => (
-                                    <div key={log.id} className="flex items-center gap-3 border-b border-gray-50 pb-2 last:border-b-0 last:pb-0">
-                                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#F9EAEC]">
-                                        <Wrench className="h-3.5 w-3.5 text-[#A31526]" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <p className="truncate text-[12px] font-semibold text-gray-900 capitalize">{log.serviceType.replace(/_/g, ' ')}</p>
-                                        <p className="truncate text-[10px] text-gray-400">{log.garageName || 'Garage not recorded'}</p>
-                                      </div>
-                                      <div className="text-right shrink-0">
-                                        <p className="text-[10px] text-gray-400">{log.serviceDate}</p>
-                                        {log.serviceCost != null && <p className="text-[11px] font-bold text-gray-700">KES {log.serviceCost.toLocaleString()}</p>}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </div>
                     )
                   ) : null}
 
-                  {activeTab === 'events' ? <EventsTabContent /> : null}
-                  {activeTab === 'notifications' ? <NotificationsTabContent /> : null}
+                  {activeTab === 'events' ? <EventsTabContent logs={logs} activeVehicleId={activeVehicleId} /> : null}
+                  {activeTab === 'notifications' ? <NotificationsTabContent vehicles={vehicles} serviceSnapshots={vehicleServiceSnapshots} /> : null}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1470,6 +1535,7 @@ function Phase4Shell() {
       {/* Sheets */}
       <MileageUpdateSheet
         vehicle={primaryVehicle}
+        serviceSnapshot={primaryVehicleServiceSnapshot}
         isOpen={isMileageSheetOpen}
         onOpenChange={setIsMileageSheetOpen}
         onSave={handleSaveMileage}

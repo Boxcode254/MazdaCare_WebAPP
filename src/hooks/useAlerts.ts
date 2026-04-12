@@ -1,5 +1,6 @@
-import { addMonths, differenceInDays, parseISO } from 'date-fns'
+import { differenceInDays } from 'date-fns'
 import { useCallback, useState } from 'react'
+import { calculateServiceDueDate, getNextServiceMileage } from '@/lib/serviceState'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/stores/appStore'
 import type { ServiceAlert, Vehicle, ServiceLog } from '@/types'
@@ -41,15 +42,14 @@ export function calculateNextService(
   vehicle: Vehicle,
   lastLog: ServiceLog,
 ): NextServiceInfo {
-  const dueMileage = lastLog.mileageAtService + vehicle.mileageInterval
-  const monthsToAdd =
-    lastLog.serviceType === 'major' ? 6 : 3
-  const dueDate = addMonths(parseISO(lastLog.serviceDate), monthsToAdd)
+  const dueMileage = getNextServiceMileage(vehicle, lastLog)
+  const dueDate = calculateServiceDueDate(lastLog)
   const kmRemaining = dueMileage - vehicle.currentMileage
   const daysRemaining = differenceInDays(dueDate, new Date())
+  const intervalDistance = Math.max(dueMileage - lastLog.mileageAtService, 1)
   const fractionUsed = Math.min(
     1,
-    Math.max(0, 1 - kmRemaining / vehicle.mileageInterval),
+    Math.max(0, (vehicle.currentMileage - lastLog.mileageAtService) / intervalDistance),
   )
 
   return { dueMileage, dueDate, kmRemaining, daysRemaining, fractionUsed }

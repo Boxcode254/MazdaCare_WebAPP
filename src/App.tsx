@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 const Auth = lazy(() => import('@/pages/Auth').then((m) => ({ default: m.Auth })))
 const VehiclesPage = lazy(() => import('@/pages/Vehicles'))
+const VehicleDetailPage = lazy(() => import('@/pages/VehicleDetail'))
 
 function PageFallback() {
   return (
@@ -64,6 +65,16 @@ function App() {
                 <ProtectedRoute>
                   <Suspense fallback={<PageFallback />}>
                     <VehiclesPage />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vehicles/:id"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageFallback />}>
+                    <VehicleDetailPage />
                   </Suspense>
                 </ProtectedRoute>
               }

@@ -2,23 +2,65 @@ import { Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { haptics } from '@/lib/haptics'
+import {
+  resolveVehicleServiceSnapshot,
+  type VehicleServiceSnapshot,
+} from '@/lib/serviceState'
 import type { Vehicle } from '@/types'
 
 interface CarCardProps {
   vehicle: Vehicle
+  serviceSnapshot?: VehicleServiceSnapshot
   onEditMileage?: (vehicle: Vehicle) => void
+  disableNavigation?: boolean
 }
 
-export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
+export function CarCard({
+  vehicle,
+  serviceSnapshot,
+  onEditMileage,
+  disableNavigation = false,
+}: CarCardProps) {
   const navigate = useNavigate()
-  const nextServiceMileage = vehicle.nextServiceMileage ?? vehicle.currentMileage + vehicle.mileageInterval
+  const snapshot = serviceSnapshot ?? resolveVehicleServiceSnapshot(vehicle)
+  const nextServiceLabel = snapshot.dueMileage != null
+    ? `${snapshot.dueMileage.toLocaleString()} km`
+    : snapshot.dueDate
+      ? snapshot.dueDate.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        })
+      : 'Awaiting first log'
+  const statusTone = snapshot.status === 'overdue'
+    ? '#8F1326'
+    : snapshot.status === 'due-soon'
+      ? '#B88A37'
+      : snapshot.status === 'healthy'
+        ? '#2C6A4A'
+        : '#7B7073'
+  const statusLabel = snapshot.status === 'overdue'
+    ? 'Service overdue'
+    : snapshot.status === 'due-soon'
+      ? snapshot.kmRemaining != null
+        ? `${Math.max(snapshot.kmRemaining, 0).toLocaleString()} km remaining`
+        : 'Service due soon'
+      : snapshot.status === 'healthy'
+        ? snapshot.kmRemaining != null
+          ? `${snapshot.kmRemaining.toLocaleString()} km remaining`
+          : 'Service on track'
+        : 'No service history yet'
 
   return (
     <article
-      className="bg-card border rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className={`bg-card border rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow ${disableNavigation ? 'cursor-default' : 'cursor-pointer'}`}
       onClick={() => {
+        if (disableNavigation) {
+          return
+        }
+
         haptics.tap()
-        navigate(`/service/${vehicle.id}`)
+        navigate(`/vehicles/${vehicle.id}`)
       }}
     >
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -31,6 +73,9 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
           <div>
             <h3 className="font-bold text-lg lg:text-xl">Mazda {vehicle.model}</h3>
             <p className="text-xs lg:text-sm text-muted-foreground uppercase">{vehicle.registration}</p>
+            <p className="mt-1 text-[11px] font-medium" style={{ color: statusTone }}>
+              {statusLabel}
+            </p>
           </div>
         </div>
 
@@ -42,7 +87,7 @@ export function CarCard({ vehicle, onEditMileage }: CarCardProps) {
           </div>
           <div>
             <p className="text-[10px] uppercase text-muted-foreground">Next Service</p>
-            <p className="font-mono font-semibold text-[#A31526]">{nextServiceMileage.toLocaleString()} km</p>
+            <p className="font-mono font-semibold" style={{ color: statusTone }}>{nextServiceLabel}</p>
           </div>
         </div>
 

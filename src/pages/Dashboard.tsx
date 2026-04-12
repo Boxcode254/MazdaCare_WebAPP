@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Activity, Bell, Calendar, Navigation, Plus, Fuel, Wrench } from 'lucide-react'
@@ -10,8 +10,8 @@ import MazdaLogo from '@/components/ui/MazdaLogo'
 import { GarageEmptyState } from '@/components/layout/EmptyState'
 import { useVehicles } from '@/hooks/useVehicles'
 import { useServiceLogs } from '@/hooks/useServiceLogs'
-import { calculateNextService } from '@/hooks/useAlerts'
 import { haptics } from '@/lib/haptics'
+import { resolveVehicleServiceSnapshot } from '@/lib/serviceState'
 import { useAppStore } from '@/stores/appStore'
 import type { Vehicle, ServiceLog } from '@/types'
 
@@ -195,7 +195,7 @@ export function Dashboard() {
   const user = useAppStore((s) => s.user)
 
   const { vehicles, fetchVehicles, updateVehicle, loading: vLoading } = useVehicles()
-  const { logs, fetchLogs, loading: lLoading } = useServiceLogs()
+  const { logs, fetchLogs, latestLogsByVehicle, fetchLatestLogs, loading: lLoading } = useServiceLogs()
 
   const [activeIdx, setActiveIdx] = useState(0)
   const [animatedMileage, setAnimatedMileage] = useState(0)
@@ -218,6 +218,14 @@ export function Dashboard() {
     }
   }, [activeVehicle?.id, fetchLogs])
 
+  useEffect(() => {
+    if (vehicles.length === 0) {
+      return
+    }
+
+    void fetchLatestLogs(vehicles.map((vehicle) => vehicle.id)).catch(() => undefined)
+  }, [fetchLatestLogs, vehicles])
+
   // Keep activeIdx in bounds when vehicles change
   useEffect(() => {
     if (activeIdx >= vehicles.length && vehicles.length > 0) {
@@ -226,7 +234,8 @@ export function Dashboard() {
   }, [vehicles.length, activeIdx])
 
   usePullToRefresh(async () => {
-    await fetchVehicles()
+    const refreshedVehicles = await fetchVehicles()
+    await fetchLatestLogs(refreshedVehicles.map((vehicle) => vehicle.id))
     if (activeVehicle?.id) await fetchLogs(activeVehicle.id)
   })
 
@@ -236,9 +245,17 @@ export function Dashboard() {
   )
   const lastLog = sortedLogs[0]
   const recentLogs = sortedLogs.slice(0, 3)
-
-  const nextSvc =
-    activeVehicle && lastLog ? calculateNextService(activeVehicle, lastLog) : null
+  const serviceSnapshots = useMemo(
+    () => vehicles.reduce<Record<string, ReturnType<typeof resolveVehicleServiceSnapshot>>>((acc, vehicle) => {
+      acc[vehicle.id] = resolveVehicleServiceSnapshot(vehicle, latestLogsByVehicle[vehicle.id])
+      return acc
+    }, {}),
+    [latestLogsByVehicle, vehicles],
+  )
+  const activeVehicleSnapshot = activeVehicle ? serviceSnapshots[activeVehicle.id] ?? null : null
+  const activeLatestLog = activeVehicle
+    ? latestLogsByVehicle[activeVehicle.id] ?? lastLog ?? null
+    : null
   const isNewUser = Boolean(
     user?.created_at && new Date(user.created_at).getTime() > Date.now() - 86400000,
   )
@@ -377,12 +394,14 @@ export function Dashboard() {
             >
               <CarCard
                 vehicle={v}
+                serviceSnapshot={serviceSnapshots[v.id]}
                 onEditMileage={async (veh) => {
                   const raw = window.prompt(`New mileage for ${veh.model}:`, String(veh.currentMileage))
                   const km = parseInt(raw ?? '', 10)
                   if (!isNaN(km) && km > veh.currentMileage) {
                     await updateVehicle(veh.id, { currentMileage: km })
-                    await fetchVehicles()
+                    const refreshedVehicles = await fetchVehicles()
+                    await fetchLatestLogs(refreshedVehicles.map((vehicle) => vehicle.id))
                   }
                 }}
               />
@@ -454,12 +473,22 @@ export function Dashboard() {
             </p>
             <p
               className="text-[22px] font-semibold leading-none"
-              style={{ fontFamily: 'Outfit, sans-serif', color: (nextSvc?.kmRemaining ?? Infinity) < 1000 ? '#9B1B30' : '#111010' }}
+              style={{
+                fontFamily: 'Outfit, sans-serif',
+                color:
+                  activeVehicleSnapshot?.status === 'overdue'
+                    ? '#8F1326'
+                    : activeVehicleSnapshot?.status === 'due-soon'
+                      ? '#B88A37'
+                      : '#111010',
+              }}
             >
-              {nextSvc ? `${Math.max(nextSvc.kmRemaining, 0).toLocaleString()}` : '--'}
+              {activeVehicleSnapshot?.kmRemaining != null
+                ? `${Math.max(activeVehicleSnapshot.kmRemaining, 0).toLocaleString()}`
+                : '--'}
             </p>
             <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              {nextSvc ? 'km remaining' : 'No service history'}
+              {activeVehicleSnapshot?.kmRemaining != null ? 'km remaining' : 'No service history'}
             </p>
           </button>
 
@@ -475,11 +504,11 @@ export function Dashboard() {
               Last Service
             </p>
             <p className="truncate text-[22px] font-semibold capitalize leading-none text-mz-black" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              {lastLog ? lastLog.serviceType.replace('_', ' ') : '--'}
+              {activeLatestLog ? activeLatestLog.serviceType.replace('_', ' ') : '--'}
             </p>
             <p className="mt-[2px] text-[11px] text-mz-gray-500" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              {lastLog
-                ? new Date(lastLog.serviceDate).toLocaleDateString('en-KE', {
+              {activeLatestLog
+                ? new Date(activeLatestLog.serviceDate).toLocaleDateString('en-KE', {
                     day: 'numeric',
                     month: 'short',
                   })
