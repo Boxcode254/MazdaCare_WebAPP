@@ -12,12 +12,14 @@ import {
   User,
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Switch } from '@/components/ui/switch'
 import { supabase } from '@/lib/supabase'
 import { sanitizeText } from '@/lib/sanitize'
 import { useAppStore } from '@/stores/appStore'
 import { toast } from 'sonner'
 
 const REMINDER_THRESHOLD_OPTIONS = [250, 500, 1000, 2000] as const
+const PUSH_NOTIFICATION_STORAGE_KEY = 'mc_push_notifications_enabled'
 const REMINDER_TIME_OPTIONS = [
   { label: 'Morning (07:00)', value: '07:00' },
   { label: 'Afternoon (12:00)', value: '12:00' },
@@ -33,9 +35,7 @@ export function Settings() {
   const setDisplayName = useAppStore((s) => s.setDisplayName)
   const clearAll = useAppStore((s) => s.clearAll)
 
-  const [notifEnabled, setNotifEnabled] = useState(
-    typeof Notification !== 'undefined' && Notification.permission === 'granted',
-  )
+  const [notifEnabled, setNotifEnabled] = useState(false)
   const [editingProfile, setEditingProfile] = useState(false)
   const [displayNameInput, setDisplayNameInput] = useState('')
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
@@ -65,6 +65,14 @@ export function Settings() {
     if (REMINDER_TIME_OPTIONS.some((option) => option.value === storedTime)) {
       setReminderTime(storedTime as ReminderTime)
     }
+
+    const storedPushPreference = localStorage.getItem(PUSH_NOTIFICATION_STORAGE_KEY)
+    if (storedPushPreference !== null) {
+      setNotifEnabled(storedPushPreference === 'true')
+      return
+    }
+
+    setNotifEnabled(typeof Notification !== 'undefined' && Notification.permission === 'granted')
   }, [])
 
   const initials = displayName
@@ -74,21 +82,41 @@ export function Settings() {
     .join('')
     .toUpperCase()
 
-  async function handleToggleNotifications() {
+  async function handleToggleNotifications(enabled: boolean) {
     if (!('Notification' in window)) {
       toast.error('Push notifications are not supported in this browser.')
       return
     }
-    if (notifEnabled) {
-      // Can't programmatically revoke; guide user
-      toast.info('To disable notifications, revoke permission in browser site settings.')
+
+    if (!enabled) {
+      setNotifEnabled(false)
+      localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'false')
+      toast.info('Push notifications turned off for MazdaCare on this device.')
       return
     }
+
+    if (Notification.permission === 'granted') {
+      setNotifEnabled(true)
+      localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'true')
+      toast.success('Notifications enabled!')
+      return
+    }
+
+    if (Notification.permission === 'denied') {
+      setNotifEnabled(false)
+      localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'false')
+      toast.error('Notifications are blocked. Enable them in browser site settings first.')
+      return
+    }
+
     const perm = await Notification.requestPermission()
     if (perm === 'granted') {
       setNotifEnabled(true)
+      localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'true')
       toast.success('Notifications enabled!')
     } else {
+      setNotifEnabled(false)
+      localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'false')
       toast.error('Permission denied. Enable in browser settings.')
     }
   }
@@ -257,23 +285,22 @@ export function Settings() {
       <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-mz-gray-500">Preferences</p>
       <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-sm">
         {/* Push Notifications */}
-        <div className="flex h-12 w-full items-center gap-3 border-b border-[#F0ECEC] px-4">
-          <Bell className="h-[18px] w-[18px] shrink-0 text-mz-red" />
-          <span className="flex-1 text-[15px] text-gray-800">Push Notifications</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={notifEnabled}
+        <div className={`flex min-h-14 w-full items-center gap-3 border-b border-[#F0ECEC] px-4 py-3 transition-all duration-200 ${notifEnabled ? 'bg-[linear-gradient(90deg,rgba(245,221,226,0.65),rgba(255,255,255,0.95))]' : 'bg-white'}`}>
+          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${notifEnabled ? 'bg-mz-red-light shadow-[0_10px_22px_rgba(143,19,38,0.18)]' : 'bg-[#F4EEEF]'}`}>
+            <Bell className={`h-[18px] w-[18px] ${notifEnabled ? 'text-mz-red' : 'text-mz-gray-500'}`} />
+          </span>
+          <div className="flex-1">
+            <span className={`block text-[15px] transition-colors duration-200 ${notifEnabled ? 'font-semibold text-mz-red' : 'text-gray-800'}`}>Push Notifications</span>
+            <span className="block text-[11px] text-mz-gray-500">{notifEnabled ? 'On for MazdaCare reminders' : 'Off on this device'}</span>
+          </div>
+          <Switch
+            checked={notifEnabled}
             aria-label="Toggle push notifications"
-            onClick={handleToggleNotifications}
-            className="relative ml-2 inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200"
-            style={{ background: notifEnabled ? '#A31526' : '#C4BABB' }}
-          >
-            <span
-              className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
-              style={{ transform: notifEnabled ? 'translateX(24px)' : 'translateX(4px)' }}
-            />
-          </button>
+            onCheckedChange={(checked) => {
+              void handleToggleNotifications(checked)
+            }}
+            className="h-6 w-11"
+          />
         </div>
         {/* Garage Display */}
         <button

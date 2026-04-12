@@ -514,6 +514,7 @@ function SettingsView({
   onLogout: () => Promise<void>
   isLoggingOut: boolean
 }) {
+  const PUSH_NOTIFICATION_STORAGE_KEY = 'mc_push_notifications_enabled'
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [subView, setSubView] = useState<'menu' | 'cost-analytics' | 'personal-details' | 'garage-display'>('menu')
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true)
@@ -533,15 +534,56 @@ function SettingsView({
 
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem('mc_push_notifications_enabled')
-      if (stored !== null) setPushNotificationsEnabled(stored === 'true')
+      const stored = window.localStorage.getItem(PUSH_NOTIFICATION_STORAGE_KEY)
+      if (stored !== null) {
+        setPushNotificationsEnabled(stored === 'true')
+        return
+      }
     } catch { /* storage unavailable */ }
+
+    setPushNotificationsEnabled(typeof Notification !== 'undefined' && Notification.permission === 'granted')
   }, [])
 
-  const handlePushToggle = (enabled: boolean) => {
-    setPushNotificationsEnabled(enabled)
+  const handlePushToggle = async (enabled: boolean) => {
     haptics.tap()
-    try { window.localStorage.setItem('mc_push_notifications_enabled', String(enabled)) } catch { /* storage unavailable */ }
+
+    if (typeof Notification === 'undefined') {
+      toast.error('Push notifications are not supported in this browser.')
+      return
+    }
+
+    if (!enabled) {
+      setPushNotificationsEnabled(false)
+      try { window.localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'false') } catch { /* storage unavailable */ }
+      toast.info('Push notifications turned off for MazdaCare on this device.')
+      return
+    }
+
+    if (Notification.permission === 'granted') {
+      setPushNotificationsEnabled(true)
+      try { window.localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'true') } catch { /* storage unavailable */ }
+      toast.success('Notifications enabled!')
+      return
+    }
+
+    if (Notification.permission === 'denied') {
+      setPushNotificationsEnabled(false)
+      try { window.localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'false') } catch { /* storage unavailable */ }
+      toast.error('Notifications are blocked. Enable them in browser site settings first.')
+      return
+    }
+
+    const permission = await Notification.requestPermission()
+    if (permission === 'granted') {
+      setPushNotificationsEnabled(true)
+      try { window.localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'true') } catch { /* storage unavailable */ }
+      toast.success('Notifications enabled!')
+      return
+    }
+
+    setPushNotificationsEnabled(false)
+    try { window.localStorage.setItem(PUSH_NOTIFICATION_STORAGE_KEY, 'false') } catch { /* storage unavailable */ }
+    toast.error('Permission denied. Enable in browser settings.')
   }
 
   if (subView === 'cost-analytics') {
@@ -651,15 +693,17 @@ function SettingsView({
 
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="border-b border-gray-100 bg-gray-50/50 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Preferences</div>
-          <div className="flex items-center justify-between border-b border-gray-50 bg-white p-4">
+          <div className={`flex items-center justify-between border-b border-gray-50 p-4 transition-all duration-200 ${pushNotificationsEnabled ? 'bg-[linear-gradient(90deg,rgba(249,234,236,0.9),rgba(255,255,255,1))]' : 'bg-white'}`}>
             <div className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-gray-400" />
+              <span className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${pushNotificationsEnabled ? 'bg-[#F9EAEC] shadow-[0_10px_22px_rgba(143,19,38,0.14)]' : 'bg-gray-100'}`}>
+                <Bell className={`h-5 w-5 ${pushNotificationsEnabled ? 'text-[#8F1326]' : 'text-gray-400'}`} />
+              </span>
               <div>
-                <p className="text-[15px] font-medium text-gray-800">Push Notifications</p>
+                <p className={`text-[15px] font-medium transition-colors duration-200 ${pushNotificationsEnabled ? 'text-[#8F1326]' : 'text-gray-800'}`}>Push Notifications</p>
                 <p className="text-[12px] text-gray-500">{pushNotificationsEnabled ? 'Enabled' : 'Disabled'}</p>
               </div>
             </div>
-            <Switch checked={pushNotificationsEnabled} onCheckedChange={handlePushToggle} />
+            <Switch checked={pushNotificationsEnabled} onCheckedChange={(checked) => { void handlePushToggle(checked) }} className="h-6 w-11" />
           </div>
           <button type="button" onClick={() => { haptics.tap(); setSubView('garage-display') }} className="flex w-full items-center justify-between bg-white p-4 active:bg-gray-50">
             <div className="flex items-center gap-3">
