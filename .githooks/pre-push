@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ "${SKIP_MAZDA_PRE_PUSH:-0}" = "1" ]; then
+  exit 0
+fi
+
+echo "Raw git push is blocked for mazda-app."
+echo "Use 'pnpm push:github -- \"commit message\"' so the app is built, committed, pushed, and verified on Vercel."
+exit 1

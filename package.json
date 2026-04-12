@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "install:hooks": "node scripts/install-git-hooks.mjs",
     "status:update": "node scripts/update-project-status.mjs",
     "push:github": "node scripts/push-github.mjs",
+    "deploy:vercel": "node scripts/push-github.mjs",
     "dev": "pnpm run status:update && vite",
     "build": "pnpm run status:update && tsc -b && vite build",
     "test": "vitest run",
