@@ -18,6 +18,10 @@ function parseCommitMessage(args) {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index]
 
+    if (arg === '--') {
+      continue
+    }
+
     if (arg === '--dry-run' || arg === '--skip-verify') {
       continue
     }
@@ -232,18 +236,22 @@ const pushTarget = token
 const startedAt = Date.now()
 
 async function main() {
-  const createdCommit = stageAndCommitIfNeeded()
-  const ahead = aheadCount(branch)
-
   if (isDryRun) {
+    const dirty = hasWorkingTreeChanges()
+    const ahead = aheadCount(branch)
     console.log('Dry run summary:')
     console.log(`- branch: ${branch}`)
     console.log(`- commit message: ${commitMessage}`)
-    console.log(`- created commit: ${createdCommit ? 'yes' : 'no'}`)
+    console.log(`- working tree dirty: ${dirty ? 'yes' : 'no'}`)
+    console.log(`- would build before commit: ${dirty ? 'yes' : 'no'}`)
+    console.log(`- would create commit: ${dirty ? 'yes' : 'no'}`)
     console.log(`- commits ahead of origin/${branch}: ${ahead}`)
     console.log(`- production verification: ${skipVerify ? 'skipped' : 'would run after push'}`)
     return
   }
+
+  const createdCommit = stageAndCommitIfNeeded()
+  const ahead = aheadCount(branch)
 
   if (ahead === 0) {
     console.log(`No commits ahead of origin/${branch}. Nothing to push.`)
